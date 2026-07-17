@@ -1,0 +1,714 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Craftlanee{% endblock %}</title>
+    <link rel="icon" href="{% static 'images/favicon.ico' %}">
+    <link rel="apple-touch-icon" href="{% static 'images/logo-icon.png' %}">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+
+    {% if active_theme.heading_font %}
+    <link href="{{ active_theme.heading_font }}" rel="stylesheet">
+    {% endif %}
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/themes.css' %}">
+    {% if active_theme.is_kids_world %}
+    <link rel="stylesheet" href="{% static 'css/kids-theme.css' %}">
+    {% endif %}
+    {% if active_theme.key == 'intermediate' %}
+    <link rel="stylesheet" href="{% static 'css/intermediate-theme.css' %}">
+    {% endif %}
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body class="d-flex flex-column min-vh-100 {% block body_class %}{% endblock %} {{ active_theme.css_class|default:'theme-other' }}">
+
+{% if active_theme.has_animated_scene and active_theme.key == 'school' %}
+<!-- ================= KIDS WORLD ANIMATED SCENE ================= -->
+<div class="kids-world-bg" aria-hidden="true">
+    <div class="kw-sun"></div>
+    <div class="kw-moon"></div>
+    <i class="bi bi-star-fill kw-star"></i>
+    <i class="bi bi-star-fill kw-star"></i>
+    <i class="bi bi-star-fill kw-star"></i>
+    <i class="bi bi-star-fill kw-star"></i>
+    <i class="bi bi-star-fill kw-star"></i>
+    <div class="kw-rainbow"></div>
+    <div class="kw-cloud kw-cloud-1"></div>
+    <div class="kw-cloud kw-cloud-2"></div>
+    <div class="kw-cloud kw-cloud-3"></div>
+
+    <span class="kw-bird kw-bird-1">
+        <svg viewBox="0 0 24 12" class="kw-icon"><path d="M0 8 Q6 0 12 8 Q18 0 24 8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+    </span>
+    <span class="kw-bird kw-bird-2">
+        <svg viewBox="0 0 24 12" class="kw-icon"><path d="M0 8 Q6 0 12 8 Q18 0 24 8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+    </span>
+
+    <span class="kw-butterfly kw-butterfly-1">
+        <svg viewBox="0 0 24 24" class="kw-icon">
+            <ellipse cx="7" cy="9" rx="6" ry="7" fill="currentColor" opacity="0.85" transform="rotate(-20 7 9)"/>
+            <ellipse cx="17" cy="9" rx="6" ry="7" fill="currentColor" opacity="0.85" transform="rotate(20 17 9)"/>
+            <ellipse cx="8" cy="17" rx="4" ry="5" fill="currentColor" opacity="0.55" transform="rotate(-10 8 17)"/>
+            <ellipse cx="16" cy="17" rx="4" ry="5" fill="currentColor" opacity="0.55" transform="rotate(10 16 17)"/>
+            <rect x="11" y="5" width="2" height="17" rx="1" fill="#3B2A1A"/>
+        </svg>
+    </span>
+    <span class="kw-butterfly kw-butterfly-2">
+        <svg viewBox="0 0 24 24" class="kw-icon">
+            <ellipse cx="7" cy="9" rx="6" ry="7" fill="currentColor" opacity="0.85" transform="rotate(-20 7 9)"/>
+            <ellipse cx="17" cy="9" rx="6" ry="7" fill="currentColor" opacity="0.85" transform="rotate(20 17 9)"/>
+            <ellipse cx="8" cy="17" rx="4" ry="5" fill="currentColor" opacity="0.55" transform="rotate(-10 8 17)"/>
+            <ellipse cx="16" cy="17" rx="4" ry="5" fill="currentColor" opacity="0.55" transform="rotate(10 16 17)"/>
+            <rect x="11" y="5" width="2" height="17" rx="1" fill="#3B2A1A"/>
+        </svg>
+    </span>
+
+    <i class="bi bi-balloon-fill kw-balloon kw-balloon-1"></i>
+    <i class="bi bi-balloon-fill kw-balloon kw-balloon-2"></i>
+    <i class="bi bi-balloon-fill kw-balloon kw-balloon-3"></i>
+
+    <!-- Sunrise wash — fades out as the story's "morning" begins, fades back
+         in right at the loop point so day 1 dissolves seamlessly into day 2. -->
+    <div class="kw-sunrise-overlay"></div>
+
+    <div class="kw-ground">
+        <div class="kw-mountains"></div>
+        <div class="kw-hills"></div>
+        <i class="bi bi-tree-fill kw-tree kw-tree-1"></i>
+        <i class="bi bi-tree-fill kw-tree kw-tree-2"></i>
+        <i class="bi bi-tree-fill kw-tree kw-tree-3"></i>
+        <i class="bi bi-flower1 kw-flower kw-flower-1"></i>
+        <i class="bi bi-flower2 kw-flower kw-flower-2"></i>
+        <i class="bi bi-flower3 kw-flower kw-flower-3"></i>
+        <!-- A little roadside park the bus passes on its route -->
+        <i class="bi bi-tree-fill kw-park-tree"></i>
+        <div class="kw-park-bench"></div>
+        <div class="kw-river"></div>
+        <div class="kw-road"></div>
+
+        <!-- ===== STORY: sunrise -> mother & child leave the house -> walk
+             to the stop -> board the bus -> bus drives the route past
+             trees/parks/houses -> school appears -> bus arrives -> kids
+             get off -> everyone walks in -> loop back to sunrise. ===== -->
+        <span class="kw-story-house">
+            <svg viewBox="0 0 40 34" class="kw-icon">
+                <rect x="4" y="14" width="32" height="20" fill="#FB923C"/>
+                <polygon points="20,0 38,14 2,14" fill="#EC4899"/>
+                <rect x="16" y="20" width="8" height="14" fill="#1E293B"/>
+                <rect x="27" y="20" width="6" height="6" fill="#7DD3FC"/>
+            </svg>
+        </span>
+
+        <!-- Mother (left, taller) holding her child's (right) hand — the
+             small circle at the meeting point of both arms is their
+             clasped hands. -->
+        <svg viewBox="0 0 50 62" class="kw-icon kw-mom-child">
+            <line x1="10" y1="47" x2="9" y2="60" stroke="#0EA5E9" stroke-width="4" stroke-linecap="round"/>
+            <line x1="16" y1="47" x2="18" y2="60" stroke="#0EA5E9" stroke-width="4" stroke-linecap="round"/>
+            <line x1="23" y1="26" x2="33" y2="33" stroke="#F59E0B" stroke-width="3" stroke-linecap="round"/>
+            <rect x="5" y="19" width="18" height="28" rx="7" fill="#0EA5E9"/>
+            <circle cx="14" cy="10" r="9" fill="#F59E0B"/>
+            <circle cx="11" cy="9" r="1.1" fill="#1E293B"/>
+            <circle cx="17" cy="9" r="1.1" fill="#1E293B"/>
+            <path d="M10 13 Q14 16 18 13" stroke="#1E293B" stroke-width="1.2" fill="none" stroke-linecap="round"/>
+
+            <line x1="35" y1="46" x2="34" y2="58" stroke="#EC4899" stroke-width="3.5" stroke-linecap="round"/>
+            <line x1="41" y1="46" x2="42" y2="58" stroke="#EC4899" stroke-width="3.5" stroke-linecap="round"/>
+            <line x1="32" y1="32" x2="33" y2="33" stroke="#FDE68A" stroke-width="3" stroke-linecap="round"/>
+            <rect x="31" y="26" width="14" height="21" rx="6" fill="#EC4899"/>
+            <circle cx="38" cy="19" r="7" fill="#FDE68A"/>
+            <circle cx="35.5" cy="18" r="1" fill="#1E293B"/>
+            <circle cx="40.5" cy="18" r="1" fill="#1E293B"/>
+            <path d="M35 22 Q38 24.5 41 22" stroke="#1E293B" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+
+            <circle cx="33" cy="33" r="2.4" fill="#FDE68A"/>
+        </svg>
+
+        <div class="kw-bus-stop-sign"></div>
+
+        <span class="kw-walking-kid kw-walking-kid-1">
+            <svg viewBox="0 0 30 56" class="kw-icon">
+                <line x1="12" y1="39" x2="10" y2="52" stroke="#FB923C" stroke-width="4" stroke-linecap="round"/>
+                <line x1="18" y1="39" x2="20" y2="52" stroke="#FB923C" stroke-width="4" stroke-linecap="round"/>
+                <line x1="8" y1="20" x2="2" y2="30" stroke="#38BDF8" stroke-width="3" stroke-linecap="round"/>
+                <line x1="22" y1="20" x2="28" y2="30" stroke="#38BDF8" stroke-width="3" stroke-linecap="round"/>
+                <rect x="20" y="18" width="7" height="15" rx="2" fill="#EC4899"/>
+                <rect x="8" y="17" width="14" height="22" rx="6" fill="#FB923C"/>
+                <circle cx="15" cy="10" r="7" fill="#38BDF8"/>
+                <circle cx="12.5" cy="9" r="1.1" fill="#1E293B"/>
+                <circle cx="17.5" cy="9" r="1.1" fill="#1E293B"/>
+                <path d="M11 13 Q15 16 19 13" stroke="#1E293B" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+            </svg>
+        </span>
+        <span class="kw-walking-kid kw-walking-kid-2">
+            <svg viewBox="0 0 30 56" class="kw-icon">
+                <line x1="12" y1="39" x2="10" y2="52" stroke="#A78BFA" stroke-width="4" stroke-linecap="round"/>
+                <line x1="18" y1="39" x2="20" y2="52" stroke="#A78BFA" stroke-width="4" stroke-linecap="round"/>
+                <line x1="8" y1="20" x2="2" y2="30" stroke="#FDE68A" stroke-width="3" stroke-linecap="round"/>
+                <line x1="22" y1="20" x2="28" y2="30" stroke="#FDE68A" stroke-width="3" stroke-linecap="round"/>
+                <rect x="1" y="18" width="7" height="15" rx="2" fill="#22C55E"/>
+                <rect x="8" y="17" width="14" height="22" rx="6" fill="#A78BFA"/>
+                <circle cx="15" cy="10" r="7" fill="#FDE68A"/>
+                <circle cx="12.5" cy="9" r="1.1" fill="#1E293B"/>
+                <circle cx="17.5" cy="9" r="1.1" fill="#1E293B"/>
+                <path d="M11 13 Q15 16 19 13" stroke="#1E293B" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+            </svg>
+        </span>
+
+        <div class="kw-school-bus">
+            <svg viewBox="0 0 120 56" class="kw-icon">
+                <rect x="2" y="10" width="100" height="34" rx="8" fill="#FDE047"/>
+                <rect x="102" y="20" width="16" height="20" rx="4" fill="#FDE047"/>
+                <rect x="10" y="18" width="18" height="14" rx="2" fill="#7DD3FC"/>
+                <rect x="34" y="18" width="18" height="14" rx="2" fill="#7DD3FC"/>
+                <rect x="58" y="18" width="18" height="14" rx="2" fill="#7DD3FC"/>
+                <rect x="82" y="18" width="14" height="14" rx="2" fill="#7DD3FC"/>
+                <rect x="2" y="34" width="116" height="6" fill="#F59E0B"/>
+                <text x="52" y="16" font-family="Arial, sans-serif" font-size="7" font-weight="700" fill="#7C3AED" text-anchor="middle">CRAFTLANEE</text>
+                <circle cx="24" cy="48" r="8" fill="#1E293B"/>
+                <circle cx="24" cy="48" r="3" fill="#94A3B8"/>
+                <circle cx="90" cy="48" r="8" fill="#1E293B"/>
+                <circle cx="90" cy="48" r="3" fill="#94A3B8"/>
+            </svg>
+        </div>
+
+        <!-- School — a permanent landmark on the route, always visible
+             (not something that flashes in and out), with a clear
+             "CRAFTLANEE SCHOOL" sign above the door so it reads unmistakably. -->
+        <div class="kw-school-building">
+            <svg viewBox="0 0 120 74" class="kw-icon">
+                <rect x="10" y="26" width="100" height="46" fill="#A78BFA"/>
+                <polygon points="60,4 114,26 6,26" fill="#7C3AED"/>
+                <rect x="50" y="46" width="20" height="26" fill="#1E1B4B"/>
+                <circle cx="66" cy="59" r="1.4" fill="#FDE047"/>
+                <rect x="18" y="34" width="16" height="16" fill="#FDE68A"/>
+                <line x1="26" y1="34" x2="26" y2="50" stroke="#7C3AED" stroke-width="1.5"/>
+                <line x1="18" y1="42" x2="34" y2="42" stroke="#7C3AED" stroke-width="1.5"/>
+                <rect x="86" y="34" width="16" height="16" fill="#FDE68A"/>
+                <line x1="94" y1="34" x2="94" y2="50" stroke="#7C3AED" stroke-width="1.5"/>
+                <line x1="86" y1="42" x2="102" y2="42" stroke="#7C3AED" stroke-width="1.5"/>
+                <rect x="10" y="12" width="100" height="14" rx="3" fill="#fff"/>
+                <text x="60" y="22" font-family="Arial, sans-serif" font-size="9" font-weight="700" fill="#7C3AED" text-anchor="middle">CRAFTLANEE SCHOOL</text>
+                <line x1="60" y1="4" x2="60" y2="-16" stroke="#1E1B4B" stroke-width="2"/>
+                <polygon points="60,-16 80,-10 60,-4" fill="#EF4444"/>
+            </svg>
+        </div>
+
+        <span class="kw-exit-kid kw-exit-kid-1">
+            <svg viewBox="0 0 30 56" class="kw-icon">
+                <line x1="12" y1="39" x2="10" y2="52" stroke="#4ADE80" stroke-width="4" stroke-linecap="round"/>
+                <line x1="18" y1="39" x2="20" y2="52" stroke="#4ADE80" stroke-width="4" stroke-linecap="round"/>
+                <line x1="8" y1="20" x2="2" y2="30" stroke="#F472B6" stroke-width="3" stroke-linecap="round"/>
+                <line x1="22" y1="20" x2="28" y2="30" stroke="#F472B6" stroke-width="3" stroke-linecap="round"/>
+                <rect x="1" y="18" width="7" height="15" rx="2" fill="#0EA5E9"/>
+                <rect x="8" y="17" width="14" height="22" rx="6" fill="#4ADE80"/>
+                <circle cx="15" cy="10" r="7" fill="#F472B6"/>
+                <circle cx="12.5" cy="9" r="1.1" fill="#1E293B"/>
+                <circle cx="17.5" cy="9" r="1.1" fill="#1E293B"/>
+                <path d="M11 13 Q15 16 19 13" stroke="#1E293B" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+            </svg>
+        </span>
+        <span class="kw-exit-kid kw-exit-kid-2">
+            <svg viewBox="0 0 30 56" class="kw-icon">
+                <line x1="12" y1="39" x2="10" y2="52" stroke="#FDE047" stroke-width="4" stroke-linecap="round"/>
+                <line x1="18" y1="39" x2="20" y2="52" stroke="#FDE047" stroke-width="4" stroke-linecap="round"/>
+                <line x1="8" y1="20" x2="2" y2="30" stroke="#7DD3FC" stroke-width="3" stroke-linecap="round"/>
+                <line x1="22" y1="20" x2="28" y2="30" stroke="#7DD3FC" stroke-width="3" stroke-linecap="round"/>
+                <rect x="20" y="18" width="7" height="15" rx="2" fill="#EC4899"/>
+                <rect x="8" y="17" width="14" height="22" rx="6" fill="#FDE047"/>
+                <circle cx="15" cy="10" r="7" fill="#7DD3FC"/>
+                <circle cx="12.5" cy="9" r="1.1" fill="#1E293B"/>
+                <circle cx="17.5" cy="9" r="1.1" fill="#1E293B"/>
+                <path d="M11 13 Q15 16 19 13" stroke="#1E293B" stroke-width="1.1" fill="none" stroke-linecap="round"/>
+            </svg>
+        </span>
+    </div>
+</div>
+{% endif %}
+
+{% if active_theme.has_animated_scene and active_theme.key == 'intermediate' %}
+<!-- ================= GROWTH JOURNEY ANIMATED SCENE ================= -->
+<!-- Story: same journey as the School theme, continued — the teen leaves
+     home (parent waving from the door) -> waits at the stop where friends
+     are already aboard the bus -> doors open, boards, doors close -> the
+     bus drives the route past hills, a river, a bridge, a traffic signal,
+     a cafe, a library and a coaching centre -> the campus comes into view,
+     alive with a gate, flag, fountain, garden, bicycles, sports courts and
+     strolling students -> doors open, everyone walks in -> loops back.
+     Day/night + weather state is driven by static/js/intermediate-scene.js
+     via the data-tod / data-weather attributes on the wrapper below. -->
+<div class="intermediate-world-bg" aria-hidden="true">
+    <div class="iw-tod-overlay iw-tod-morning"></div>
+    <div class="iw-tod-overlay iw-tod-afternoon"></div>
+    <div class="iw-tod-overlay iw-tod-evening"></div>
+    <div class="iw-tod-overlay iw-tod-night"></div>
+
+    <div class="iw-sun"></div>
+    <div class="iw-moon"></div>
+    <i class="bi bi-star-fill iw-star"></i>
+    <i class="bi bi-star-fill iw-star"></i>
+    <i class="bi bi-star-fill iw-star"></i>
+    <i class="bi bi-star-fill iw-star"></i>
+
+    <!-- Weather layers — only one set is visible at a time via data-weather -->
+    <div class="iw-weather-layer iw-weather-dim"></div>
+    <div class="iw-cloud iw-extra-cloud" style="top:14%; left:30%; width:50px; height:18px;"></div>
+
+    <div class="iw-weather-layer iw-rain">
+        <div class="iw-rain-drop" style="left:8%;  animation-delay:0s;"></div>
+        <div class="iw-rain-drop" style="left:18%; animation-delay:-0.2s;"></div>
+        <div class="iw-rain-drop" style="left:28%; animation-delay:-0.4s;"></div>
+        <div class="iw-rain-drop" style="left:40%; animation-delay:-0.1s;"></div>
+        <div class="iw-rain-drop" style="left:52%; animation-delay:-0.3s;"></div>
+        <div class="iw-rain-drop" style="left:64%; animation-delay:-0.5s;"></div>
+        <div class="iw-rain-drop" style="left:76%; animation-delay:-0.15s;"></div>
+        <div class="iw-rain-drop" style="left:88%; animation-delay:-0.35s;"></div>
+    </div>
+
+    <div class="iw-weather-layer iw-rainbow-layer"><div class="iw-rainbow"></div></div>
+
+    <div class="iw-weather-layer iw-snow">
+        <div class="iw-snowflake" style="left:10%; animation-duration:7s; animation-delay:0s;"></div>
+        <div class="iw-snowflake" style="left:24%; animation-duration:9s; animation-delay:-2s;"></div>
+        <div class="iw-snowflake" style="left:38%; animation-duration:6s; animation-delay:-4s;"></div>
+        <div class="iw-snowflake" style="left:55%; animation-duration:8s; animation-delay:-1s;"></div>
+        <div class="iw-snowflake" style="left:70%; animation-duration:7.5s; animation-delay:-3s;"></div>
+        <div class="iw-snowflake" style="left:85%; animation-duration:9.5s; animation-delay:-5s;"></div>
+    </div>
+
+    <div class="iw-weather-layer iw-autumn">
+        <i class="bi bi-tree-fill iw-leaf" style="left:14%; color:#FB923C; animation-duration:8s; animation-delay:0s;"></i>
+        <i class="bi bi-tree-fill iw-leaf" style="left:32%; color:#F87171; animation-duration:6.5s; animation-delay:-2s;"></i>
+        <i class="bi bi-tree-fill iw-leaf" style="left:50%; color:#FBBF24; animation-duration:9s; animation-delay:-4s;"></i>
+        <i class="bi bi-tree-fill iw-leaf" style="left:68%; color:#F97316; animation-duration:7s; animation-delay:-1s;"></i>
+        <i class="bi bi-tree-fill iw-leaf" style="left:82%; color:#EF4444; animation-duration:8.5s; animation-delay:-3s;"></i>
+    </div>
+
+    <div class="iw-cloud iw-cloud-1"></div>
+    <div class="iw-cloud iw-cloud-2"></div>
+    <div class="iw-cloud iw-cloud-3"></div>
+
+    <span class="iw-bird iw-bird-1">
+        <svg viewBox="0 0 24 12" class="kw-icon"><path d="M0 8 Q6 0 12 8 Q18 0 24 8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+    </span>
+    <span class="iw-bird iw-bird-2">
+        <svg viewBox="0 0 24 12" class="kw-icon"><path d="M0 8 Q6 0 12 8 Q18 0 24 8" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+    </span>
+
+    <span class="iw-butterfly iw-butterfly-1">
+        <svg viewBox="0 0 24 24" class="kw-icon">
+            <ellipse cx="7" cy="9" rx="6" ry="7" fill="currentColor" opacity="0.85" transform="rotate(-20 7 9)"/>
+            <ellipse cx="17" cy="9" rx="6" ry="7" fill="currentColor" opacity="0.85" transform="rotate(20 17 9)"/>
+            <rect x="11" y="5" width="2" height="17" rx="1" fill="#3B2A1A"/>
+        </svg>
+    </span>
+    <span class="iw-butterfly iw-butterfly-2">
+        <svg viewBox="0 0 24 24" class="kw-icon">
+            <ellipse cx="7" cy="9" rx="6" ry="7" fill="currentColor" opacity="0.85" transform="rotate(-20 7 9)"/>
+            <ellipse cx="17" cy="9" rx="6" ry="7" fill="currentColor" opacity="0.85" transform="rotate(20 17 9)"/>
+            <rect x="11" y="5" width="2" height="17" rx="1" fill="#3B2A1A"/>
+        </svg>
+    </span>
+
+    <span class="iw-cap">
+        <svg viewBox="0 0 48 32" class="kw-icon">
+            <polygon points="24,2 46,12 24,22 2,12" fill="currentColor"/>
+            <rect x="21" y="20" width="6" height="10" fill="currentColor"/>
+            <line x1="42" y1="12" x2="42" y2="24" stroke="currentColor" stroke-width="2"/>
+            <circle cx="42" cy="26" r="2.5" fill="currentColor"/>
+        </svg>
+    </span>
+
+    <span class="iw-book iw-book-1">
+        <svg viewBox="0 0 32 26" class="kw-icon"><rect x="2" y="2" width="28" height="20" rx="2" fill="currentColor"/><line x1="16" y1="2" x2="16" y2="22" stroke="#fff" stroke-width="1.5"/></svg>
+    </span>
+    <span class="iw-book iw-book-2">
+        <svg viewBox="0 0 32 26" class="kw-icon"><rect x="2" y="2" width="28" height="20" rx="2" fill="currentColor"/><line x1="16" y1="2" x2="16" y2="22" stroke="#fff" stroke-width="1.5"/></svg>
+    </span>
+
+    <!-- Occasional career-motivation icons: formulas, code, medicine,
+         engineering, law, commerce — each fades in and out on its own
+         timer so they read as subtle, not constant clutter. -->
+    <span class="iw-career-icon iw-career-formula">&Sigma;</span>
+    <span class="iw-career-icon iw-career-code">&lt;/&gt;</span>
+    <span class="iw-career-icon iw-career-medical">+</span>
+    <i class="bi bi-gear-fill iw-career-icon iw-career-engineering"></i>
+    <i class="bi bi-bank iw-career-icon iw-career-law"></i>
+    <span class="iw-career-icon iw-career-commerce">$</span>
+
+    <div class="iw-ground">
+        <div class="iw-hills"></div>
+        <div class="iw-river"></div>
+        <div class="iw-bridge"></div>
+
+        <!-- Small-town landmarks the bus passes on its route -->
+        <i class="bi bi-tree-fill iw-park-tree"></i>
+        <div class="iw-park-bench"></div>
+
+        <div class="iw-traffic-signal"><div class="iw-signal-light"></div></div>
+
+        <span class="iw-cafe">
+            <svg viewBox="0 0 34 28" class="kw-icon">
+                <rect x="2" y="10" width="30" height="16" fill="#F59E0B"/>
+                <path d="M0 10 L34 10 L30 2 L4 2 Z" fill="#EF4444"/>
+                <path d="M14 26 Q14 20 17 20 Q20 20 20 26" fill="none" stroke="#78350F" stroke-width="2"/>
+            </svg>
+        </span>
+        <span class="iw-library-stop">
+            <svg viewBox="0 0 34 28" class="kw-icon">
+                <rect x="2" y="8" width="30" height="18" fill="#818CF8"/>
+                <polygon points="17,0 32,8 2,8" fill="#4338CA"/>
+                <rect x="13" y="14" width="8" height="12" fill="#1E1B4B"/>
+            </svg>
+        </span>
+        <span class="iw-coaching">
+            <svg viewBox="0 0 34 28" class="kw-icon">
+                <rect x="2" y="8" width="30" height="18" fill="#6366F1"/>
+                <rect x="6" y="12" width="8" height="8" fill="#E0E7FF"/>
+                <rect x="20" y="12" width="8" height="8" fill="#E0E7FF"/>
+            </svg>
+        </span>
+
+        <!-- City buildings the bus passes along its route -->
+        <div class="iw-city iw-city-1"></div>
+        <div class="iw-city iw-city-2"></div>
+
+        <span class="iw-home">
+            <svg viewBox="0 0 40 34" class="kw-icon">
+                <rect x="4" y="14" width="32" height="20" fill="#6366F1"/>
+                <polygon points="20,0 38,14 2,14" fill="#4338CA"/>
+                <rect x="16" y="20" width="8" height="14" fill="#1E1B4B"/>
+            </svg>
+        </span>
+
+        <!-- Parent waving goodbye from the doorway, continuously, on its
+             own idle loop (independent of the 30s bus-route timeline). -->
+        <svg viewBox="0 0 22 42" class="kw-icon iw-parent">
+            <line x1="9" y1="26" x2="8" y2="40" stroke="#4338CA" stroke-width="3" stroke-linecap="round"/>
+            <line x1="13" y1="26" x2="14" y2="40" stroke="#4338CA" stroke-width="3" stroke-linecap="round"/>
+            <rect x="5" y="14" width="12" height="15" rx="4" fill="#6366F1"/>
+            <circle cx="11" cy="8" r="6" fill="#FBCFE8"/>
+            <g class="iw-parent-arm">
+                <line x1="15" y1="16" x2="20" y2="10" stroke="#6366F1" stroke-width="3" stroke-linecap="round"/>
+            </g>
+        </svg>
+
+        <i class="bi bi-tree-fill iw-tree iw-tree-1"></i>
+        <i class="bi bi-tree-fill iw-tree iw-tree-2"></i>
+        <i class="bi bi-tree-fill iw-tree iw-tree-3"></i>
+
+        <div class="iw-bus-stop-sign"></div>
+
+        <!-- Taller, more mature proportions than the School figures. -->
+        <span class="iw-teen iw-teen-1">
+            <svg viewBox="0 0 30 62" class="kw-icon">
+                <line x1="13" y1="44" x2="11" y2="58" stroke="#312E81" stroke-width="4" stroke-linecap="round"/>
+                <line x1="19" y1="44" x2="21" y2="58" stroke="#312E81" stroke-width="4" stroke-linecap="round"/>
+                <line x1="9" y1="23" x2="3" y2="34" stroke="#7C3AED" stroke-width="3" stroke-linecap="round"/>
+                <line x1="23" y1="23" x2="29" y2="34" stroke="#7C3AED" stroke-width="3" stroke-linecap="round"/>
+                <rect x="21" y="21" width="7" height="16" rx="2" fill="#4338CA"/>
+                <rect x="9" y="20" width="14" height="25" rx="5" fill="#7C3AED"/>
+                <circle cx="16" cy="11" r="7.5" fill="#C4B5FD"/>
+                <path d="M8.5 9 Q16 1 23.5 9" fill="#312E81"/>
+                <circle cx="13.3" cy="10.5" r="1" fill="#1E293B"/>
+                <circle cx="18.7" cy="10.5" r="1" fill="#1E293B"/>
+                <path d="M12.5 14.5 Q16 17 19.5 14.5" stroke="#1E293B" stroke-width="1" fill="none" stroke-linecap="round"/>
+            </svg>
+        </span>
+        <span class="iw-teen iw-teen-2">
+            <svg viewBox="0 0 30 62" class="kw-icon">
+                <line x1="13" y1="44" x2="11" y2="58" stroke="#4C1D95" stroke-width="4" stroke-linecap="round"/>
+                <line x1="19" y1="44" x2="21" y2="58" stroke="#4C1D95" stroke-width="4" stroke-linecap="round"/>
+                <line x1="9" y1="23" x2="3" y2="34" stroke="#4F46E5" stroke-width="3" stroke-linecap="round"/>
+                <line x1="23" y1="23" x2="29" y2="34" stroke="#4F46E5" stroke-width="3" stroke-linecap="round"/>
+                <rect x="1" y="21" width="7" height="16" rx="2" fill="#7C3AED"/>
+                <rect x="9" y="20" width="14" height="25" rx="5" fill="#4F46E5"/>
+                <circle cx="16" cy="11" r="7.5" fill="#FBCFE8"/>
+                <path d="M8 10 Q9 0 16 1 Q23 0 24 10 Q24 4 16 4 Q8 4 8 10" fill="#1E1B4B"/>
+                <circle cx="13.3" cy="11" r="1" fill="#1E293B"/>
+                <circle cx="18.7" cy="11" r="1" fill="#1E293B"/>
+                <path d="M12.5 15 Q16 17.5 19.5 15" stroke="#1E293B" stroke-width="1" fill="none" stroke-linecap="round"/>
+            </svg>
+        </span>
+
+        <div class="iw-bus">
+            <svg viewBox="0 0 120 52" class="kw-icon">
+                <rect x="2" y="8" width="100" height="32" rx="8" fill="#6366F1"/>
+                <rect x="102" y="16" width="16" height="20" rx="4" fill="#6366F1"/>
+                <rect x="10" y="16" width="18" height="13" rx="2" fill="#E0E7FF"/>
+                <rect x="34" y="16" width="18" height="13" rx="2" fill="#E0E7FF"/>
+                <circle cx="43" cy="23" r="3" fill="#7C3AED"/>
+                <rect x="58" y="16" width="18" height="13" rx="2" fill="#E0E7FF"/>
+                <!-- Entrance door — swings open/closed via .iw-bus-door -->
+                <rect class="iw-bus-door" x="82" y="16" width="14" height="13" rx="2" fill="#C7D2FE" stroke="#4338CA" stroke-width="1"/>
+                <rect x="2" y="32" width="116" height="5" fill="#4338CA"/>
+                <text x="52" y="14" font-family="Arial, sans-serif" font-size="7" font-weight="700" fill="#fff" text-anchor="middle">CRAFTLANEE</text>
+                <circle class="iw-bus-light" cx="6" cy="20" r="3" fill="#FDE68A"/>
+                <circle cx="24" cy="44" r="7" fill="#1E1B4B"/>
+                <circle cx="90" cy="44" r="7" fill="#1E1B4B"/>
+            </svg>
+        </div>
+
+        <!-- Campus — a permanent landmark, always visible, with a clear
+             "CRAFTLANEE COLLEGE" sign so it reads unmistakably, plus the
+             campus-life cluster around it (gate, flag, fountain, garden,
+             bicycles, courts, library, posters, strolling students, window
+             lights) animating continuously and independently of the bus
+             timeline. -->
+        <div class="iw-gate"></div>
+        <div class="iw-fountain"></div>
+        <i class="bi bi-tree-fill iw-garden"></i>
+        <i class="bi bi-flower2 iw-garden-2"></i>
+
+        <div class="iw-campus">
+            <svg viewBox="0 0 120 72" class="kw-icon">
+                <rect x="10" y="26" width="100" height="46" fill="currentColor"/>
+                <polygon points="60,4 114,26 6,26" fill="currentColor"/>
+                <rect x="50" y="46" width="20" height="26" fill="#1E1B4B"/>
+                <rect x="18" y="34" width="16" height="16" fill="#E0E7FF"/>
+                <rect x="86" y="34" width="16" height="16" fill="#E0E7FF"/>
+                <rect x="10" y="12" width="100" height="14" rx="3" fill="#fff"/>
+                <text x="60" y="22" font-family="Arial, sans-serif" font-size="8" font-weight="700" fill="#4338CA" text-anchor="middle">CRAFTLANEE COLLEGE</text>
+            </svg>
+        </div>
+        <div class="iw-campus-light" style="right: 11%; bottom: 20%;"></div>
+        <div class="iw-campus-light" style="right: 6%; bottom: 20%;"></div>
+
+        <div class="iw-flagpole"><div class="iw-flag"></div></div>
+
+        <i class="bi bi-bicycle iw-bicycle iw-bicycle-1"></i>
+        <i class="bi bi-bicycle iw-bicycle iw-bicycle-2"></i>
+        <i class="bi bi-basket2-fill iw-basketball-court"></i>
+        <i class="bi bi-book-half iw-library-entrance"></i>
+
+        <div class="iw-poster iw-poster-1"></div>
+        <div class="iw-poster iw-poster-2"></div>
+
+        <i class="bi bi-person-walking iw-campus-walker iw-campus-walker-1"></i>
+        <i class="bi bi-person-walking iw-campus-walker iw-campus-walker-2"></i>
+
+        <span class="iw-enter-campus iw-enter-campus-1">
+            <svg viewBox="0 0 30 62" class="kw-icon">
+                <line x1="13" y1="44" x2="11" y2="58" stroke="#4C1D95" stroke-width="4" stroke-linecap="round"/>
+                <line x1="19" y1="44" x2="21" y2="58" stroke="#4C1D95" stroke-width="4" stroke-linecap="round"/>
+                <line x1="9" y1="23" x2="3" y2="34" stroke="#A78BFA" stroke-width="3" stroke-linecap="round"/>
+                <line x1="23" y1="23" x2="29" y2="34" stroke="#A78BFA" stroke-width="3" stroke-linecap="round"/>
+                <rect x="1" y="21" width="7" height="16" rx="2" fill="#6366F1"/>
+                <rect x="9" y="20" width="14" height="25" rx="5" fill="#8B5CF6"/>
+                <circle cx="16" cy="11" r="7.5" fill="#C4B5FD"/>
+                <path d="M8.5 9 Q16 1 23.5 9" fill="#312E81"/>
+                <circle cx="13.3" cy="10.5" r="1" fill="#1E293B"/>
+                <circle cx="18.7" cy="10.5" r="1" fill="#1E293B"/>
+                <path d="M12.5 14.5 Q16 17 19.5 14.5" stroke="#1E293B" stroke-width="1" fill="none" stroke-linecap="round"/>
+            </svg>
+        </span>
+        <span class="iw-enter-campus iw-enter-campus-2">
+            <svg viewBox="0 0 30 62" class="kw-icon">
+                <line x1="13" y1="44" x2="11" y2="58" stroke="#312E81" stroke-width="4" stroke-linecap="round"/>
+                <line x1="19" y1="44" x2="21" y2="58" stroke="#312E81" stroke-width="4" stroke-linecap="round"/>
+                <line x1="9" y1="23" x2="3" y2="34" stroke="#6366F1" stroke-width="3" stroke-linecap="round"/>
+                <line x1="23" y1="23" x2="29" y2="34" stroke="#6366F1" stroke-width="3" stroke-linecap="round"/>
+                <rect x="21" y="21" width="7" height="16" rx="2" fill="#8B5CF6"/>
+                <rect x="9" y="20" width="14" height="25" rx="5" fill="#6366F1"/>
+                <circle cx="16" cy="11" r="7.5" fill="#FBCFE8"/>
+                <path d="M8 10 Q9 0 16 1 Q23 0 24 10 Q24 4 16 4 Q8 4 8 10" fill="#1E1B4B"/>
+                <circle cx="13.3" cy="11" r="1" fill="#1E293B"/>
+                <circle cx="18.7" cy="11" r="1" fill="#1E293B"/>
+                <path d="M12.5 15 Q16 17.5 19.5 15" stroke="#1E293B" stroke-width="1" fill="none" stroke-linecap="round"/>
+            </svg>
+        </span>
+    </div>
+</div>
+{% endif %}
+
+<!-- ================= NAVBAR ================= -->
+<nav class="navbar navbar-expand-lg navbar-light sticky-top">
+    <div class="container-fluid px-lg-4">
+
+        <a class="navbar-brand d-flex align-items-center" href="{% url 'home' %}" aria-label="Craftlanee home">
+            <img src="{% static 'images/logo-navbar.png' %}" alt="Craftlanee" class="brand-logo">
+        </a>
+
+        <button class="navbar-toggler" type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#mainNavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNavbar">
+
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        {% if user.profile.role == 'ADMIN' %}
+                            <a class="nav-link" href="{% url 'admin_dashboard' %}">
+                                <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                            </a>
+                        {% elif user.profile.role == 'INSTRUCTOR' %}
+                            <a class="nav-link" href="{% url 'instructor_dashboard' %}">
+                                <i class="bi bi-easel2 me-1"></i> Dashboard
+                            </a>
+                        {% else %}
+                            <a class="nav-link" href="{% url 'student_dashboard' %}">
+                                <i class="bi bi-mortarboard me-1"></i> Dashboard
+                            </a>
+                        {% endif %}
+                    </li>
+                {% endif %}
+            </ul>
+
+            <ul class="navbar-nav ms-auto align-items-lg-center">
+                <li class="nav-item me-2">
+                    <button type="button" class="nav-link theme-toggle-btn" id="themeToggleBtn" aria-label="Toggle dark mode">
+                        <i class="bi bi-moon-stars" id="themeToggleIcon"></i>
+                    </button>
+                </li>
+                {% if active_theme.is_kids_world %}
+                <li class="nav-item me-2">
+                    <button type="button" class="kw-sound-toggle" id="kwSoundToggleBtn" aria-label="Toggle sound">
+                        <i class="bi bi-volume-up-fill" id="kwSoundToggleIcon"></i>
+                    </button>
+                </li>
+                {% endif %}
+                {% if user.is_authenticated %}
+                    {% if user.profile.role == 'ADMIN' %}
+                    <li class="nav-item me-2">
+                        <a class="nav-link position-relative" href="{% url 'admin_broadcast_list' %}" title="Broadcast Messages">
+                            <i class="bi bi-envelope fs-5"></i>
+                        </a>
+                    </li>
+                    {% else %}
+                    <li class="nav-item me-2">
+                        <a class="nav-link position-relative" href="{% url 'broadcast_inbox' %}" title="Messages">
+                            <i class="bi bi-envelope fs-5"></i>
+                            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger {% if not broadcast_unread_count %}d-none{% endif %}"
+                                  data-broadcast-badge>
+                                {{ broadcast_unread_count|default:0 }}
+                                <span class="visually-hidden">unread messages</span>
+                            </span>
+                        </a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item dropdown me-2">
+                        <a class="nav-link position-relative" href="#" id="notificationDropdown"
+                           role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="bi bi-bell fs-5"></i>
+                            {% if nav_unread_count %}
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                                    {{ nav_unread_count }}
+                                    <span class="visually-hidden">unread notifications</span>
+                                </span>
+                            {% endif %}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end notification-dropdown" aria-labelledby="notificationDropdown">
+                            <li class="d-flex justify-content-between align-items-center px-3 py-2">
+                                <span class="fw-semibold">Notifications</span>
+                                {% if nav_unread_count %}
+                                    <form method="post" action="{% url 'notifications_mark_all_read' %}">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-link btn-sm p-0">Mark all read</button>
+                                    </form>
+                                {% endif %}
+                            </li>
+                            <li><hr class="dropdown-divider"></li>
+                            {% for notification in nav_notifications %}
+                                <li>
+                                    <a class="dropdown-item {% if not notification.is_read %}fw-semibold{% endif %}"
+                                       href="{% url 'notification_read' notification.id %}">
+                                        {{ notification.message }}
+                                        <br><small class="text-muted">{{ notification.created_at|timesince }} ago</small>
+                                    </a>
+                                </li>
+                            {% empty %}
+                                <li><span class="dropdown-item-text text-muted">No notifications yet</span></li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                {% else %}
+                    <li class="nav-item me-2">
+                        <a class="nav-link" href="{% url 'login' %}">Login</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="btn btn-warning btn-sm px-3 fw-semibold" href="{% url 'register' %}">
+                            Register
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+
+        </div>
+    </div>
+</nav>
+<!-- =============== END NAVBAR =============== -->
+
+<!-- ================= MAIN CONTENT ================= -->
+<main class="container my-4 flex-grow-1">
+    {% block content %}{% endblock %}
+</main>
+
+<!-- ================= FOOTER ================= -->
+<footer class="text-center py-4 mt-auto">
+    <small>© 2025 Craftlanee. All rights reserved.</small>
+</footer>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+{% if user.is_authenticated and user.profile.role == 'STUDENT' %}
+
+    <!-- ================= AI MENTOR CHATBOT ================= -->
+    <link rel="stylesheet" href="{% static 'chatbot/chatbot.css' %}">
+    {% include "includes/chatbot.html" %}
+    <script src="{% static 'chatbot/chatbot.js' %}"></script>
+    <!-- =============== END AI MENTOR CHATBOT =============== -->
+
+{% endif %}
+
+{% if active_theme.is_kids_world %}
+<!-- ================= KIDS WORLD MASCOT ================= -->
+<div class="kw-mascot-corner" aria-hidden="true">
+    <div class="kw-mascot-bubble" id="kwMascotBubble">You're doing great, keep going! <i class="bi bi-star-fill"></i></div>
+    <img src="{% static active_theme.mascot_illustration %}" alt="" class="kw-mascot-img">
+</div>
+<div class="kw-fx-layer" id="kwFxLayer"></div>
+<!-- =============== END KIDS WORLD MASCOT =============== -->
+{% endif %}
+
+{% if user.is_authenticated and user.profile.role != 'ADMIN' %}
+<div class="toast-container position-fixed bottom-0 end-0 p-3" id="broadcastToastContainer" style="z-index: 1080;"></div>
+<script src="{% static 'js/broadcast-notify.js' %}" defer></script>
+{% endif %}
+
+<script src="{% static 'js/theme-toggle.js' %}"></script>
+
+{% if active_theme.is_kids_world %}
+{{ active_theme.sounds|json_script:"kw-sounds-data" }}
+<script>window.KIDS_THEME_STATIC_URL = "{% static '' %}";</script>
+<script src="{% static 'js/kids-sound.js' %}"></script>
+<script src="{% static 'js/kids-celebrations.js' %}"></script>
+<script src="{% static 'js/kids-ripple.js' %}"></script>
+{% endif %}
+
+{% if active_theme.key == 'intermediate' %}
+<script src="{% static 'js/intermediate-scene.js' %}"></script>
+{% endif %}
+
+{% block extra_js %}{% endblock %}
+
+</body>
+</html>

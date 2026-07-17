@@ -1,0 +1,161 @@
+{% extends 'adminpanel/admin_base.html' %}
+{% block title %}Course Management{% endblock %}
+
+{% block admin_content %}
+
+<style>
+  .section-card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface);
+  }
+
+  .section-card-header h5 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-card-header h5 svg { width: 17px; height: 17px; color: var(--color-primary); }
+  .form-body { padding: 20px 24px; }
+
+  .course-image {
+    width: 60px;
+    height: 40px;
+    object-fit: cover;
+    border-radius: 7px;
+    border: 1px solid var(--color-border);
+  }
+
+  .action-group { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .action-group .btn {
+    font-size: 0.78rem;
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: 8px;
+  }
+</style>
+
+<div class="page-header">
+  <div class="page-header-text">
+    <h3>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+      </svg>
+      Course Management
+    </h3>
+    <p class="page-subtitle">Create courses, assign instructors, and manage course content</p>
+  </div>
+</div>
+
+<div class="section-card">
+  <div class="section-card-header">
+    <h5>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="16"/>
+        <line x1="8" y1="12" x2="16" y2="12"/>
+      </svg>
+      Create New Course
+    </h5>
+  </div>
+  <div class="form-body">
+    <form method="post" action="{% url 'admin_create_course' %}" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Course Title</label>
+          <input type="text" name="title" class="form-control" placeholder="Enter course title" required>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Assign Instructor</label>
+          <select name="instructor" class="form-select">
+            <option value="">-- Select Instructor --</option>
+            {% for instructor in instructors %}
+              <option value="{{ instructor.id }}">{{ instructor.username }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-4 d-flex align-items-end">
+          <button class="btn btn-primary w-100">Create Course</button>
+        </div>
+      </div>
+      <div class="mt-3">
+        <label class="form-label">Course Description</label>
+        <textarea name="description" class="form-control" rows="3" placeholder="Brief course description" required></textarea>
+      </div>
+      <div class="mt-3">
+        <label class="form-label">Course Image</label>
+        <input type="file" name="image" class="form-control">
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="section-card">
+  <div class="section-card-header">
+    <h5>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+      </svg>
+      All Courses
+    </h5>
+  </div>
+
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Title</th>
+            <th>Instructor</th>
+            <th>Status</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for course in courses %}
+          <tr>
+            <td>
+              {% if course.image %}
+                <img src="{{ course.image.url }}" class="course-image">
+              {% else %}
+                <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+            <td class="fw-semibold">{{ course.title }}</td>
+            <td>{{ course.instructor.username|default:"Not Assigned" }}</td>
+            <td>
+              {% if course.is_active %}
+                <span class="badge bg-success">Active</span>
+              {% else %}
+                <span class="badge bg-danger">Inactive</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="action-group justify-content-center">
+                <a href="{% url 'admin_lesson_list' course.id %}" class="btn btn-sm btn-outline-info">Lessons</a>
+                <a href="{% url 'admin_quiz_list' course.id %}" class="btn btn-sm btn-outline-warning">Quizzes</a>
+                <a href="{% url 'toggle_course_status' course.id %}"
+                   class="btn btn-sm {% if course.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}">
+                  {% if course.is_active %}Disable{% else %}Enable{% endif %}
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

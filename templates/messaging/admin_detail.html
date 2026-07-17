@@ -1,0 +1,67 @@
+{% extends 'adminpanel/admin_base.html' %}
+{% load static %}
+{% block title %}{{ broadcast.subject }}{% endblock %}
+
+{% block admin_content %}
+<link rel="stylesheet" href="{% static 'css/messaging.css' %}">
+
+<div class="page-header">
+  <div class="page-header-text">
+    <h3><i class="bi bi-envelope-fill"></i> {{ broadcast.subject }}</h3>
+    <p class="page-subtitle">
+      Sent to {{ broadcast.get_recipient_type_display }} by {{ broadcast.sender.get_full_name|default:broadcast.sender.username }}
+      on {{ broadcast.created_at|date:"M d, Y H:i" }}
+    </p>
+  </div>
+  <div class="page-header-actions">
+    <a href="{% url 'admin_broadcast_list' %}" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left"></i> Back
+    </a>
+  </div>
+</div>
+
+<div class="section-card">
+  <div class="form-body">
+    <span class="badge msg-priority-badge msg-priority-{{ broadcast.priority|lower }} mb-3">
+      {{ broadcast.get_priority_display }}
+    </span>
+    <p style="white-space: pre-wrap;">{{ broadcast.message }}</p>
+    {% if broadcast.attachment %}
+      <a href="{{ broadcast.attachment.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+        <i class="bi bi-paperclip"></i> {{ broadcast.attachment.name }}
+      </a>
+    {% endif %}
+  </div>
+</div>
+
+<div class="section-card">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>Recipient</th>
+            <th>Status</th>
+            <th>Read At</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in recipients %}
+          <tr>
+            <td>{{ r.user.get_full_name|default:r.user.username }}</td>
+            <td>
+              {% if r.is_read %}
+                <span class="badge bg-success">Read</span>
+              {% else %}
+                <span class="badge bg-secondary">Unread</span>
+              {% endif %}
+            </td>
+            <td>{{ r.read_at|date:"M d, Y H:i"|default:"—" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

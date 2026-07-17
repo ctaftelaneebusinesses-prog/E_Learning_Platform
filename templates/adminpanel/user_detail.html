@@ -1,0 +1,218 @@
+{% extends 'adminpanel/admin_base.html' %}
+{% block title %}Profile Details{% endblock %}
+
+{% block admin_content %}
+
+<style>
+  .profile-detail-card {
+    background: var(--color-surface);
+    border-radius: var(--radius-card);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-soft);
+    padding: 28px;
+  }
+
+  .detail-avatar-section {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .detail-avatar, .detail-avatar-fallback {
+    width: 84px;
+    height: 84px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid var(--color-primary-soft);
+  }
+
+  .detail-avatar-fallback {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--color-primary), #818cf8);
+    color: #fff;
+    font-size: 1.8rem;
+    font-weight: 700;
+  }
+
+  .field-group { margin-bottom: 16px; }
+  .field-group label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    margin-bottom: 6px;
+    display: block;
+  }
+  .fields-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0 20px;
+  }
+  @media (max-width: 576px) {
+    .fields-grid { grid-template-columns: 1fr; }
+  }
+</style>
+
+<div class="page-header">
+  <div class="page-header-text">
+    <h2><i class="bi bi-person-vcard"></i> Profile Details</h2>
+    <p class="page-subtitle">View, edit or delete this user's full profile</p>
+  </div>
+  <div class="page-header-actions">
+    <a href="{% url 'admin_user_list' %}" class="btn btn-sm btn-outline-secondary">
+      <i class="bi bi-arrow-left"></i> Back to Users
+    </a>
+  </div>
+</div>
+
+{% for message in messages %}
+  <div class="alert alert-info shadow-sm">{{ message }}</div>
+{% endfor %}
+
+<div class="profile-detail-card">
+  <form method="post"
+        action="{% url 'admin_update_user_profile_detail' profile_user.id %}"
+        enctype="multipart/form-data">
+    {% csrf_token %}
+
+    <div class="detail-avatar-section">
+      {% if profile_user.profile.profile_image %}
+        <img src="{{ profile_user.profile.profile_image.url }}" alt="" class="detail-avatar">
+      {% else %}
+        <div class="detail-avatar-fallback">{{ profile_user.username|slice:":1"|upper }}</div>
+      {% endif %}
+      <div>
+        <h5 class="fw-bold mb-1">{{ profile_user.get_full_name|default:profile_user.username }}</h5>
+        <p class="text-muted mb-1">@{{ profile_user.username }}</p>
+        <span class="badge bg-secondary">{{ profile_user.profile.role }}</span>
+        {% if profile_user.profile.approval_status == 'PENDING' %}
+          <span class="badge bg-warning text-dark">Pending Approval</span>
+        {% elif profile_user.profile.approval_status == 'REJECTED' %}
+          <span class="badge bg-danger">Rejected</span>
+        {% elif profile_user.is_active %}
+          <span class="badge bg-success">Active</span>
+        {% else %}
+          <span class="badge bg-danger">Inactive</span>
+        {% endif %}
+      </div>
+      <div class="ms-auto">
+        <label class="form-label d-block small text-muted mb-1">Update photo</label>
+        <input type="file" name="profile_image" class="form-control form-control-sm" accept="image/png,image/jpeg,image/jpg,image/webp">
+      </div>
+    </div>
+
+    <div class="fields-grid">
+      <div class="field-group">
+        <label>First Name</label>
+        <input type="text" name="first_name" class="form-control" value="{{ profile_user.first_name }}">
+      </div>
+      <div class="field-group">
+        <label>Last Name</label>
+        <input type="text" name="last_name" class="form-control" value="{{ profile_user.last_name }}">
+      </div>
+      <div class="field-group">
+        <label>Username</label>
+        <input type="text" class="form-control" value="{{ profile_user.username }}" disabled>
+      </div>
+      <div class="field-group">
+        <label>Email</label>
+        <input type="email" name="email" class="form-control" value="{{ profile_user.email }}">
+      </div>
+      <div class="field-group">
+        <label>Role</label>
+        <input type="text" class="form-control" value="{{ profile_user.profile.role }}" disabled>
+      </div>
+      <div class="field-group">
+        <label>Phone Number</label>
+        <input type="text" name="phone_number" class="form-control" value="{{ profile_user.profile.phone_number }}">
+      </div>
+      <div class="field-group">
+        <label>Institution</label>
+        <input type="text" name="institution_name" class="form-control" value="{{ profile_user.profile.institution_name }}">
+      </div>
+      <div class="field-group">
+        <label>LinkedIn URL</label>
+        <input type="url" name="linkedin_url" class="form-control" value="{{ profile_user.profile.linkedin_url }}">
+      </div>
+      <div class="field-group">
+        <label>GitHub URL</label>
+        <input type="url" name="github_url" class="form-control" value="{{ profile_user.profile.github_url }}">
+      </div>
+      <div class="field-group">
+        <label>XP</label>
+        <input type="number" name="xp" class="form-control" value="{{ profile_user.profile.xp }}">
+      </div>
+      <div class="field-group">
+        <label>Level</label>
+        <input type="number" name="level" class="form-control" value="{{ profile_user.profile.level }}">
+      </div>
+      <div class="field-group">
+        <label>Date Joined</label>
+        <input type="text" class="form-control" value="{{ profile_user.date_joined }}" disabled>
+      </div>
+      <div class="field-group">
+        <label>Last Login</label>
+        <input type="text" class="form-control" value="{{ profile_user.last_login|default:'Never' }}" disabled>
+      </div>
+      <div class="field-group" style="grid-column: 1 / -1;">
+        <label>Skills</label>
+        <textarea name="skills" class="form-control" rows="2">{{ profile_user.profile.skills }}</textarea>
+      </div>
+    </div>
+
+    <div class="d-flex justify-content-end gap-2 mt-3">
+      <button type="submit" class="btn btn-primary">
+        <i class="bi bi-save me-1"></i> Save Changes
+      </button>
+    </div>
+  </form>
+
+  {% if profile_user.profile.approval_status == 'PENDING' or profile_user.profile.approval_status == 'REJECTED' %}
+  <hr class="my-4">
+  <div class="d-flex justify-content-between align-items-center">
+    <div>
+      <h6 class="fw-bold mb-1">Registration Approval</h6>
+      <p class="text-muted mb-0 small">This account is locked out until an admin approves the registration.</p>
+    </div>
+    <div class="d-flex gap-2">
+      <a href="{% url 'admin_approve_user' profile_user.id %}" class="btn btn-success">
+        <i class="bi bi-check-circle me-1"></i>Accept Registration
+      </a>
+      {% if profile_user.profile.approval_status == 'PENDING' %}
+      <form method="post"
+            action="{% url 'admin_reject_user' profile_user.id %}"
+            onsubmit="return confirm('Reject {{ profile_user.username|escapejs }}\'s registration? They will not be able to log in.');">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-outline-danger">
+          <i class="bi bi-x-circle me-1"></i>Reject Registration
+        </button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if profile_user != request.user %}
+  <hr class="my-4">
+  <div class="d-flex justify-content-between align-items-center">
+    <div>
+      <h6 class="fw-bold mb-1 text-danger">Danger Zone</h6>
+      <p class="text-muted mb-0 small">Permanently delete this user's account and profile.</p>
+    </div>
+    <form method="post"
+          action="{% url 'admin_delete_user_account' profile_user.id %}"
+          onsubmit="return confirm('Are you sure you want to permanently delete {{ profile_user.username }}\'s account? This cannot be undone.');">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-outline-danger">
+        <i class="bi bi-trash me-1"></i> Delete Account
+      </button>
+    </form>
+  </div>
+  {% endif %}
+</div>
+
+{% endblock %}

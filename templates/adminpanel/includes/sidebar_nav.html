@@ -1,0 +1,139 @@
+{% with url_name=request.resolver_match.url_name %}
+<aside class="dash-sidebar" id="dashSidebar">
+  <div class="dash-sidebar-header">
+    <a href="{% url 'profile' %}" class="dash-sidebar-profile">
+      {% if user.profile.profile_image %}
+        <img src="{{ user.profile.profile_image.url }}" alt="" class="dash-sidebar-avatar">
+      {% else %}
+        <span class="dash-sidebar-avatar dash-sidebar-avatar-fallback"><i class="bi bi-person-fill"></i></span>
+      {% endif %}
+      <span class="dash-sidebar-profile-info">
+        <span class="dash-sidebar-profile-name">{{ user.first_name|default:user.username }}</span>
+        <span class="dash-sidebar-profile-role">Administrator</span>
+      </span>
+    </a>
+    <button type="button" class="dash-sidebar-collapse-btn" id="dashSidebarCollapseBtn" aria-label="Collapse sidebar">
+      <i class="bi bi-chevron-left"></i>
+    </button>
+  </div>
+
+  <nav class="dash-sidebar-nav">
+    <div class="dash-nav-section-label">Overview</div>
+    <ul class="dash-nav-list">
+      <li>
+        <a href="{% url 'admin_dashboard' %}" data-label="Dashboard"
+           class="dash-nav-link {% if url_name == 'admin_dashboard' %}active{% endif %}">
+          <i class="bi bi-speedometer2"></i>
+          <span class="dash-nav-text">Dashboard</span>
+        </a>
+      </li>
+    </ul>
+
+    <div class="dash-nav-section-label">Management</div>
+    <ul class="dash-nav-list">
+      <li>
+        <a href="{% url 'admin_user_list' %}" data-label="Manage Users"
+           class="dash-nav-link {% if url_name == 'admin_user_list' %}active{% endif %}">
+          <i class="bi bi-people"></i>
+          <span class="dash-nav-text">Manage Users</span>
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'admin_pending_approvals' %}" data-label="Pending Approvals"
+           class="dash-nav-link {% if url_name == 'admin_pending_approvals' %}active{% endif %}">
+          <i class="bi bi-person-vcard"></i>
+          <span class="dash-nav-text">Pending Approvals</span>
+          {% if pending_approval_count %}
+            <span class="badge bg-danger rounded-pill ms-auto">{{ pending_approval_count }}</span>
+          {% endif %}
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'admin_course_list' %}" data-label="Manage Courses"
+           class="dash-nav-link {% if url_name == 'admin_course_list' or url_name == 'admin_lesson_list' or url_name == 'admin_quiz_list' or url_name == 'admin_question_list' %}active{% endif %}">
+          <i class="bi bi-journal-text"></i>
+          <span class="dash-nav-text">Manage Courses</span>
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'admin_progress' %}" data-label="View Progress"
+           class="dash-nav-link {% if url_name == 'admin_progress' %}active{% endif %}">
+          <i class="bi bi-bar-chart-line"></i>
+          <span class="dash-nav-text">View Progress</span>
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'admin_achievement_list' %}" data-label="Achievements"
+           class="dash-nav-link {% if url_name == 'admin_achievement_list' %}active{% endif %}">
+          <i class="bi bi-award"></i>
+          <span class="dash-nav-text">Achievements</span>
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'admin_streaks' %}" data-label="Learning Streaks"
+           class="dash-nav-link {% if url_name == 'admin_streaks' %}active{% endif %}">
+          <i class="bi bi-fire"></i>
+          <span class="dash-nav-text">Learning Streaks</span>
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'admin_skill_list' %}" data-label="Skills &amp; Paths"
+           class="dash-nav-link {% if url_name == 'admin_skill_list' %}active{% endif %}">
+          <i class="bi bi-diagram-3"></i>
+          <span class="dash-nav-text">Skills &amp; Paths</span>
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'admin_time_tracking' %}" data-label="Time Tracking"
+           class="dash-nav-link {% if url_name == 'admin_time_tracking' %}active{% endif %}">
+          <i class="bi bi-clock-history"></i>
+          <span class="dash-nav-text">Time Tracking</span>
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'admin_user_activity_log' %}" data-label="Registered Users"
+           class="dash-nav-link {% if url_name == 'admin_user_activity_log' %}active{% endif %}">
+          <i class="bi bi-person-check"></i>
+          <span class="dash-nav-text">Registered Users</span>
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'admin_certificate_list' %}" data-label="Certificates"
+           class="dash-nav-link {% if url_name == 'admin_certificate_list' %}active{% endif %}">
+          <i class="bi bi-patch-check"></i>
+          <span class="dash-nav-text">Certificates</span>
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'career_job_roles' %}" data-label="Job Roles"
+           class="dash-nav-link {% if url_name == 'career_job_roles' or url_name == 'career_job_role_create' or url_name == 'career_job_role_edit' %}active{% endif %}">
+          <i class="bi bi-briefcase"></i>
+          <span class="dash-nav-text">Job Roles</span>
+        </a>
+      </li>
+    </ul>
+
+    <div class="dash-nav-section-label">Communication</div>
+    <ul class="dash-nav-list">
+      <li>
+        <a href="{% url 'admin_broadcast_list' %}" data-label="Messages"
+           class="dash-nav-link {% if url_name == 'admin_broadcast_list' or url_name == 'admin_broadcast_create' or url_name == 'admin_broadcast_detail' %}active{% endif %}">
+          <i class="bi bi-envelope-fill"></i>
+          <span class="dash-nav-text">Messages</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="dash-sidebar-footer">
+    <a href="{% url 'home' %}" class="dash-nav-link" data-label="Back to Site">
+      <i class="bi bi-box-arrow-left"></i>
+      <span class="dash-nav-text">Back to Site</span>
+    </a>
+    <a href="{% url 'logout' %}" class="dash-nav-link dash-nav-link-logout" data-label="Logout">
+      <i class="bi bi-box-arrow-right"></i>
+      <span class="dash-nav-text">Logout</span>
+    </a>
+  </div>
+</aside>
+{% endwith %}

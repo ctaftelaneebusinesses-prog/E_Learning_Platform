@@ -1,0 +1,82 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'css/messaging.css' %}">
+
+<div class="page-header">
+  <div class="page-header-text">
+    <h3><i class="bi bi-envelope-fill"></i> Messages</h3>
+    <p class="page-subtitle">Announcements from the administration</p>
+  </div>
+</div>
+
+<form method="get" id="csrfHolder">{% csrf_token %}</form>
+
+<div class="section-card msg-inbox-toolbar">
+  <div class="form-body">
+    <form method="get" class="msg-toolbar-form">
+      <input type="hidden" name="filter" value="{{ filter_by }}" id="filterInput">
+      <div class="msg-toolbar-row">
+        <label class="form-label">Search</label>
+        <div class="msg-search-wrap">
+          <i class="bi bi-search msg-search-icon"></i>
+          <input type="text" name="q" value="{{ q }}" class="form-control msg-search-input" placeholder="Search subject or message">
+        </div>
+      </div>
+      <div class="msg-toolbar-row">
+        <div class="msg-filter-tabs">
+          <a class="msg-filter-tab {% if filter_by == 'all' %}active{% endif %}"
+             href="?filter=all{% if q %}&q={{ q }}{% endif %}">All</a>
+          <a class="msg-filter-tab {% if filter_by == 'unread' %}active{% endif %}"
+             href="?filter=unread{% if q %}&q={{ q }}{% endif %}">Unread</a>
+          <a class="msg-filter-tab {% if filter_by == 'read' %}active{% endif %}"
+             href="?filter=read{% if q %}&q={{ q }}{% endif %}">Read</a>
+          <a class="msg-filter-tab {% if filter_by == 'important' %}active{% endif %}"
+             href="?filter=important{% if q %}&q={{ q }}{% endif %}">Important</a>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="msg-inbox-list">
+  {% for entry in entries %}
+    <div class="msg-card msg-priority-accent-{{ entry.broadcast.priority|lower }} {% if not entry.is_read %}msg-card-unread{% endif %}" data-entry-id="{{ entry.id }}">
+      <div class="msg-card-main">
+        <div class="msg-avatar" aria-hidden="true">
+          {{ entry.broadcast.sender.get_full_name|default:entry.broadcast.sender.username|slice:":1"|upper }}
+        </div>
+        <div class="msg-card-body">
+          <div class="msg-card-top">
+            <div class="msg-card-subject">
+              {% if not entry.is_read %}<span class="msg-unread-dot" aria-hidden="true"></span>{% endif %}
+              {{ entry.broadcast.subject }}
+            </div>
+            <span class="badge msg-priority-badge msg-priority-{{ entry.broadcast.priority|lower }}">
+              {{ entry.broadcast.get_priority_display }}
+            </span>
+          </div>
+          <div class="msg-card-meta">
+            <i class="bi bi-person-circle"></i> {{ entry.broadcast.sender.get_full_name|default:entry.broadcast.sender.username }}
+            <span class="msg-card-meta-dot">&middot;</span>
+            <i class="bi bi-clock"></i> {{ entry.broadcast.created_at|date:"M d, Y H:i" }}
+          </div>
+          <div class="msg-card-preview">{{ entry.broadcast.message|truncatechars:120 }}</div>
+          <div class="msg-card-full d-none">
+            <p style="white-space: pre-wrap;">{{ entry.broadcast.message }}</p>
+            {% if entry.broadcast.attachment %}
+              <a href="{{ entry.broadcast.attachment.url }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                <i class="bi bi-paperclip"></i> Download attachment
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  {% empty %}
+    <div class="empty-state msg-empty-state">
+      <i class="bi bi-envelope-open"></i>
+      <p>No messages here yet</p>
+    </div>
+  {% endfor %}
+</div>
+
+<script src="{% static 'js/messaging-inbox.js' %}" defer></script>

@@ -1,0 +1,753 @@
+{% extends 'students/student_base.html' %}
+{% load static %}
+{% load student_extras %}
+{% block title %}Student Dashboard{% endblock %}
+
+{% block student_content %}
+
+<style>
+  /* Theme-driven aliases — colors come from body.theme-* (static/css/themes.css) */
+  :root {
+    --navy: var(--color-primary);
+    --navy-mid: var(--color-secondary);
+    --navy-light: var(--color-secondary);
+    --gold: var(--color-secondary);
+    --gold-light: var(--color-secondary);
+    --gold-soft: var(--color-primary-soft);
+  }
+
+  /* ==============================
+     WELCOME BANNER
+  ============================== */
+  .welcome-banner {
+    position: relative;
+    background: var(--theme-gradient-hero, linear-gradient(120deg, var(--navy) 0%, var(--navy-mid) 100%));
+    border-radius: var(--radius-card, 20px);
+    padding: 30px 34px;
+    margin-bottom: 28px;
+    color: #fff;
+    box-shadow: 0 20px 40px -14px rgba(15, 23, 42, 0.45);
+    overflow: hidden;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+  }
+
+  .welcome-banner::before,
+  .welcome-banner::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(201, 168, 76, 0.14);
+    pointer-events: none;
+  }
+
+  .welcome-banner::before {
+    width: 220px;
+    height: 220px;
+    top: -110px;
+    right: -60px;
+  }
+
+  .welcome-banner::after {
+    width: 140px;
+    height: 140px;
+    bottom: -80px;
+    right: 120px;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .welcome-left {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .welcome-avatar {
+    width: 54px;
+    height: 54px;
+    flex-shrink: 0;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(6px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    font-weight: 800;
+  }
+
+  .welcome-banner h4 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #fff;
+  }
+
+  .welcome-banner p {
+    margin: 4px 0 0;
+    font-size: 0.92rem;
+    opacity: 0.88;
+  }
+
+  .welcome-date {
+    position: relative;
+    z-index: 1;
+    background: rgba(255, 255, 255, 0.16);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 7px 16px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* ==============================
+     DASHBOARD HEADER
+  ============================== */
+  .dashboard-title {
+    font-size: 1.55rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .dashboard-title i {
+    color: var(--gold);
+    font-size: 1.35rem;
+  }
+
+  .dashboard-title::after {
+    content: '';
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(90deg, var(--gold-soft), transparent);
+    border-radius: 2px;
+    margin-left: 12px;
+  }
+
+  /* ==============================
+     STAT CARDS
+  ============================== */
+  .stat-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 18px;
+    padding: 22px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    height: 100%;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lift);
+  }
+
+  .stat-icon {
+    width: 52px;
+    height: 52px;
+    flex-shrink: 0;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+  }
+
+  .stat-card.streak .stat-icon { background: rgba(249, 115, 22, 0.12); color: #F97316; }
+  .stat-card.longest .stat-icon { background: rgba(245, 158, 11, 0.12); color: #F59E0B; }
+  .stat-card.xp .stat-icon { background: var(--gold-soft); color: var(--gold); }
+
+  .stat-card h6 {
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    margin: 0 0 4px;
+  }
+
+  .stat-card h3 {
+    font-size: 1.85rem;
+    font-weight: 800;
+    margin: 0;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+
+  .stat-card h3 span {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--color-text-muted);
+    margin-left: 4px;
+  }
+
+  /* ==============================
+     SECTION HEADINGS
+  ============================== */
+  .section-heading {
+    font-size: 1.02rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-heading i {
+    color: var(--gold);
+    font-size: 1.05rem;
+  }
+
+  .section-count {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--navy);
+    background: var(--gold-soft);
+    padding: 3px 10px;
+    border-radius: 999px;
+  }
+
+  /* ==============================
+     COURSE CARDS
+  ============================== */
+  .course-card {
+    height: 100%;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 18px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  }
+
+  .course-card:hover {
+    transform: translateY(-6px);
+    box-shadow: var(--shadow-lift);
+  }
+
+  .course-image-wrap {
+    position: relative;
+  }
+
+  .course-image {
+    width: 100%;
+    height: 158px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .course-placeholder {
+    height: 158px;
+    background: linear-gradient(135deg, var(--navy-mid), var(--navy-light));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--gold-light);
+    font-size: 2.3rem;
+  }
+
+  .course-progress-badge {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    background: rgba(15, 23, 42, 0.72);
+    backdrop-filter: blur(4px);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 4px 11px;
+    border-radius: 999px;
+  }
+
+  .card-body {
+    padding: 18px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 12px;
+  }
+
+  .card-body h6 {
+    font-size: 0.94rem;
+    font-weight: 700;
+    line-height: 1.4;
+    margin: 0;
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+    margin-bottom: 6px;
+  }
+
+  .btn-continue {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-weight: 600;
+    border-radius: 10px;
+  }
+
+  .btn-continue i {
+    transition: transform 0.2s ease;
+  }
+
+  .btn-continue:hover i {
+    transform: translateX(3px);
+  }
+
+  /* ==============================
+     PROGRESS BAR
+  ============================== */
+  .progress {
+    height: 8px;
+    border-radius: 999px;
+    background: var(--color-bg);
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light)) !important;
+  }
+
+  .btn-continue {
+    background: var(--navy) !important;
+    border-color: var(--navy) !important;
+    color: #fff !important;
+  }
+
+  .btn-continue:hover,
+  .btn-continue:focus {
+    background: var(--gold) !important;
+    border-color: var(--gold) !important;
+    color: var(--navy) !important;
+  }
+
+  /* ==============================
+     JOB SUGGESTION CARDS
+  ============================== */
+  .job-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 20px 22px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .job-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lift);
+  }
+
+  .readiness-ring {
+    --p: 0;
+    width: 60px;
+    height: 60px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: conic-gradient(var(--gold) calc(var(--p) * 3.6deg), var(--color-border) 0);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .readiness-ring-inner {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--color-surface);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.76rem;
+    font-weight: 800;
+    color: var(--color-text);
+  }
+
+  .job-card-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .job-card h6 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .job-ready-badge {
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: rgba(34, 197, 94, 0.12);
+    color: #16A34A;
+  }
+
+  /* ==============================
+     ACHIEVEMENT CARDS (school students)
+  ============================== */
+  .achievement-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 16px;
+    padding: 20px 22px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .achievement-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-lift);
+  }
+
+  .achievement-icon {
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    background: rgba(249, 115, 22, 0.12);
+    color: #F97316;
+  }
+
+  .achievement-card.locked .achievement-icon {
+    background: var(--color-border);
+    color: var(--color-text-muted, #94A3B8);
+  }
+
+  .achievement-card.locked {
+    opacity: 0.6;
+  }
+
+  .achievement-card-body {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .achievement-card h6 {
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .achievement-unlocked-badge {
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    padding: 2px 9px;
+    border-radius: 999px;
+    background: rgba(34, 197, 94, 0.12);
+    color: #16A34A;
+  }
+
+  .job-card .small {
+    font-size: 0.84rem;
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  /* ==============================
+     EMPTY STATES
+  ============================== */
+  .empty-state {
+    border: 1.5px dashed var(--color-border);
+    border-radius: 16px;
+    padding: 38px 20px;
+    text-align: center;
+    color: var(--color-text-muted);
+    background: var(--color-bg);
+  }
+
+  .empty-state i {
+    display: block;
+    font-size: 1.8rem;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+
+  @media (max-width: 575.98px) {
+    .welcome-banner {
+      padding: 22px 20px;
+    }
+
+    .welcome-left {
+      gap: 12px;
+    }
+
+    .welcome-avatar {
+      width: 46px;
+      height: 46px;
+      font-size: 1.1rem;
+    }
+
+    .welcome-banner h4 {
+      font-size: 1.15rem;
+    }
+
+    .welcome-date {
+      font-size: 0.74rem;
+      padding: 6px 12px;
+    }
+  }
+</style>
+
+<!-- WELCOME BANNER -->
+<div class="welcome-banner">
+  <div class="welcome-left">
+    <div class="welcome-avatar">{{ user.first_name|default:user.username|first|upper }}</div>
+    <div>
+      <h4>{{ active_theme.greeting|default:"Welcome back," }} {{ user.first_name|default:user.username }}</h4>
+      <p>{{ active_theme.tagline|default:"Keep up the momentum, you're doing wonderfully." }}</p>
+    </div>
+  </div>
+  <div class="welcome-date"><i class="bi bi-calendar3"></i> {% now "l, F j, Y" %} &nbsp;|&nbsp; <i class="bi bi-clock"></i> {% now "g:i A" %}</div>
+</div>
+
+{% if active_theme.is_kids_world %}
+<!-- KIDS WORLD GAMIFICATION WIDGETS -->
+<div class="kw-widget-row">
+  <div class="kw-widget-card">
+    <i class="bi bi-bullseye kw-widget-emoji"></i>
+    <h6>Today's Learning Mission</h6>
+    <p>Finish one lesson to keep your streak alive!</p>
+  </div>
+
+  <div class="kw-widget-card">
+    <i class="bi bi-trophy-fill kw-widget-emoji"></i>
+    <h6>Level &amp; XP Progress</h6>
+    <span class="kw-level-badge"><i class="bi bi-lightning-charge-fill"></i> Level {{ user.profile.level|default:1 }}</span>
+    <div class="kw-xp-bar"><div class="kw-xp-bar-fill" style="width: {{ total_xp|default:0|floatformat:0 }}%;"></div></div>
+    <p class="mt-2">{{ total_xp|default:0 }} XP earned</p>
+  </div>
+
+  <div class="kw-widget-card">
+    <i class="bi bi-star-fill kw-widget-emoji"></i>
+    <h6>Stars &amp; Streak</h6>
+    <span class="kw-star-counter"><i class="bi bi-fire"></i> {{ streak.current_streak|default:0 }} day streak</span>
+  </div>
+
+  <div class="kw-widget-card" id="kwDailyRewardCard">
+    <i class="bi bi-gift-fill kw-widget-emoji"></i>
+    <h6>Daily Reward</h6>
+    <p>Open today's treasure chest for a surprise!</p>
+    <button type="button" class="kw-claim-btn" id="kwClaimRewardBtn">Claim Reward</button>
+  </div>
+</div>
+
+<script>
+(function () {
+  var btn = document.getElementById('kwClaimRewardBtn');
+  if (btn && window.KidsCelebrations) {
+    btn.addEventListener('click', function () {
+      window.KidsCelebrations.treasureChest();
+      setTimeout(function () { window.KidsCelebrations.coinBurst(8); }, 400);
+      setTimeout(function () { window.KidsCelebrations.confetti(50); }, 500);
+      window.KidsCelebrations.glow(document.getElementById('kwDailyRewardCard'), 3000);
+      btn.disabled = true;
+      btn.innerHTML = 'Reward Claimed! <i class="bi bi-check-circle-fill"></i>';
+    });
+  }
+})();
+</script>
+{% endif %}
+
+<!-- HEADER -->
+<h3 class="dashboard-title mb-4"><i class="bi {{ active_theme.icon|default:'bi-mortarboard-fill' }}"></i> Student Dashboard</h3>
+
+<!-- STATS -->
+<div class="row g-4 mb-5">
+  {% if streak %}
+    <div class="col-md-4">
+      <div class="stat-card streak">
+        <div class="stat-icon"><i class="bi bi-fire"></i></div>
+        <div>
+          <h6>Current Streak</h6>
+          <h3>{{ streak.current_streak }}<span>days</span></h3>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="stat-card longest">
+        <div class="stat-icon"><i class="bi bi-trophy-fill"></i></div>
+        <div>
+          <h6>Longest Streak</h6>
+          <h3>{{ streak.longest_streak }}<span>days</span></h3>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-4">
+      <div class="stat-card xp">
+        <div class="stat-icon"><i class="bi bi-star-fill"></i></div>
+        <div>
+          <h6>Total XP</h6>
+          <h3>{{ total_xp }}</h3>
+        </div>
+      </div>
+    </div>
+  {% else %}
+    <div class="col-12">
+      <div class="empty-state">
+        <i class="bi bi-fire"></i>
+        Start learning today to build your streak
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+<!-- COURSES -->
+<div class="d-flex align-items-center gap-2 mb-3">
+  <h5 class="section-heading mb-0"><i class="bi bi-book-fill"></i> My Enrolled Courses</h5>
+  {% if enrollments %}<span class="section-count">{{ enrollments|length }}</span>{% endif %}
+</div>
+
+<div class="row g-4">
+  {% for enroll in enrollments %}
+    {% with progress=progress_map|get_item:enroll.course.id %}
+      <div class="col-lg-4 col-md-6">
+        <div class="course-card">
+
+          <div class="course-image-wrap">
+            {% if enroll.course.image %}
+              <img src="{{ enroll.course.image.url }}" class="course-image" alt="{{ enroll.course.title }}">
+            {% else %}
+              <div class="course-placeholder"><i class="bi bi-journal-bookmark-fill"></i></div>
+            {% endif %}
+            <span class="course-progress-badge">
+              {% if progress %}{{ progress.completion_percentage }}{% else %}0{% endif %}% complete
+            </span>
+          </div>
+
+          <div class="card-body">
+            <h6>{{ enroll.course.title }}</h6>
+
+            <div>
+              <div class="progress-label">
+                <span>Progress</span>
+                <span>{% if progress %}{{ progress.completion_percentage }}{% else %}0{% endif %}%</span>
+              </div>
+              <div class="progress">
+                <div class="progress-bar"
+                     style="width: {% if progress %}{{ progress.completion_percentage }}{% else %}0{% endif %}%">
+                </div>
+              </div>
+            </div>
+
+            <a href="{% url 'student_lesson_list' enroll.course.id %}"
+               class="btn btn-primary btn-sm btn-continue">
+              Continue Learning <i class="bi bi-arrow-right"></i>
+            </a>
+          </div>
+
+        </div>
+      </div>
+    {% endwith %}
+  {% empty %}
+    <div class="col-12">
+      <div class="empty-state">
+        <i class="bi bi-info-circle"></i>
+        No enrolled courses yet
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+{% if active_theme.key == 'school' %}
+<!-- ACHIEVEMENTS (school students) -->
+<div class="mt-5">
+  <h5 class="section-heading mb-3"><i class="bi bi-award-fill"></i> Achievements</h5>
+
+  {% if achievements %}
+    <div class="d-flex flex-column gap-3">
+      {% for a in achievements %}
+        <div class="achievement-card {% if not a.unlocked %}locked{% endif %}">
+          <div class="achievement-icon"><i class="bi {{ a.icon }}"></i></div>
+          <div class="achievement-card-body">
+            <h6>
+              {{ a.title }}
+              {% if a.unlocked %}<span class="achievement-unlocked-badge"><i class="bi bi-star-fill"></i> Unlocked</span>{% endif %}
+            </h6>
+            <p class="small">{{ a.message }}</p>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <i class="bi bi-award-fill"></i>
+      Keep learning to unlock your first achievement!
+    </div>
+  {% endif %}
+</div>
+{% else %}
+<!-- JOB SUGGESTIONS -->
+<div class="mt-5">
+  <h5 class="section-heading mb-3"><i class="bi bi-briefcase-fill"></i> Job Suggestions</h5>
+
+  {% if job_suggestions %}
+    <div class="d-flex flex-column gap-3">
+      {% for j in job_suggestions %}
+        <div class="job-card">
+          <div class="readiness-ring" style="--p: {{ j.readiness|default:0 }};">
+            <div class="readiness-ring-inner">{{ j.readiness|default:0 }}%</div>
+          </div>
+          <div class="job-card-body">
+            <h6>
+              {{ j.job }}
+              {% if j.readiness >= 90 %}<span class="job-ready-badge"><i class="bi bi-rocket-takeoff-fill"></i> Ready</span>{% endif %}
+            </h6>
+            <p class="small">{{ j.message }}</p>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <i class="bi bi-rocket-takeoff-fill"></i>
+      Complete more courses to unlock job suggestions
+    </div>
+  {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends 'adminpanel/admin_base.html' %}
+{% load static %}
+{% block title %}Messages{% endblock %}
+
+{% block admin_content %}
+<link rel="stylesheet" href="{% static 'css/messaging.css' %}">
+
+<div class="page-header">
+  <div class="page-header-text">
+    <h3>
+      <i class="bi bi-envelope-fill"></i>
+      Broadcast Messages
+    </h3>
+    <p class="page-subtitle">Send announcements to students, instructors, or everyone</p>
+  </div>
+  <div class="page-header-actions">
+    <a href="{% url 'admin_broadcast_create' %}" class="btn btn-primary">
+      <i class="bi bi-plus-lg"></i> New Message
+    </a>
+  </div>
+</div>
+
+<div class="section-card">
+  <div class="form-body">
+    <form method="get" class="row g-3 align-items-end">
+      <div class="col-md-4">
+        <label class="form-label">Search</label>
+        <input type="text" name="q" value="{{ q }}" class="form-control" placeholder="Search subject or message">
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Recipient</label>
+        <select name="recipient" class="form-select">
+          <option value="">All</option>
+          {% for value, label in recipient_choices %}
+            <option value="{{ value }}" {% if recipient == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-3">
+        <label class="form-label">Priority</label>
+        <select name="priority" class="form-select">
+          <option value="">All</option>
+          {% for value, label in priority_choices %}
+            <option value="{{ value }}" {% if priority == value %}selected{% endif %}>{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-2">
+        <button class="btn btn-outline-primary w-100">Filter</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="section-card">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>Subject</th>
+            <th>Recipient</th>
+            <th>Priority</th>
+            <th>Sent</th>
+            <th>Read</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+          <tr>
+            <td class="fw-semibold">
+              <a href="{% url 'admin_broadcast_detail' row.broadcast.id %}">{{ row.broadcast.subject }}</a>
+            </td>
+            <td>{{ row.broadcast.get_recipient_type_display }}</td>
+            <td>
+              <span class="badge msg-priority-badge msg-priority-{{ row.broadcast.priority|lower }}">
+                {{ row.broadcast.get_priority_display }}
+              </span>
+            </td>
+            <td>{{ row.broadcast.created_at|date:"M d, Y H:i" }}</td>
+            <td>{{ row.read }} / {{ row.total }}</td>
+            <td class="text-center">
+              <form method="post" action="{% url 'admin_broadcast_delete' row.broadcast.id %}" class="d-inline"
+                    onsubmit="return confirm('Delete this broadcast?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6">
+              <div class="empty-state">
+                <i class="bi bi-envelope-open"></i>
+                <p>No broadcasts sent yet</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,167 @@
+{% extends 'instructors/instructor_base.html' %}
+{% block title %}Instructor Dashboard{% endblock %}
+
+{% block instructor_content %}
+
+<style>
+  .section-card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--color-surface);
+  }
+
+  .section-card-header h5 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-secondary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-card-header svg {
+    width: 18px;
+    height: 18px;
+    color: var(--color-primary);
+  }
+
+  .course-image {
+    width: 70px;
+    height: 45px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+  }
+
+  .badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .action-group {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .action-group .btn {
+    font-size: 0.78rem;
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: 8px;
+    letter-spacing: 0.01em;
+  }
+</style>
+
+<div class="page-header">
+  <div class="page-header-text">
+    <h3>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+      Instructor Dashboard
+    </h3>
+    <p class="page-subtitle">Manage your courses, students, and communication</p>
+  </div>
+</div>
+
+<div class="section-card">
+  <div class="section-card-header">
+    <h5>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+      </svg>
+      My Courses
+    </h5>
+  </div>
+
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Course</th>
+            <th>Status</th>
+            <th class="text-center">Students</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for c in courses %}
+          <tr>
+            <td>
+              {% if c.image %}
+                <img src="{{ c.image.url }}" class="course-image">
+              {% else %}
+                <span class="text-muted">—</span>
+              {% endif %}
+            </td>
+
+            <td class="fw-semibold" style="color:var(--color-secondary);">{{ c.title }}</td>
+
+            <td>
+              {% if c.is_active %}
+                <span class="pill-metric pill-metric-success badge-status">
+                  <svg width="7" height="7" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg>
+                  Active
+                </span>
+              {% else %}
+                <span class="pill-metric pill-metric-danger badge-status">
+                  <svg width="7" height="7" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg>
+                  Inactive
+                </span>
+              {% endif %}
+            </td>
+
+            <td class="text-center">
+              <div class="d-flex flex-column align-items-center gap-1">
+                <span class="pill-metric pill-metric-primary">{{ c.enrollment_set.count }} students</span>
+                <a href="{% url 'courses:instructor_course_students' c.id %}"
+                   class="btn btn-sm btn-outline-primary">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right:4px;vertical-align:-1px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                  View Students
+                </a>
+              </div>
+            </td>
+
+            <td>
+              <div class="action-group">
+                <a href="{% url 'instructor_lesson_list' c.id %}" class="btn btn-sm btn-outline-info">Lessons</a>
+                <a href="{% url 'instructor_quiz_list' c.id %}" class="btn btn-sm btn-outline-warning">Quizzes</a>
+                <a href="{% url 'instructor_student_progress' c.id %}" class="btn btn-sm btn-outline-secondary">Progress</a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5">
+              <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <rect x="3" y="3" width="18" height="18" rx="3"/>
+                  <path d="M9 9h6M9 12h6M9 15h4"/>
+                </svg>
+                <p>No courses assigned yet</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

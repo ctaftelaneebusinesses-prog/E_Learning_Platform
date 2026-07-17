@@ -1,0 +1,156 @@
+{% extends 'instructors/instructor_base.html' %}
+{% block title %}Manage Quizzes{% endblock %}
+
+{% block instructor_content %}
+
+<style>
+  .section-card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface);
+  }
+
+  .section-card-header h5 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-secondary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-card-header h5 svg { width: 17px; height: 17px; color: var(--color-primary); }
+  .form-body { padding: 20px 24px; }
+
+  .badge-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .action-group { display: flex; gap: 6px; flex-wrap: wrap; }
+
+  .action-group .btn {
+    font-size: 0.78rem;
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: 8px;
+  }
+</style>
+
+<div class="page-header">
+  <div class="page-header-text">
+    <h3>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+      </svg>
+      Manage Quizzes
+    </h3>
+    <p class="page-subtitle">Creating and managing quizzes for <strong>{{ course.title }}</strong></p>
+  </div>
+</div>
+
+<div class="section-card instructor-form-card">
+  <div class="section-card-header">
+    <h5>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="16"/>
+        <line x1="8" y1="12" x2="16" y2="12"/>
+      </svg>
+      Create Quiz
+    </h5>
+  </div>
+  <div class="form-body">
+    <form method="post" action="{% url 'instructor_create_quiz' course.id %}">
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Quiz Title</label>
+          <input name="title" class="form-control" placeholder="Quiz title" required>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Total Marks</label>
+          <input name="total_marks" type="number" class="form-control" placeholder="e.g. 100" required>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Pass Marks</label>
+          <input name="pass_mark" type="number" class="form-control" placeholder="e.g. 40" required>
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+          <button class="btn btn-primary w-100">Add Quiz</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="section-card">
+  <div class="section-card-header">
+    <h5>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+      </svg>
+      Quizzes
+    </h5>
+  </div>
+
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>Quiz</th>
+            <th>Total</th>
+            <th>Pass</th>
+            <th>Status</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for q in quizzes %}
+          <tr>
+            <td class="fw-semibold" style="color:var(--color-secondary);">{{ q.title }}</td>
+            <td>{{ q.total_marks }}</td>
+            <td>{{ q.pass_mark }}</td>
+            <td>
+              {% if q.is_active %}
+                <span class="pill-metric pill-metric-success badge-status"><svg width="7" height="7" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg>Active</span>
+              {% else %}
+                <span class="pill-metric pill-metric-danger badge-status"><svg width="7" height="7" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4"/></svg>Inactive</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="action-group justify-content-center">
+                <a href="{% url 'instructor_question_list' q.id %}" class="btn btn-sm btn-outline-info">Questions</a>
+                <a href="{% url 'instructor_toggle_quiz_status' q.id %}"
+                   class="btn btn-sm {% if q.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}">
+                  {% if q.is_active %}Disable{% else %}Enable{% endif %}
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5">
+              <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                <p>No quizzes created yet</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="mt-4">
+  <a href="{% url 'instructor_dashboard' %}" class="btn btn-secondary">← Back to Dashboard</a>
+</div>
+
+{% endblock %}

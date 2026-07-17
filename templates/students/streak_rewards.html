@@ -1,0 +1,145 @@
+{% extends 'students/student_base.html' %}
+{% block title %}Streak Rewards{% endblock %}
+
+{% block student_content %}
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    /* Theme-driven aliases — colors/radius come from body.theme-* (static/css/themes.css) */
+    --navy: var(--color-primary); --gold: var(--color-secondary); --gold-light: var(--color-secondary);
+    --surface: var(--color-bg); --white: var(--color-surface); --border: var(--color-border);
+    --text-primary: var(--color-text); --text-secondary: var(--color-text-muted);
+    --success: var(--color-success); --warning: var(--color-warning); --radius: var(--radius-card, 12px);
+  }
+
+  body { font-family: var(--font-sans, 'DM Sans', sans-serif); background: var(--surface); }
+
+  .page-header {
+    padding: 28px 28px 26px; margin: -4px 0 32px; border-radius: var(--radius);
+    background: var(--theme-gradient-hero, linear-gradient(120deg, var(--navy) 0%, var(--navy) 100%));
+    box-shadow: var(--shadow-soft, 0 10px 28px rgba(15,23,42,0.18));
+  }
+  .page-title { font-family: 'Syne', sans-serif; font-size: 1.375rem; font-weight: 700; color: #fff; letter-spacing: -0.01em; margin: 0; }
+  .page-title span { color: #FDE68A; }
+  .page-subtitle { font-size: 0.8125rem; color: rgba(255,255,255,0.75); margin-top: 4px; }
+
+  .streak-stat-card {
+    background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 24px 20px; text-align: center; position: relative; overflow: hidden;
+  }
+
+  .streak-stat-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(circle at 50% 0%, rgba(201,168,76,0.06) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .streak-label { font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 8px; }
+
+  .streak-value { font-family: 'Syne', sans-serif; font-size: 1.875rem; font-weight: 700; color: var(--navy); letter-spacing: -0.01em; line-height: 1; margin-bottom: 4px; }
+
+  .streak-value span { color: var(--gold); }
+
+  .streak-unit { font-size: 0.6875rem; color: var(--text-secondary); letter-spacing: 0.04em; text-transform: uppercase; }
+
+  .section-label { font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); margin-bottom: 18px; margin-top: 4px; }
+
+  .reward-card {
+    background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px; height: 100%; transition: all 0.25s ease;
+    position: relative; overflow: hidden;
+  }
+  .reward-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(15,23,42,0.06); }
+
+  .reward-card.is-unlocked { border-color: rgba(5,150,105,0.3); background: #f0fdf4; }
+  .reward-card.is-pending  { border-color: rgba(217,119,6,0.3); background: #fffbeb; }
+  .reward-card.is-locked   { opacity: 0.65; }
+
+  .reward-days { font-family: 'Syne', sans-serif; font-size: 1.0625rem; font-weight: 700; color: var(--navy); letter-spacing: -0.01em; margin-bottom: 2px; }
+
+  .reward-days span { color: var(--gold); }
+
+  .reward-desc { font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 12px; line-height: 1.4; }
+
+  .reward-xp {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-family: 'Syne', sans-serif; font-size: 0.75rem; font-weight: 600;
+    color: var(--gold); background: #fef9ec; border: 1px solid #fde68a;
+    padding: 3px 10px; border-radius: 20px; margin-bottom: 12px;
+  }
+
+  .reward-status { font-size: 0.6875rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; }
+  .status-unlocked { color: var(--success); }
+  .status-pending  { color: var(--warning); }
+  .status-locked   { color: var(--text-secondary); }
+
+  .empty-state { background: var(--white); border: 1px dashed var(--border); border-radius: var(--radius); padding: 48px 24px; text-align: center; color: var(--text-secondary); font-size: 0.8125rem; }
+
+  .btn-back { display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; border-radius: 8px; font-size: 0.8125rem; font-weight: 500; background: var(--white); color: var(--navy); border: 1px solid var(--border); text-decoration: none; transition: all 0.2s ease; margin-top: 28px; }
+  .btn-back:hover { background: var(--navy); color: var(--white); border-color: var(--navy); transform: translateX(-3px); }
+</style>
+
+<div class="page-header">
+  <h1 class="page-title">Learning <span>Streak</span></h1>
+  <p class="page-subtitle">Keep your momentum going and unlock exclusive rewards</p>
+</div>
+
+<div class="row g-4 mb-5">
+  <div class="col-md-6">
+    <div class="streak-stat-card">
+      <div class="streak-label">Current Streak</div>
+      <div class="streak-value"><span>{{ streak.current_streak }}</span></div>
+      <div class="streak-unit">Days</div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="streak-stat-card">
+      <div class="streak-label">Longest Streak</div>
+      <div class="streak-value">{{ streak.longest_streak }}</div>
+      <div class="streak-unit">Days</div>
+    </div>
+  </div>
+</div>
+
+<div class="section-label">Available Rewards</div>
+
+<div class="row g-4">
+  {% for reward in rewards %}
+    <div class="col-lg-4 col-md-6">
+      <div class="reward-card {% if reward.streak_days in earned_days %}is-unlocked{% elif streak.current_streak >= reward.streak_days %}is-pending{% else %}is-locked{% endif %}">
+
+        <div class="reward-days"><span>{{ reward.streak_days }}</span> Day Streak</div>
+        <div class="reward-desc">Complete {{ reward.streak_days }} consecutive days of learning</div>
+
+        <div class="reward-xp">
+          <svg width="11" height="11" fill="currentColor" viewBox="0 0 20 20">
+            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+          </svg>
+          +{{ reward.bonus_xp }} XP Bonus
+        </div>
+
+        {% if reward.streak_days in earned_days %}
+          <div class="reward-status status-unlocked">Unlocked</div>
+        {% elif streak.current_streak >= reward.streak_days %}
+          <div class="reward-status status-pending">Ready to Claim</div>
+        {% else %}
+          <div class="reward-status status-locked">Locked</div>
+        {% endif %}
+
+      </div>
+    </div>
+  {% empty %}
+    <div class="col-12"><div class="empty-state">No streak rewards configured yet.</div></div>
+  {% endfor %}
+</div>
+
+<a href="{% url 'student_dashboard' %}" class="btn-back">
+  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>
+  </svg>
+  Back to Dashboard
+</a>
+
+{% endblock %}

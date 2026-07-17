@@ -1,0 +1,39 @@
+<div class="msg-row {% if msg.is_me %}is-me{% else %}is-other{% endif %}" data-msg-id="{{ msg.id }}">
+  <div class="msg-group">
+    <div class="msg-bubble">
+      {% if msg.message %}<div class="msg-text">{{ msg.message }}</div>{% endif %}
+      {% if msg.attachment_url %}
+        {% if msg.is_image %}
+          <a href="{{ msg.attachment_url }}" target="_blank" rel="noopener"><img class="msg-attachment-image" src="{{ msg.attachment_url }}" alt="attachment"></a>
+        {% else %}
+          <a class="msg-attachment-file" href="{{ msg.attachment_url }}" target="_blank" rel="noopener"><i class="bi bi-paperclip"></i> {{ msg.attachment_name }}</a>
+        {% endif %}
+      {% endif %}
+      {% if msg.voice_note_url %}
+        <div class="msg-voice-note"><audio controls src="{{ msg.voice_note_url }}"></audio></div>
+      {% endif %}
+    </div>
+    <div class="msg-reactions" data-reactions-for="{{ msg.id }}">
+      {% for r in msg.reactions %}
+        <span class="reaction-chip">{{ r.emoji }} {% if r.count > 1 %}{{ r.count }}{% endif %}</span>
+      {% endfor %}
+    </div>
+    <div class="msg-meta">
+      <span class="msg-time">{{ msg.time_display }}</span>
+      {% if msg.is_me %}
+        <span class="tick tick-{{ msg.tick_state }}" data-tick-for="{{ msg.id }}">
+          {% if msg.tick_state == 'read' or msg.tick_state == 'delivered' %}
+            <svg viewBox="0 0 20 15" fill="none"><path d="M14 3L6 11L2.5 7.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 3L11 11" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          {% else %}
+            <svg viewBox="0 0 16 15" fill="none"><path d="M15 3L5.5 12.5L1 8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          {% endif %}
+        </span>
+      {% endif %}
+    </div>
+    <div class="reaction-picker">
+      {% for emoji in reaction_emojis %}
+        <button type="button" data-emoji="{{ emoji }}" data-msg-id="{{ msg.id }}">{{ emoji }}</button>
+      {% endfor %}
+    </div>
+  </div>
+</div>

@@ -1,0 +1,82 @@
+{% extends 'adminpanel/admin_base.html' %}
+{% block title %}Pending Approvals{% endblock %}
+
+{% block admin_content %}
+
+<div class="page-header">
+  <div class="page-header-text">
+    <h2><i class="bi bi-person-vcard"></i> Pending Approvals</h2>
+    <p class="page-subtitle">Registrations awaiting review before the account can log in</p>
+  </div>
+</div>
+
+{% for message in messages %}
+  <div class="alert alert-info shadow-sm">{{ message }}</div>
+{% endfor %}
+
+<div class="card shadow-sm">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Registered</th>
+            <th>Status</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in users %}
+          <tr>
+            <td>
+              <span class="avatar-chip-row">
+                <span class="avatar-chip">{{ user.username|first|upper }}</span>
+                <span class="fw-semibold">{{ user.username }}</span>
+              </span>
+            </td>
+            <td class="text-muted">{{ user.email }}</td>
+            <td><span class="badge bg-secondary">{{ user.profile.role }}</span></td>
+            <td class="text-muted">{{ user.date_joined|date:"M d, Y H:i" }}</td>
+            <td>
+              {% if user.profile.approval_status == 'PENDING' %}
+                <span class="badge bg-warning text-dark">Pending Approval</span>
+              {% else %}
+                <span class="badge bg-danger">Rejected</span>
+              {% endif %}
+            </td>
+            <td class="text-center">
+              <div class="d-flex gap-2 justify-content-center">
+                <a href="{% url 'admin_approve_user' user.id %}" class="btn btn-sm btn-success">
+                  <i class="bi bi-check-circle me-1"></i>Accept
+                </a>
+                {% if user.profile.approval_status == 'PENDING' %}
+                <form method="post"
+                      action="{% url 'admin_reject_user' user.id %}"
+                      onsubmit="return confirm('Reject {{ user.username|escapejs }}\'s registration? They will not be able to log in.');">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-outline-danger">
+                    <i class="bi bi-x-circle me-1"></i>Reject
+                  </button>
+                </form>
+                {% endif %}
+                <a href="{% url 'admin_user_profile_detail' user.id %}" class="btn btn-sm btn-outline-secondary">
+                  <i class="bi bi-eye"></i>
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6" class="text-center text-muted py-4">No registrations are waiting on review.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

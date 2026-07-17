@@ -1,0 +1,290 @@
+{% extends 'students/student_base.html' %}
+{% block title %}Activity Timeline{% endblock %}
+
+{% block student_content %}
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    /* Theme-driven aliases — colors/radius come from body.theme-* (static/css/themes.css) */
+    --navy: var(--color-primary);
+    --navy-mid: var(--color-secondary);
+    --gold: var(--color-secondary);
+    --gold-light: var(--color-secondary);
+    --silver: var(--color-text-muted);
+    --surface: var(--color-bg);
+    --white: var(--color-surface);
+    --border: var(--color-border);
+    --text-primary: var(--color-text);
+    --text-secondary: var(--color-text-muted);
+    --success: var(--color-success);
+    --danger: var(--color-error);
+    --radius: var(--radius-card, 12px);
+  }
+
+  body { font-family: var(--font-sans, 'DM Sans', sans-serif); background: var(--surface); }
+
+  .page-header {
+    padding: 28px 28px 26px;
+    margin: -4px 0 32px;
+    border-radius: var(--radius);
+    background: var(--theme-gradient-hero, linear-gradient(120deg, var(--navy) 0%, var(--navy-mid) 100%));
+    box-shadow: var(--shadow-soft, 0 10px 28px rgba(15,23,42,0.18));
+  }
+
+  .page-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+
+  .page-title span { color: #FDE68A; }
+
+  .page-subtitle {
+    font-size: 0.8125rem;
+    color: rgba(255,255,255,0.75);
+    margin-top: 4px;
+  }
+
+  .timeline {
+    position: relative;
+    padding-left: 40px;
+    margin-top: 8px;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 11px;
+    top: 4px;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, var(--gold) 0%, var(--border) 100%);
+  }
+
+  .timeline-item {
+    position: relative;
+    margin-bottom: 20px;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .timeline-item:nth-child(1) { animation-delay: 0.05s; }
+  .timeline-item:nth-child(2) { animation-delay: 0.10s; }
+  .timeline-item:nth-child(3) { animation-delay: 0.15s; }
+  .timeline-item:nth-child(4) { animation-delay: 0.20s; }
+  .timeline-item:nth-child(5) { animation-delay: 0.25s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .timeline-dot {
+    position: absolute;
+    left: -33px;
+    top: 16px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--gold);
+    border: 2px solid var(--white);
+    box-shadow: 0 0 0 2px var(--gold);
+    z-index: 1;
+  }
+
+  .timeline-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .timeline-card::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: var(--gold);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .timeline-card:hover {
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.06);
+    transform: translateX(3px);
+  }
+
+  .timeline-card:hover::before {
+    opacity: 1;
+  }
+
+  .timeline-type {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.875rem;
+    color: var(--navy);
+    letter-spacing: -0.01em;
+  }
+
+  .timeline-course {
+    color: var(--gold);
+  }
+
+  .timeline-time {
+    font-size: 0.71rem;
+    color: var(--text-secondary);
+    margin-top: 2px;
+    letter-spacing: 0.02em;
+  }
+
+  .timeline-meta {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-top: 9px;
+    padding-top: 9px;
+    border-top: 1px solid var(--border);
+  }
+
+  .timeline-meta strong {
+    color: var(--navy);
+  }
+
+  .badge-pass {
+    display: inline-block;
+    background: #dcfce7;
+    color: #15803d;
+    font-size: 0.66rem;
+    font-weight: 600;
+    padding: 2px 9px;
+    border-radius: 20px;
+    letter-spacing: 0.03em;
+  }
+
+  .badge-fail {
+    display: inline-block;
+    background: #fee2e2;
+    color: #b91c1c;
+    font-size: 0.66rem;
+    font-weight: 600;
+    padding: 2px 9px;
+    border-radius: 20px;
+    letter-spacing: 0.03em;
+  }
+
+  .activity-tag {
+    display: inline-block;
+    font-size: 0.64rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: #fef9ec;
+    border: 1px solid #fde68a;
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-bottom: 6px;
+  }
+
+  .empty-state {
+    background: var(--white);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 48px 24px;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.8125rem;
+  }
+
+  .btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 18px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    background: var(--white);
+    color: var(--navy);
+    border: 1px solid var(--border);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    margin-top: 28px;
+  }
+
+  .btn-back:hover {
+    background: var(--navy);
+    color: var(--white);
+    border-color: var(--navy);
+    transform: translateX(-3px);
+  }
+</style>
+
+<div class="page-header">
+  <h1 class="page-title">Activity <span>Timeline</span></h1>
+  <p class="page-subtitle">A chronological record of your learning activity</p>
+</div>
+
+<div class="timeline">
+  {% for activity in activities %}
+    <div class="timeline-item">
+      <div class="timeline-dot"></div>
+      <div class="timeline-card">
+
+        <div class="activity-tag">{{ activity.activity_type }}</div>
+
+        <div class="timeline-type">
+          {{ activity.get_activity_type_display }}
+          {% if activity.course %}
+            &mdash; <span class="timeline-course">{{ activity.course.title }}</span>
+          {% endif %}
+        </div>
+
+        <div class="timeline-time">{{ activity.timestamp|date:"d M Y, h:i A" }}</div>
+
+        {% if activity.metadata %}
+          <div class="timeline-meta">
+            {% if activity.activity_type == 'LESSON_VIEW' %}
+              Lesson: <strong>{{ activity.metadata.lesson_title }}</strong>
+
+            {% elif activity.activity_type == 'QUIZ_ATTEMPT' %}
+              Quiz: <strong>{{ activity.metadata.quiz }}</strong> &nbsp;&middot;&nbsp;
+              Score: {{ activity.metadata.score }} &nbsp;&middot;&nbsp;
+              {% if activity.metadata.passed %}
+                <span class="badge-pass">Passed</span>
+              {% else %}
+                <span class="badge-fail">Failed</span>
+              {% endif %}
+
+            {% elif activity.activity_type == 'STREAK_REWARD' %}
+              {{ activity.metadata.streak_days }}-day streak reward
+              &nbsp;(+{{ activity.metadata.bonus_xp }} XP)
+            {% endif %}
+          </div>
+        {% endif %}
+
+      </div>
+    </div>
+
+  {% empty %}
+    <div class="empty-state">No activity recorded yet.</div>
+  {% endfor %}
+</div>
+
+<a href="{% url 'student_dashboard' %}" class="btn-back">
+  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>
+  </svg>
+  Back to Dashboard
+</a>
+
+{% endblock %}

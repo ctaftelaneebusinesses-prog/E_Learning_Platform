@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 220" width="200" height="220">
+  <!-- Original friendly star-bot mascot placeholder (no copyrighted characters) -->
+  <ellipse cx="100" cy="200" rx="55" ry="12" fill="#0F172A" opacity="0.08"/>
+  <circle cx="100" cy="95" r="70" fill="#38BDF8"/>
+  <circle cx="100" cy="95" r="70" fill="none" stroke="#FFFFFF" stroke-width="4" opacity="0.6"/>
+  <circle cx="76" cy="88" r="10" fill="#0F172A"/>
+  <circle cx="124" cy="88" r="10" fill="#0F172A"/>
+  <circle cx="79" cy="85" r="3" fill="#FFFFFF"/>
+  <circle cx="127" cy="85" r="3" fill="#FFFFFF"/>
+  <path d="M75 118 Q100 140 125 118" stroke="#0F172A" stroke-width="5" fill="none" stroke-linecap="round"/>
+  <circle cx="60" cy="105" r="8" fill="#FB7185" opacity="0.6"/>
+  <circle cx="140" cy="105" r="8" fill="#FB7185" opacity="0.6"/>
+  <path d="M100 20 L108 40 L130 40 L112 53 L119 74 L100 61 L81 74 L88 53 L70 40 L92 40 Z" fill="#FDE047" stroke="#F59E0B" stroke-width="2"/>
+  <rect x="55" y="150" width="90" height="50" rx="20" fill="#0EA5E9"/>
+  <circle cx="75" cy="175" r="10" fill="#FDE047"/>
+  <circle cx="125" cy="175" r="10" fill="#FDE047"/>
+</svg>

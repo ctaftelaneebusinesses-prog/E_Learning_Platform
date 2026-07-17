@@ -1,0 +1,114 @@
+<!-- =================== available_courses.html =================== -->
+{% extends 'students/student_base.html' %}
+{% block title %}Available Courses{% endblock %}
+
+{% block student_content %}
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    /* Theme-driven aliases — colors/radius come from body.theme-* (static/css/themes.css) */
+    --navy: var(--color-primary); --gold: var(--color-secondary); --surface: var(--color-bg);
+    --white: var(--color-surface); --border: var(--color-border);
+    --text-primary: var(--color-text); --text-secondary: var(--color-text-muted);
+    --success: var(--color-success); --radius: var(--radius-card, 12px);
+
+    /* Typography scale — keep identical in every template */
+    --fs-xs: 0.72rem;
+    --fs-sm: 0.8rem;
+    --fs-base: 0.85rem;
+    --fs-md: 0.95rem;
+    --fs-lg: 1.375rem;
+  }
+
+  body { font-family: var(--font-sans, 'Inter', sans-serif); background: var(--surface); font-size: 15px; line-height: 1.5; }
+
+  .page-header {
+    padding: 28px 28px 26px; margin: -4px 0 32px; border-radius: var(--radius);
+    background: linear-gradient(120deg, var(--navy) 0%, #1e293b 100%);
+    box-shadow: 0 10px 28px rgba(15,23,42,0.18);
+    position: relative; overflow: hidden;
+  }
+  .page-header::after {
+    content: ''; position: absolute; inset: 0;
+    background: linear-gradient(120deg, rgba(201,168,76,0.16), transparent 55%);
+    pointer-events: none;
+  }
+  .page-title { font-family: 'Inter', sans-serif; font-size: var(--fs-lg); font-weight: 700; color: var(--white); letter-spacing: -0.02em; margin: 0; position: relative; }
+  .page-title span { color: #e6c87a; }
+  .page-subtitle { font-size: var(--fs-base); font-weight: 400; color: rgba(255,255,255,0.65); margin-top: 6px; position: relative; }
+
+  .course-card {
+    background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden; height: 100%; display: flex; flex-direction: column;
+    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+  }
+  .course-card:hover { transform: translateY(-6px); box-shadow: 0 20px 40px rgba(15,23,42,0.10); border-color: rgba(201,168,76,0.4); }
+
+  .course-image { width: 100%; height: 180px; object-fit: cover; }
+  .course-placeholder {
+    height: 180px; background: linear-gradient(135deg, #1e293b, #334155);
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .course-placeholder svg { width: 40px; height: 40px; color: rgba(201,168,76,0.55); }
+
+  .course-body { padding: 22px; display: flex; flex-direction: column; flex: 1; }
+
+  .course-title { font-family: 'Inter', sans-serif; font-size: var(--fs-md); font-weight: 600; color: var(--navy); letter-spacing: -0.01em; margin-bottom: 8px; line-height: 1.35; }
+
+  .course-desc { font-size: var(--fs-sm); font-weight: 400; color: var(--text-secondary); line-height: 1.6; margin-bottom: 16px; }
+
+  .course-actions { margin-top: auto; }
+
+  .btn-enroll-lg {
+    display: block; text-align: center; padding: 11px;
+    background: var(--success); color: var(--white);
+    font-family: 'Inter', sans-serif; font-size: var(--fs-sm); font-weight: 600;
+    letter-spacing: 0.02em; border-radius: 8px; text-decoration: none;
+    transition: all 0.2s ease;
+  }
+  .btn-enroll-lg:hover { background: #047857; transform: translateY(-1px); box-shadow: 0 6px 18px rgba(5,150,105,0.25); }
+
+  .empty-state {
+    background: var(--white); border: 1px dashed var(--border); border-radius: var(--radius);
+    padding: 60px 24px; text-align: center; color: var(--text-secondary); font-size: var(--fs-sm);
+  }
+</style>
+
+<div class="page-header">
+  <h1 class="page-title">Available <span>Courses</span></h1>
+  <p class="page-subtitle">Browse and enroll in courses to begin your learning journey</p>
+</div>
+
+<div class="row g-4">
+  {% for course in courses %}
+    <div class="col-lg-4 col-md-6">
+      <div class="course-card">
+
+        {% if course.image %}
+          <img src="{{ course.image.url }}" class="course-image">
+        {% else %}
+          <div class="course-placeholder">
+            <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/>
+            </svg>
+          </div>
+        {% endif %}
+
+        <div class="course-body">
+          <div class="course-title">{{ course.title }}</div>
+          <p class="course-desc">{{ course.description|truncatechars:100 }}</p>
+          <div class="course-actions">
+            <a href="{% url 'enroll_course' course.id %}" class="btn-enroll-lg">Enroll &amp; Learn</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  {% empty %}
+    <div class="col-12"><div class="empty-state">No courses available at the moment.</div></div>
+  {% endfor %}
+</div>
+
+{% endblock %}

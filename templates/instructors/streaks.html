@@ -1,0 +1,150 @@
+{% extends 'instructors/instructor_base.html' %}
+{% block title %}Learning Streaks{% endblock %}
+
+{% block instructor_content %}
+
+<style>
+  .section-title {
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+</style>
+
+<div class="page-header">
+  <div class="page-header-text">
+    <h2><i class="bi bi-fire"></i> Learning Streaks</h2>
+    <p class="page-subtitle">Configure streak rewards and monitor learner consistency</p>
+  </div>
+</div>
+
+<!-- Streak Rewards Configuration -->
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <h5 class="section-title">Configure Streak Rewards</h5>
+
+    <form method="post" action="{% url 'instructor_create_streak_reward' %}">
+      {% csrf_token %}
+
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Streak Days</label>
+          <input name="streak_days"
+                 type="number"
+                 class="form-control"
+                 placeholder="e.g. 7"
+                 required>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Bonus XP</label>
+          <input name="bonus_xp"
+                 type="number"
+                 class="form-control"
+                 placeholder="XP reward"
+                 required>
+        </div>
+
+        <div class="col-md-4 d-flex align-items-end">
+          <button class="btn btn-primary w-100">
+            Add Reward
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Streak Rewards List -->
+<div class="card shadow-sm mb-4">
+  <div class="card-header bg-white">
+    <h5 class="fw-semibold mb-0"><i class="bi bi-gift-fill me-1"></i> Streak Rewards</h5>
+  </div>
+
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>Streak Days</th>
+            <th>Bonus XP</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r in rewards %}
+          <tr>
+            <td>{{ r.streak_days }} days</td>
+            <td>{{ r.bonus_xp }} XP</td>
+            <td>
+              {% if r.is_active %}
+                <span class="badge bg-success">Active</span>
+              {% else %}
+                <span class="badge bg-danger">Inactive</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="3">
+              <div class="empty-state">
+                <i class="bi bi-bullseye"></i>
+                <p>No rewards configured</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Student Streak Overview -->
+<div class="card shadow-sm">
+  <div class="card-header bg-white">
+    <h5 class="fw-semibold mb-0"><i class="bi bi-bar-chart-fill me-1"></i> Student Streak Overview</h5>
+  </div>
+
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Current Streak</th>
+            <th>Longest Streak</th>
+            <th>Last Activity</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in streaks %}
+          <tr>
+            <td>
+              <span class="avatar-chip-row">
+                <span class="avatar-chip">{{ s.student.username|first|upper }}</span>
+                <span class="fw-semibold">{{ s.student.username }}</span>
+              </span>
+            </td>
+            <td>{{ s.current_streak }} days</td>
+            <td>{{ s.longest_streak }} days</td>
+            <td class="text-muted">
+              {{ s.last_activity_date|default:"—" }}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="4">
+              <div class="empty-state">
+                <i class="bi bi-inbox"></i>
+                <p>No streak data available</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

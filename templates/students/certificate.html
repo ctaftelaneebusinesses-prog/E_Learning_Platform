@@ -1,0 +1,392 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Certificate of Completion</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    @page { size: A4 landscape; margin: 10mm; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background: #f8f5f0;
+      color: #1a1a2e;
+    }
+
+    .no-print {
+      text-align: center;
+      padding: 16px;
+      background: #1a1a2e;
+    }
+
+    .download-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: #c9a84c;
+      color: #1a1a2e;
+      padding: 10px 28px;
+      border-radius: 6px;
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 700;
+      font-size: 0.875rem;
+      letter-spacing: 0.05em;
+      text-decoration: none;
+      text-transform: uppercase;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+    }
+
+    .download-btn:hover { background: #e6c87a; transform: translateY(-1px); }
+
+    .cert-wrap {
+      max-width: 960px;
+      margin: 10px auto;
+      background: #ffffff;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cert-border {
+      position: absolute;
+      inset: 12px;
+      border: 1px solid #c9a84c;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .cert-border::before {
+      content: '';
+      position: absolute;
+      inset: 5px;
+      border: 3px solid #0f172a;
+    }
+
+    .corner { position: absolute; width: 50px; height: 50px; z-index: 11; }
+    .corner-tl { top: 8px; left: 8px; border-top: 4px solid #c9a84c; border-left: 4px solid #c9a84c; }
+    .corner-tr { top: 8px; right: 8px; border-top: 4px solid #c9a84c; border-right: 4px solid #c9a84c; }
+    .corner-bl { bottom: 8px; left: 8px; border-bottom: 4px solid #c9a84c; border-left: 4px solid #c9a84c; }
+    .corner-br { bottom: 8px; right: 8px; border-bottom: 4px solid #c9a84c; border-right: 4px solid #c9a84c; }
+
+    .cert-bg {
+      position: absolute;
+      inset: 0;
+      background-image:
+        radial-gradient(circle at 10% 90%, rgba(201,168,76,0.06) 0%, transparent 50%),
+        radial-gradient(circle at 90% 10%, rgba(15,23,42,0.04) 0%, transparent 50%);
+    }
+
+    .cert-inner {
+      padding: 30px 60px;
+      position: relative;
+      z-index: 2;
+      text-align: center;
+    }
+
+    .cert-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .cert-logo {
+      width: 180px;
+      height: auto;
+      object-fit: contain;
+    }
+
+    .cert-seal {
+      width: 160px;
+      height: auto;
+      object-fit: contain;
+      opacity: 0.9;
+    }
+
+    .cert-logo-fallback,
+    .cert-seal-fallback {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f1f5f9;
+      border: 2px dashed #c9a84c;
+      border-radius: 8px;
+      color: #94a3b8;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .cert-logo-fallback { width: 180px; height: 100px; }
+    .cert-seal-fallback { width: 160px; height: 160px; border-radius: 50%; }
+
+    .cert-eyebrow {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: #c9a84c;
+      margin-bottom: 6px;
+    }
+
+    .cert-main-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #0f172a;
+      letter-spacing: -0.01em;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .cert-divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 10px auto;
+      max-width: 400px;
+    }
+
+    .cert-divider-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #c9a84c, transparent);
+    }
+
+    .cert-divider-diamond {
+      width: 8px;
+      height: 8px;
+      background: #c9a84c;
+      transform: rotate(45deg);
+      flex-shrink: 0;
+    }
+
+    .cert-presented {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .cert-student-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 600;
+      font-style: italic;
+      color: #0f172a;
+      letter-spacing: 0.02em;
+      margin: 4px 0 2px;
+      line-height: 1.1;
+    }
+
+    .cert-for-text {
+      font-size: 0.72rem;
+      color: #94a3b8;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+      margin-top: 10px;
+    }
+
+    .cert-course-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: #c9a84c;
+      letter-spacing: 0.02em;
+      margin-bottom: 12px;
+    }
+
+    .cert-body-text {
+      font-size: 0.75rem;
+      color: #64748b;
+      line-height: 1.6;
+      max-width: 560px;
+      margin: 0 auto 16px;
+    }
+
+    .cert-info-row {
+      display: flex;
+      justify-content: center;
+      gap: 60px;
+      margin-bottom: 20px;
+    }
+
+    .cert-info-item { text-align: center; }
+
+    .cert-info-label {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: #94a3b8;
+      margin-bottom: 4px;
+    }
+
+    .cert-info-value {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #0f172a;
+    }
+
+    .cert-signatures {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 16px;
+    }
+
+    .cert-sig-box { width: 42%; text-align: center; }
+
+    .cert-sig-line {
+      width: 100%;
+      height: 1px;
+      background: #0f172a;
+      margin-bottom: 6px;
+    }
+
+    .cert-sig-name { font-size: 0.78rem; font-weight: 600; color: #0f172a; }
+
+    .cert-sig-role {
+      font-size: 0.68rem;
+      color: #64748b;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    @media print {
+      .no-print { display: none; }
+      body { background: #fff; }
+      .cert-wrap { margin: 0; box-shadow: none; }
+    }
+
+    {% if active_theme.key == 'school' %}
+    /* KIDS WORLD — rainbow border + star stickers */
+    .cert-border { border-color: #FB923C; }
+    .cert-border::before { border-color: #38BDF8; border-image: linear-gradient(90deg, #F87171, #FB923C, #FDE047, #4ADE80, #38BDF8, #A78BFA) 1; border-width: 4px; }
+    .corner-tl, .corner-tr, .corner-bl, .corner-br { border-color: #EC4899 !important; }
+    .cert-eyebrow, .cert-course-name { color: #EC4899; }
+    .cert-main-title { font-family: 'Cormorant Garamond', serif; color: #38BDF8; }
+    .cert-divider-diamond { background: #FDE047; }
+    .cert-wrap::after {
+      content: '\2B50 \2B50 \2B50';
+      position: absolute; top: 20px; left: 0; right: 0; text-align: center;
+      font-size: 1.1rem; letter-spacing: 12px; z-index: 12; opacity: 0.9;
+    }
+    {% elif active_theme.key == 'university' %}
+    /* UNIVERSITY — ornate navy/gold double border, serif emphasis */
+    .cert-border { border-color: #B08D57; border-width: 2px; }
+    .cert-border::before { border-color: #1E1B4B; border-width: 4px; }
+    .corner-tl, .corner-tr, .corner-bl, .corner-br { border-color: #B08D57 !important; border-width: 5px !important; }
+    .cert-main-title, .cert-student-name { font-family: 'Cormorant Garamond', serif; }
+    .cert-eyebrow, .cert-course-name { color: #B08D57; }
+    {% elif active_theme.key == 'college' %}
+    /* COLLEGE — minimal indigo/cyan tech border */
+    .cert-border { border-color: #4338CA; border-width: 1px; }
+    .cert-border::before { border: 2px solid #0891B2; }
+    .corner-tl, .corner-tr, .corner-bl, .corner-br { border-color: #0891B2 !important; }
+    .cert-eyebrow, .cert-course-name { color: #4338CA; }
+    {% endif %}
+  </style>
+</head>
+
+<body>
+
+<div class="no-print">
+  <button class="download-btn" onclick="window.print()">
+    <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+    </svg>
+    Download Certificate (PDF)
+  </button>
+</div>
+
+<div class="cert-wrap">
+  <div class="cert-bg"></div>
+  <div class="cert-border"></div>
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-tr"></div>
+  <div class="corner corner-bl"></div>
+  <div class="corner corner-br"></div>
+
+  <div class="cert-inner">
+
+    <div class="cert-header">
+      {% if logo_url %}
+        <img src="{{ logo_url }}" class="cert-logo" alt="Logo"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="cert-logo-fallback" style="display:none;">LOGO</div>
+      {% else %}
+        <div class="cert-logo-fallback">LOGO</div>
+      {% endif %}
+
+      {% if seal_url %}
+        <img src="{{ seal_url }}" class="cert-seal" alt="Seal"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <div class="cert-seal-fallback" style="display:none;">SEAL</div>
+      {% else %}
+        <div class="cert-seal-fallback">SEAL</div>
+      {% endif %}
+    </div>
+
+    <div class="cert-eyebrow">Craftlanee &mdash; Official Document</div>
+    <div class="cert-main-title">Certificate of Completion</div>
+
+    <div class="cert-divider">
+      <div class="cert-divider-line"></div>
+      <div class="cert-divider-diamond"></div>
+      <div class="cert-divider-line"></div>
+    </div>
+
+    <div class="cert-presented">This certificate is proudly presented to</div>
+
+    <div class="cert-student-name">
+      {{ student.get_full_name|default:student.username }}
+    </div>
+
+    <div class="cert-for-text">for successfully completing the course</div>
+
+    <div class="cert-course-name">{{ course.title }}</div>
+
+    <p class="cert-body-text">
+      This certificate is awarded in recognition of the successful completion of all academic
+      requirements, assessments, and learning activities associated with this course.
+      The recipient has demonstrated dedication, skill, and knowledge in this subject area.
+    </p>
+
+    <div class="cert-info-row">
+      <div class="cert-info-item">
+        <div class="cert-info-label">Certificate ID</div>
+        <div class="cert-info-value">{{ certificate.certificate_id }}</div>
+      </div>
+      <div class="cert-info-item">
+        <div class="cert-info-label">Issued On</div>
+        <div class="cert-info-value">{{ certificate.issued_at|date:"d M Y" }}</div>
+      </div>
+    </div>
+
+    <div class="cert-signatures">
+      <div class="cert-sig-box">
+        <div class="cert-sig-line"></div>
+        <div class="cert-sig-name">
+          {{ course.instructor.get_full_name|default:course.instructor.username }}
+        </div>
+        <div class="cert-sig-role">Course Instructor</div>
+      </div>
+      <div class="cert-sig-box">
+        <div class="cert-sig-line"></div>
+        <div class="cert-sig-name">Craftlanee</div>
+        <div class="cert-sig-role">Authorized Authority</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>

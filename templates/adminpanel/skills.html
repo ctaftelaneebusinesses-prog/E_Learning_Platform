@@ -1,0 +1,177 @@
+{% extends 'adminpanel/admin_base.html' %}
+{% block title %}Skill Management{% endblock %}
+
+{% block admin_content %}
+
+<style>
+  .section-title {
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+</style>
+
+<div class="page-header">
+  <div class="page-header-text">
+    <h2><i class="bi bi-lightbulb-fill"></i> Skill Proficiency & Learning Path</h2>
+    <p class="page-subtitle">Define skills, map courses, and build structured learning paths</p>
+  </div>
+</div>
+
+<!-- Create Skill -->
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <h5 class="section-title">Create Skill</h5>
+
+    <form method="post" action="{% url 'admin_create_skill' %}">
+      {% csrf_token %}
+
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Skill Name</label>
+          <input name="name"
+                 class="form-control"
+                 placeholder="e.g. Python Basics"
+                 required>
+        </div>
+
+        <div class="col-md-6">
+          <label class="form-label">Description</label>
+          <input name="description"
+                 class="form-control"
+                 placeholder="Optional skill description">
+        </div>
+
+        <div class="col-md-2 d-flex align-items-end">
+          <button class="btn btn-primary w-100">
+            Add Skill
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Available Skills -->
+<div class="card shadow-sm mb-4">
+  <div class="card-header bg-white">
+    <h5 class="fw-semibold mb-0"><i class="bi bi-list-ul me-1"></i> Available Skills</h5>
+  </div>
+
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>Skill</th>
+            <th>Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in skills %}
+          <tr>
+            <td class="fw-semibold">{{ s.name }}</td>
+            <td>{{ s.description|default:"—" }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="2">
+              <div class="empty-state">
+                <i class="bi bi-puzzle"></i>
+                <p>No skills created yet</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Map Course to Skill -->
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <h5 class="section-title">Map Course to Skill</h5>
+
+    <form method="post" action="{% url 'admin_map_course_skill' %}">
+      {% csrf_token %}
+
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label class="form-label">Course</label>
+          <select name="course" class="form-select" required>
+            <option value="">Select Course</option>
+            {% for c in courses %}
+              <option value="{{ c.id }}">{{ c.title }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label">Skill</label>
+          <select name="skill" class="form-select" required>
+            <option value="">Select Skill</option>
+            {% for s in skills %}
+              <option value="{{ s.id }}">{{ s.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label">Weight</label>
+          <input name="weight"
+                 type="number"
+                 class="form-control"
+                 placeholder="e.g. 5">
+        </div>
+
+        <div class="col-md-2 d-flex align-items-end">
+          <button class="btn btn-success w-100">
+            Map
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Course–Skill Mappings -->
+<div class="card shadow-sm">
+  <div class="card-header bg-white">
+    <h5 class="fw-semibold mb-0"><i class="bi bi-link-45deg me-1"></i> Course–Skill Mappings</h5>
+  </div>
+
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>Course</th>
+            <th>Skill</th>
+            <th>Weight</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for m in mappings %}
+          <tr>
+            <td>{{ m.course.title }}</td>
+            <td>{{ m.skill.name }}</td>
+            <td>{{ m.weight }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="3">
+              <div class="empty-state">
+                <i class="bi bi-link-45deg"></i>
+                <p>No mappings created yet</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

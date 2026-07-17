@@ -1,0 +1,111 @@
+{% extends 'students/student_base.html' %}
+{% block title %}My Skills{% endblock %}
+
+{% block student_content %}
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    /* Theme-driven aliases — colors/radius come from body.theme-* (static/css/themes.css) */
+    --navy: var(--color-primary); --gold: var(--color-secondary); --gold-light: var(--color-secondary);
+    --surface: var(--color-bg); --white: var(--color-surface); --border: var(--color-border);
+    --text-primary: var(--color-text); --text-secondary: var(--color-text-muted); --radius: var(--radius-card, 12px);
+  }
+
+  body { font-family: var(--font-sans, 'DM Sans', sans-serif); background: var(--surface); }
+
+  .page-header {
+    padding: 28px 28px 26px; margin: -4px 0 32px; border-radius: var(--radius);
+    background: var(--theme-gradient-hero, linear-gradient(120deg, var(--navy) 0%, var(--navy) 100%));
+    box-shadow: var(--shadow-soft, 0 10px 28px rgba(15,23,42,0.18));
+  }
+  .page-title { font-family: 'Syne', sans-serif; font-size: 1.375rem; font-weight: 700; color: #fff; letter-spacing: -0.01em; margin: 0; }
+  .page-title span { color: #FDE68A; }
+  .page-subtitle { font-size: 0.8125rem; color: rgba(255,255,255,0.75); margin-top: 4px; }
+
+  .skill-card {
+    background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 20px; height: 100%; transition: all 0.25s ease;
+  }
+  .skill-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(15,23,42,0.06); border-color: rgba(201,168,76,0.35); }
+
+  .skill-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+
+  .skill-name { font-family: 'Syne', sans-serif; font-size: 0.875rem; font-weight: 700; color: var(--navy); letter-spacing: -0.01em; line-height: 1.3; }
+
+  .skill-score-badge {
+    font-family: 'Syne', sans-serif; font-size: 0.6875rem; font-weight: 700;
+    color: var(--gold); background: #fef9ec; border: 1px solid #fde68a;
+    padding: 3px 9px; border-radius: 20px; white-space: nowrap; flex-shrink: 0; margin-left: 10px;
+  }
+
+  .progress-track {
+    height: 7px; background: #f1f5f9; border-radius: 20px; overflow: hidden; margin-bottom: 8px;
+  }
+
+  .progress-fill {
+    height: 100%; border-radius: 20px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .progress-label { font-size: 0.6875rem; color: var(--text-secondary); display: flex; justify-content: space-between; }
+
+  .empty-state {
+    background: var(--white); border: 1px dashed var(--border); border-radius: var(--radius);
+    padding: 48px 24px; text-align: center; color: var(--text-secondary);
+  }
+  .empty-state svg { width: 40px; height: 40px; color: var(--border); margin: 0 auto 14px; display: block; }
+  .empty-state p { font-size: 0.8125rem; margin: 0; }
+
+  .btn-back { display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; border-radius: 8px; font-size: 0.8125rem; font-weight: 500; background: var(--white); color: var(--navy); border: 1px solid var(--border); text-decoration: none; transition: all 0.2s ease; margin-top: 28px; }
+  .btn-back:hover { background: var(--navy); color: var(--white); border-color: var(--navy); transform: translateX(-3px); }
+</style>
+
+<div class="page-header">
+  <h1 class="page-title">Skill <span>Progress</span></h1>
+  <p class="page-subtitle">Track your proficiency across all learned skill areas</p>
+</div>
+
+<div class="row g-4">
+  {% for s in skills %}
+    <div class="col-lg-4 col-md-6">
+      <div class="skill-card">
+
+        <div class="skill-top">
+          <div class="skill-name">{{ s.skill.name }}</div>
+          <div class="skill-score-badge">{{ s.proficiency_score|floatformat:1 }}%</div>
+        </div>
+
+        <div class="progress-track">
+          <div class="progress-fill" style="width: {{ s.proficiency_score|floatformat:0 }}%"></div>
+        </div>
+
+        <div class="progress-label">
+          <span>Proficiency</span>
+          <span>{{ s.proficiency_score|floatformat:0 }} / 100</span>
+        </div>
+
+      </div>
+    </div>
+  {% empty %}
+    <div class="col-12">
+      <div class="empty-state">
+        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5"/>
+        </svg>
+        <p>No skills earned yet &mdash; start learning to build your skill profile.</p>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<a href="{% url 'student_dashboard' %}" class="btn-back">
+  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>
+  </svg>
+  Back to Dashboard
+</a>
+
+{% endblock %}

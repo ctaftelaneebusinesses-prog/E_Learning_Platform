@@ -1,0 +1,319 @@
+{% extends 'students/student_base.html' %}
+{% block title %}Leaderboard{% endblock %}
+
+{% block student_content %}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    /* Theme-driven aliases — colors/radius come from body.theme-* (static/css/themes.css) */
+    --navy: var(--color-primary); --navy-mid: var(--color-secondary);
+    --gold: var(--color-secondary); --gold-light: var(--color-secondary); --gold-dark: var(--color-secondary);
+    --surface: var(--color-bg); --white: var(--color-surface); --border: var(--color-border);
+    --text-primary: var(--color-text); --text-secondary: var(--color-text-muted); --text-muted: var(--color-text-muted);
+    --success: var(--color-success); --success-light: var(--color-primary-soft); --radius: var(--radius-card, 12px);
+
+    /* Typography scale — kept identical across every template */
+    --fs-xs: 0.72rem;
+    --fs-sm: 0.8rem;
+    --fs-base: 0.85rem;
+    --fs-md: 0.95rem;
+    --fs-lg: 1.375rem;
+  }
+
+  /* Scoped wrapper so nothing here leaks into / gets leaked into by base.html or the navbar */
+  .leaderboard-page {
+    font-family: 'Inter', sans-serif !important;
+    background: var(--surface);
+    font-size: 15px;
+    line-height: 1.5;
+    color: var(--text-primary) !important;
+    padding-bottom: 40px;
+  }
+
+  .leaderboard-page * { font-family: 'Inter', sans-serif; }
+
+  .page-header {
+    padding: 28px 28px 26px;
+    margin: -4px 0 28px;
+    border-radius: var(--radius);
+    background: var(--theme-gradient-hero, linear-gradient(120deg, var(--navy) 0%, var(--navy-mid) 100%)) !important;
+    box-shadow: var(--shadow-soft, 0 10px 28px rgba(15,23,42,0.18));
+  }
+
+  .page-title {
+    font-size: var(--fs-lg);
+    font-weight: 700;
+    color: #fff !important;
+    letter-spacing: -0.02em;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .page-title i { color: #FDE68A !important; font-size: 1.15rem; }
+
+  .page-subtitle {
+    font-size: var(--fs-base);
+    font-weight: 400;
+    color: rgba(255,255,255,0.75) !important;
+    margin-top: 6px;
+  }
+
+  /* ---- Card ---- */
+  .leaderboard-card {
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    background: var(--white);
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(15,23,42,0.06), 0 1px 2px rgba(15,23,42,0.04);
+  }
+
+  /* ---- Table ---- */
+  .leaderboard-page table.table {
+    margin-bottom: 0;
+    font-size: var(--fs-sm);
+    color: var(--text-primary) !important;
+  }
+
+  .leaderboard-page table.table thead {
+    background: var(--navy);
+  }
+
+  .leaderboard-page table.table thead th {
+    color: var(--white) !important;
+    font-weight: 600;
+    font-size: var(--fs-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 15px 18px;
+    border: none;
+    background: transparent !important;
+  }
+
+  .leaderboard-page table.table tbody td {
+    padding: 14px 18px;
+    vertical-align: middle;
+    color: var(--text-primary) !important;
+    background: var(--white) !important;
+    border-top: 1px solid var(--border);
+    border-bottom: none;
+  }
+
+  .leaderboard-row { transition: background 0.15s ease; }
+  .leaderboard-row:hover td { background: var(--surface) !important; }
+
+  /* ---- Rank badge ---- */
+  .rank-badge {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: var(--fs-sm);
+  }
+
+  .rank-1 { background: linear-gradient(135deg, var(--gold), var(--gold-light)); color: var(--navy) !important; box-shadow: 0 2px 6px rgba(201,168,76,0.4); }
+  .rank-2 { background: #cbd5e1; color: var(--navy) !important; }
+  .rank-3 { background: linear-gradient(135deg, var(--gold-dark), #c98a3f); color: var(--white) !important; }
+
+  .rank-number {
+    color: var(--text-secondary) !important;
+    font-weight: 500;
+    padding-left: 8px;
+  }
+
+  /* ---- Student cell ---- */
+  .student-name {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: var(--fs-sm);
+    color: var(--text-primary) !important;
+  }
+
+  .avatar-circle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--navy-mid);
+    color: var(--white) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--fs-xs);
+    font-weight: 700;
+    flex-shrink: 0;
+    text-transform: uppercase;
+  }
+
+  .you-badge {
+    display: inline-block;
+    font-size: var(--fs-xs);
+    font-weight: 600;
+    color: var(--success) !important;
+    background: var(--success-light);
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-left: 6px;
+  }
+
+  /* ---- Stats cells ---- */
+  .xp-text {
+    font-weight: 700;
+    font-size: var(--fs-sm);
+    color: var(--navy) !important;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .xp-text i { color: var(--gold) !important; font-size: var(--fs-sm); }
+
+  .streak-text {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--fs-sm);
+    color: var(--text-secondary) !important;
+    font-weight: 500;
+  }
+
+  .streak-text i { color: #ea580c !important; font-size: var(--fs-sm); }
+  .streak-text.longest i { color: var(--gold) !important; }
+
+  .me-row td { background: var(--success-light) !important; font-weight: 600; }
+
+  /* ---- Empty state ---- */
+  .empty-row {
+    color: var(--text-secondary) !important;
+    padding: 48px 16px !important;
+  }
+
+  .empty-row i {
+    font-size: 2rem;
+    color: var(--border);
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  /* ---- Back button ---- */
+  .btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-size: var(--fs-sm);
+    font-weight: 500;
+    background: var(--white);
+    color: var(--navy) !important;
+    border: 1px solid var(--border);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    margin-top: 28px;
+  }
+
+  .btn-back:hover {
+    background: var(--navy);
+    color: var(--white) !important;
+    border-color: var(--navy);
+    transform: translateX(-3px);
+  }
+
+  @media (max-width: 576px) {
+    .page-header { padding: 24px 0 18px; }
+    .leaderboard-page table.table thead th,
+    .leaderboard-page table.table tbody td { padding: 12px 10px; }
+    .student-name { gap: 8px; }
+  }
+</style>
+
+<div class="leaderboard-page">
+
+  <!-- HEADER -->
+  <div class="page-header">
+    <h1 class="page-title"><i class="bi bi-trophy-fill"></i> Student Leaderboard</h1>
+    <p class="page-subtitle">See how you rank against your peers</p>
+  </div>
+
+  <div class="leaderboard-card">
+    <div class="table-responsive">
+    <table class="table table-borderless mb-0">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Student</th>
+          <th>Total XP</th>
+          <th>Current Streak</th>
+          <th>Longest Streak</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for row in leaderboard %}
+          <tr class="leaderboard-row {% if row.username == request.user.username %}me-row{% endif %}">
+
+            <!-- Rank -->
+            <td>
+              {% if row.rank <= 3 %}
+                <span class="rank-badge rank-{{ row.rank }}">{{ row.rank }}</span>
+              {% else %}
+                <span class="rank-number">{{ row.rank }}</span>
+              {% endif %}
+            </td>
+
+            <!-- Student -->
+            <td>
+              <span class="student-name">
+                <span class="avatar-circle">{{ row.username|slice:":1" }}</span>
+                {% if row.username == request.user.username %}
+                  <strong>{{ row.username }}</strong><span class="you-badge">You</span>
+                {% else %}
+                  {{ row.username }}
+                {% endif %}
+              </span>
+            </td>
+
+            <!-- XP -->
+            <td>
+              <span class="xp-text"><i class="bi bi-star-fill"></i> {{ row.xp }}</span>
+            </td>
+
+            <!-- Current Streak -->
+            <td>
+              <span class="streak-text"><i class="bi bi-fire"></i> {{ row.current_streak }}</span>
+            </td>
+
+            <!-- Longest Streak -->
+            <td>
+              <span class="streak-text longest"><i class="bi bi-trophy-fill"></i> {{ row.longest_streak }}</span>
+            </td>
+
+          </tr>
+        {% empty %}
+          <tr>
+            <td colspan="5" class="text-center empty-row">
+              <i class="bi bi-bar-chart-line"></i>
+              No leaderboard data yet
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+
+  <a href="{% url 'student_dashboard' %}" class="btn-back">
+    <i class="bi bi-arrow-left"></i> Back to Dashboard
+  </a>
+
+</div>
+
+{% endblock %}

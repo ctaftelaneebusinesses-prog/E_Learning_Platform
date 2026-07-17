@@ -1,0 +1,97 @@
+{% extends "students/student_base.html" %}
+{% load static %}
+{% block title %}Chat with Instructor{% endblock %}
+
+{% block student_content %}
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/chat.css' %}">
+
+{% with instructor_name=instructor.first_name|default:instructor.username|default:"your Instructor" %}
+<div class="chat-page-header">
+  <button type="button" class="chat-page-avatar {% if instructor.profile.profile_image %}is-viewable{% endif %}"
+          {% if instructor.profile.profile_image %}data-view-pic="{{ instructor.profile.profile_image.url }}" data-view-name="{{ instructor_name }}"{% endif %}
+          title="{% if instructor.profile.profile_image %}View photo{% else %}No photo uploaded{% endif %}">
+    {% if instructor.profile.profile_image %}
+      <img src="{{ instructor.profile.profile_image.url }}" alt="{{ instructor_name }}">
+    {% else %}
+      <i class="bi bi-person-circle"></i>
+    {% endif %}
+  </button>
+  <div>
+    <h1 class="chat-page-title">I'm {{ instructor_name }}, your instructor</h1>
+    <p class="chat-page-course"><i class="bi bi-journal-bookmark"></i> {{ course.title }}</p>
+  </div>
+</div>
+{% endwith %}
+
+<div class="chat-app"
+     data-poll-url="{{ poll_url }}"
+     data-react-url-template="{{ react_url_template }}"
+     data-reaction-emojis='{{ reaction_emojis_json }}'>
+  <div class="chat-card">
+
+    <div class="chat-header">
+      <div class="chat-header-left">
+        <div class="chat-title">{{ instructor.first_name|default:instructor.username|default:"Instructor" }}</div>
+      </div>
+      <div class="chat-header-actions">
+        <div class="theme-picker-wrap">
+          <button type="button" class="icon-btn" id="themeBtn" title="Chat theme"><i class="bi bi-palette"></i></button>
+          <div class="theme-picker" id="themePicker" hidden>
+            <button type="button" class="theme-swatch" data-theme="default" title="Default"><span style="background:linear-gradient(135deg,#1a3a6b,#2a5298);"></span></button>
+            <button type="button" class="theme-swatch" data-theme="whatsapp" title="WhatsApp Green"><span style="background:linear-gradient(135deg,#075e54,#25d366);"></span></button>
+            <button type="button" class="theme-swatch" data-theme="dark" title="Dark"><span style="background:linear-gradient(135deg,#1e1e1e,#3a3a3a);"></span></button>
+            <button type="button" class="theme-swatch" data-theme="sunset" title="Sunset"><span style="background:linear-gradient(135deg,#f97316,#db2777);"></span></button>
+            <button type="button" class="theme-swatch" data-theme="ocean" title="Ocean"><span style="background:linear-gradient(135deg,#0369a1,#06b6d4);"></span></button>
+          </div>
+        </div>
+        <div class="chat-header-right">
+          <span class="online-dot chat-header-dot {% if other_online %}is-online{% endif %}"></span>
+          <div class="chat-instructor-status chat-subtitle {% if other_online %}is-online{% endif %}">
+            {% if other_online %}Online{% else %}Offline{% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+      {% if messages %}
+        {% for msg in messages %}
+          {% include "chat/_message_bubble.html" %}
+        {% endfor %}
+      {% else %}
+        <div class="chat-empty">
+          <div class="chat-empty-greeting">
+            Hey, this is {{ instructor.first_name|default:instructor.username|default:"your instructor" }}! 👋
+          </div>
+          <div>I'm here to help you clear your doubts in {{ course.title }}. Ask me anything!</div>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="chat-composer">
+      <div class="attach-preview" id="attachPreview" hidden></div>
+      <form id="chatForm" class="composer-row" enctype="multipart/form-data">
+        {% csrf_token %}
+        <button type="button" class="icon-btn" id="attachBtn" title="Attach file"><i class="bi bi-paperclip"></i></button>
+        <input type="file" id="fileInput" hidden accept="image/*,.pdf,.doc,.docx,.txt,.zip">
+        <textarea name="message" id="messageInput" class="chat-textarea" rows="1" placeholder="Type a message…"></textarea>
+        <button type="button" class="icon-btn" id="micBtn" title="Record voice note"><i class="bi bi-mic"></i></button>
+        <button type="submit" class="send-btn" title="Send"><i class="bi bi-send-fill"></i></button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<div class="pic-lightbox" id="picLightbox" hidden>
+  <div class="pic-lightbox-backdrop" id="picLightboxBackdrop"></div>
+  <div class="pic-lightbox-content">
+    <button type="button" class="pic-lightbox-close" id="picLightboxClose">&times;</button>
+    <img id="picLightboxImg" src="" alt="">
+    <div class="pic-lightbox-name" id="picLightboxName"></div>
+  </div>
+</div>
+
+<script src="{% static 'js/chat.js' %}"></script>
+{% endblock %}

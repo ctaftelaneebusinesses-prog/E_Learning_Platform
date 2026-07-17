@@ -1,0 +1,113 @@
+{% with url_name=request.resolver_match.url_name %}
+<aside class="dash-sidebar" id="dashSidebar">
+  <div class="dash-sidebar-header">
+    <a href="{% url 'profile' %}" class="dash-sidebar-profile">
+      {% if user.profile.profile_image %}
+        <img src="{{ user.profile.profile_image.url }}" alt="" class="dash-sidebar-avatar">
+      {% else %}
+        <span class="dash-sidebar-avatar dash-sidebar-avatar-fallback"><i class="bi bi-person-fill"></i></span>
+      {% endif %}
+      <span class="dash-sidebar-profile-info">
+        <span class="dash-sidebar-profile-name">{{ user.first_name|default:user.username }}</span>
+        <span class="dash-sidebar-profile-role">Student</span>
+      </span>
+    </a>
+    <button type="button" class="dash-sidebar-collapse-btn" id="dashSidebarCollapseBtn" aria-label="Collapse sidebar">
+      <i class="bi bi-chevron-left"></i>
+    </button>
+  </div>
+
+  <nav class="dash-sidebar-nav">
+    <div class="dash-nav-section-label">Overview</div>
+    <ul class="dash-nav-list">
+      <li>
+        <a href="{% url 'student_dashboard' %}" data-label="Dashboard"
+           class="dash-nav-link {% if url_name == 'student_dashboard' %}active{% endif %}">
+          <i class="bi bi-speedometer2"></i>
+          <span class="dash-nav-text">Dashboard</span>
+        </a>
+      </li>
+    </ul>
+
+    <div class="dash-nav-section-label">Learning</div>
+    <ul class="dash-nav-list">
+      <li>
+        <a href="{% url 'student_course_list' %}" data-label="Browse Courses"
+           class="dash-nav-link {% if url_name == 'student_course_list' %}active{% endif %}">
+          <i class="bi bi-search"></i>
+          <span class="dash-nav-text">Browse Courses</span>
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'student_my_courses' %}" data-label="My Courses"
+           class="dash-nav-link {% if url_name == 'student_my_courses' or url_name == 'student_lesson_list' or url_name == 'student_lesson_detail' or url_name == 'student_quiz_list' or url_name == 'attempt_quiz' or url_name == 'student_view_certificate' or url_name == 'student_instructor_chat' %}active{% endif %}">
+          <i class="bi bi-collection-fill"></i>
+          <span class="dash-nav-text">My Courses</span>
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'student_achievements' %}" data-label="Achievements"
+           class="dash-nav-link {% if url_name == 'student_achievements' %}active{% endif %}">
+          <i class="bi bi-award-fill"></i>
+          <span class="dash-nav-text">Achievements</span>
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'student_leaderboard' %}" data-label="Leaderboard"
+           class="dash-nav-link {% if url_name == 'student_leaderboard' %}active{% endif %}">
+          <i class="bi bi-bar-chart-fill"></i>
+          <span class="dash-nav-text">Leaderboard</span>
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'student_streak_rewards' %}" data-label="Streak Rewards"
+           class="dash-nav-link {% if url_name == 'student_streak_rewards' %}active{% endif %}">
+          <i class="bi bi-fire"></i>
+          <span class="dash-nav-text">Streak Rewards</span>
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'student_skills' %}" data-label="My Skills"
+           class="dash-nav-link {% if url_name == 'student_skills' %}active{% endif %}">
+          <i class="bi bi-cpu-fill"></i>
+          <span class="dash-nav-text">My Skills</span>
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'student_activity' %}" data-label="Activity Timeline"
+           class="dash-nav-link {% if url_name == 'student_activity' %}active{% endif %}">
+          <i class="bi bi-clock-history"></i>
+          <span class="dash-nav-text">Activity Timeline</span>
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'ai_learning_path' %}" data-label="AI Learning Path"
+           class="dash-nav-link {% if url_name == 'ai_learning_path' %}active{% endif %}">
+          <i class="bi bi-robot"></i>
+          <span class="dash-nav-text">AI Learning Path</span>
+        </a>
+      </li>
+      <li>
+        <a href="{% url 'broadcast_inbox' %}" data-label="Messages"
+           class="dash-nav-link {% if url_name == 'broadcast_inbox' %}active{% endif %}">
+          <i class="bi bi-envelope-fill"></i>
+          <span class="dash-nav-text">Messages</span>
+          <span class="badge rounded-pill bg-danger ms-auto {% if not broadcast_unread_count %}d-none{% endif %}"
+                data-broadcast-badge>{{ broadcast_unread_count|default:0 }}</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="dash-sidebar-footer">
+    <a href="{% url 'home' %}" class="dash-nav-link" data-label="Back to Site">
+      <i class="bi bi-box-arrow-left"></i>
+      <span class="dash-nav-text">Back to Site</span>
+    </a>
+    <a href="{% url 'logout' %}" class="dash-nav-link dash-nav-link-logout" data-label="Logout">
+      <i class="bi bi-box-arrow-right"></i>
+      <span class="dash-nav-text">Logout</span>
+    </a>
+  </div>
+</aside>
+{% endwith %}

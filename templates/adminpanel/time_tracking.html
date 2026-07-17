@@ -1,0 +1,130 @@
+{% extends 'adminpanel/admin_base.html' %}
+{% block title %}Time Tracking & Activity{% endblock %}
+
+{% block admin_content %}
+
+<style>
+  .section-card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface);
+  }
+
+  .section-card-header h5 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-text);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-card-header h5 svg { width: 17px; height: 17px; color: var(--color-primary); }
+
+  .metric-badge {
+    font-size: 0.73rem;
+    padding: 4px 12px;
+    border-radius: var(--radius-pill);
+    font-weight: 600;
+    display: inline-block;
+  }
+
+  .metric-info { background: var(--color-primary-soft); color: var(--color-primary-hover); border: 1px solid #c7d2fe; }
+  .metric-secondary { background: var(--color-bg); color: var(--color-text-muted); border: 1px solid var(--color-border); }
+</style>
+
+<div class="page-header">
+  <div class="page-header-text">
+    <h2>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="10"/>
+        <polyline points="12 6 12 12 16 14"/>
+      </svg>
+      Time Tracking & Activity
+    </h2>
+    <p class="page-subtitle">Monitor learner session durations and recent platform activity</p>
+  </div>
+</div>
+
+<div class="section-card">
+  <div class="section-card-header">
+    <h5>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+      </svg>
+      Learning Sessions
+    </h5>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>Student</th><th>Course</th><th>Duration</th><th>Started</th><th>Ended</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for s in sessions %}
+          <tr>
+            <td>
+              <span class="avatar-chip-row">
+                <span class="avatar-chip">{{ s.student.username|first|upper }}</span>
+                <span class="fw-semibold">{{ s.student.username }}</span>
+              </span>
+            </td>
+            <td>{{ s.course.title|default:"—" }}</td>
+            <td><span class="metric-badge metric-info">{{ s.duration_minutes }} mins</span></td>
+            <td class="text-muted" style="font-size:0.85rem;">{{ s.start_time|date:"d M Y H:i" }}</td>
+            <td class="text-muted" style="font-size:0.85rem;">{{ s.end_time|date:"d M Y H:i"|default:"—" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="5"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><p>No learning sessions recorded</p></div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="section-card">
+  <div class="section-card-header">
+    <h5>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      Recent Activity
+    </h5>
+  </div>
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>Student</th><th>Activity</th><th>Course</th><th>Time</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for a in activities %}
+          <tr>
+            <td>
+              <span class="avatar-chip-row">
+                <span class="avatar-chip">{{ a.student.username|first|upper }}</span>
+                <span class="fw-semibold">{{ a.student.username }}</span>
+              </span>
+            </td>
+            <td><span class="metric-badge metric-secondary">{{ a.get_activity_type_display }}</span></td>
+            <td>{{ a.course.title|default:"—" }}</td>
+            <td class="text-muted" style="font-size:0.85rem;">{{ a.timestamp|date:"d M Y H:i" }}</td>
+          </tr>
+          {% empty %}
+          <tr><td colspan="4"><div class="empty-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg><p>No activity recorded</p></div></td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

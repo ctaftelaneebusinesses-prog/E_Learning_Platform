@@ -1,0 +1,262 @@
+{% extends 'students/student_base.html' %}
+{% block title %}Attempt Quiz{% endblock %}
+
+{% block student_content %}
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    /* Theme-driven aliases — colors/radius come from body.theme-* (static/css/themes.css) */
+    --navy: var(--color-primary);
+    --gold: var(--color-secondary);
+    --gold-light: var(--color-secondary);
+    --surface: var(--color-bg);
+    --white: var(--color-surface);
+    --border: var(--color-border);
+    --text-primary: var(--color-text);
+    --text-secondary: var(--color-text-muted);
+    --success: var(--color-success);
+    --radius: var(--radius-card, 12px);
+  }
+
+  body { font-family: var(--font-sans, 'DM Sans', sans-serif); background: var(--surface); }
+
+  .page-header {
+    padding: 32px 0 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 32px;
+  }
+
+  .page-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+
+  .page-title span { color: var(--gold); }
+
+  .page-subtitle {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+
+  .question-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 18px;
+    transition: box-shadow 0.2s ease;
+  }
+
+  .question-card:hover {
+    box-shadow: 0 4px 16px rgba(15,23,42,0.06);
+  }
+
+  .question-header {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--border);
+    background: #fafbfc;
+  }
+
+  .question-number {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    background: var(--navy);
+    color: var(--white);
+    font-family: 'Syne', sans-serif;
+    font-size: 0.71rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .question-text {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.5;
+  }
+
+  .options-body {
+    padding: 15px 22px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .option-label {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    padding: 11px 15px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    position: relative;
+  }
+
+  .option-label:hover {
+    border-color: var(--gold);
+    background: #fef9ec;
+  }
+
+  .option-label input[type="radio"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 17px;
+    height: 17px;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: all 0.18s ease;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .option-label input[type="radio"]:checked {
+    border-color: var(--gold);
+    background: var(--gold);
+    box-shadow: inset 0 0 0 3px var(--white);
+  }
+
+  .option-label:has(input:checked) {
+    border-color: var(--gold);
+    background: #fef9ec;
+  }
+
+  .option-letter {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    background: #f1f5f9;
+    color: var(--text-secondary);
+    font-family: 'Syne', sans-serif;
+    font-size: 0.66rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    letter-spacing: 0;
+  }
+
+  .option-text {
+    font-size: 0.8125rem;
+    color: var(--text-primary);
+    flex: 1;
+  }
+
+  .submit-bar {
+    position: sticky;
+    bottom: 0;
+    background: rgba(248, 250, 252, 0.95);
+    backdrop-filter: blur(8px);
+    padding: 16px 0;
+    border-top: 1px solid var(--border);
+    margin-top: 12px;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .btn-submit {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    padding: 12px 32px;
+    background: var(--success);
+    color: var(--white);
+    border: none;
+    border-radius: 9px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-submit:hover {
+    background: #047857;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(5, 150, 105, 0.25);
+  }
+</style>
+
+<div class="page-header">
+  <h1 class="page-title"><span>{{ quiz.title }}</span></h1>
+  <p class="page-subtitle">Answer all questions and submit when ready</p>
+</div>
+
+<form method="post">
+  {% csrf_token %}
+
+  {% for q in questions %}
+    <div class="question-card">
+      <div class="question-header">
+        <div class="question-number">{{ forloop.counter }}</div>
+        <div class="question-text">{{ q.text }}</div>
+      </div>
+
+      <div class="options-body">
+        <label class="option-label">
+          <input type="radio" name="{{ q.id }}" value="A">
+          <span class="option-letter">A</span>
+          <span class="option-text">{{ q.option_a }}</span>
+        </label>
+
+        <label class="option-label">
+          <input type="radio" name="{{ q.id }}" value="B">
+          <span class="option-letter">B</span>
+          <span class="option-text">{{ q.option_b }}</span>
+        </label>
+
+        <label class="option-label">
+          <input type="radio" name="{{ q.id }}" value="C">
+          <span class="option-letter">C</span>
+          <span class="option-text">{{ q.option_c }}</span>
+        </label>
+
+        <label class="option-label">
+          <input type="radio" name="{{ q.id }}" value="D">
+          <span class="option-letter">D</span>
+          <span class="option-text">{{ q.option_d }}</span>
+        </label>
+      </div>
+    </div>
+  {% endfor %}
+
+  <div class="submit-bar">
+    <button type="submit" class="btn-submit">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      Submit Quiz
+    </button>
+  </div>
+</form>
+
+{% if active_theme.is_kids_world %}
+<script>
+document.querySelectorAll('.option-label input[type="radio"]').forEach(function (input) {
+  input.addEventListener('change', function () {
+    if (window.KidsSound) window.KidsSound.play('click');
+  });
+});
+</script>
+{% endif %}
+
+{% endblock %}

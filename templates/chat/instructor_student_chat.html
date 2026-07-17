@@ -1,0 +1,89 @@
+{% extends "instructors/instructor_base.html" %}
+{% load static %}
+{% block title %}Chat – {{ student.username }}{% endblock %}
+
+{% block instructor_content %}
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/chat.css' %}">
+
+<div style="max-width:820px;margin:0 auto 8px;">
+  <a href="{% url 'courses:instructor_course_students' course.id %}" style="display:inline-flex;align-items:center;gap:6px;font-size:0.8125rem;font-weight:600;color:var(--color-text-muted);text-decoration:none;">
+    <i class="bi bi-arrow-left"></i> Back to Students
+  </a>
+</div>
+
+{% with student_name=student.first_name|default:student.username %}
+<div class="chat-page-header">
+  <button type="button" class="chat-page-avatar {% if student.profile.profile_image %}is-viewable{% endif %}"
+          {% if student.profile.profile_image %}data-view-pic="{{ student.profile.profile_image.url }}" data-view-name="{{ student_name }}"{% endif %}
+          title="{% if student.profile.profile_image %}View photo{% else %}No photo uploaded{% endif %}">
+    {% if student.profile.profile_image %}
+      <img src="{{ student.profile.profile_image.url }}" alt="{{ student_name }}">
+    {% else %}
+      <i class="bi bi-person-circle"></i>
+    {% endif %}
+  </button>
+  <div>
+    <h1 class="chat-page-title">{{ student_name }}</h1>
+    <p class="chat-page-course"><i class="bi bi-journal-bookmark"></i> {{ course.title }}</p>
+  </div>
+</div>
+{% endwith %}
+
+<div class="chat-app"
+     data-poll-url="{{ poll_url }}"
+     data-react-url-template="{{ react_url_template }}"
+     data-reaction-emojis='{{ reaction_emojis_json }}'>
+  <div class="chat-card">
+
+    <div class="chat-header">
+      <div class="chat-header-left">
+        <div class="chat-title">{{ student.first_name|default:student.username }}</div>
+      </div>
+      <div class="chat-header-right">
+        <span class="online-dot chat-header-dot {% if other_online %}is-online{% endif %}"></span>
+        <div class="chat-instructor-status chat-subtitle {% if other_online %}is-online{% endif %}">
+          {% if other_online %}Online{% else %}Offline{% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+      {% if messages %}
+        {% for msg in messages %}
+          {% include "chat/_message_bubble.html" %}
+        {% endfor %}
+      {% else %}
+        <div class="chat-empty">
+          <i class="bi bi-chat-dots" style="font-size:2rem;"></i>
+          <div>No messages yet. Start the conversation!</div>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="chat-composer">
+      <div class="attach-preview" id="attachPreview" hidden></div>
+      <form id="chatForm" class="composer-row" enctype="multipart/form-data">
+        {% csrf_token %}
+        <button type="button" class="icon-btn" id="attachBtn" title="Attach file"><i class="bi bi-paperclip"></i></button>
+        <input type="file" id="fileInput" hidden accept="image/*,.pdf,.doc,.docx,.txt,.zip">
+        <textarea name="message" id="messageInput" class="chat-textarea" rows="1" placeholder="Type a message…"></textarea>
+        <button type="button" class="icon-btn" id="micBtn" title="Record voice note"><i class="bi bi-mic"></i></button>
+        <button type="submit" class="send-btn" title="Send"><i class="bi bi-send-fill"></i></button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<div class="pic-lightbox" id="picLightbox" hidden>
+  <div class="pic-lightbox-backdrop" id="picLightboxBackdrop"></div>
+  <div class="pic-lightbox-content">
+    <button type="button" class="pic-lightbox-close" id="picLightboxClose">&times;</button>
+    <img id="picLightboxImg" src="" alt="">
+    <div class="pic-lightbox-name" id="picLightboxName"></div>
+  </div>
+</div>
+
+<script src="{% static 'js/chat.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,530 @@
+/* ==========================================================================
+   DASHBOARD SIDEBAR
+   Fixed / collapsible left navigation, shared by the Admin, Instructor and
+   Student panels. Relies on the design tokens declared in css/style.css.
+   ========================================================================== */
+
+:root {
+  --dash-sidebar-w: 268px;
+  --dash-sidebar-w-collapsed: 80px;
+  --dash-navbar-h: 72px;
+}
+
+/* Let the panel shell own the full viewport width; the sidebar handles its
+   own fixed positioning independently of Bootstrap's centered container. */
+body.dash-body main.container {
+  max-width: 100%;
+  width: 100%;
+  padding-left: 0;
+  padding-right: 0;
+  margin: 0;
+}
+
+body.dash-body .navbar {
+  min-height: var(--dash-navbar-h);
+}
+
+.dash-layout {
+  display: flex;
+  align-items: stretch;
+  min-height: calc(100vh - var(--dash-navbar-h));
+}
+
+/* ---------------------------------------------------------------------- */
+/* Sidebar                                                                 */
+/* ---------------------------------------------------------------------- */
+
+.dash-sidebar {
+  position: fixed;
+  top: var(--dash-navbar-h);
+  left: 0;
+  width: var(--dash-sidebar-w);
+  height: calc(100vh - var(--dash-navbar-h));
+  display: flex;
+  flex-direction: column;
+  background: var(--color-chrome);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: var(--shadow-soft);
+  z-index: 1030;
+  transition: width var(--transition), transform var(--transition);
+  overflow-x: hidden;
+}
+
+.dash-sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 18px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
+}
+
+.dash-sidebar-profile {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  color: #fff;
+  text-decoration: none;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.dash-sidebar-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.dash-sidebar-avatar-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 1.1rem;
+}
+
+.dash-sidebar-profile-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.dash-sidebar-profile-name {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dash-sidebar-profile-role {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.dash-sidebar-collapse-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background-color var(--transition), transform var(--transition);
+}
+
+.dash-sidebar-collapse-btn:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.dash-sidebar-collapse-btn i {
+  transition: transform var(--transition);
+}
+
+.dash-sidebar-nav {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 14px 12px;
+}
+
+.dash-sidebar-nav::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dash-sidebar-nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+  border-radius: 999px;
+}
+
+.dash-nav-section-label {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  padding: 14px 12px 6px;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.dash-nav-section-label:first-child {
+  padding-top: 4px;
+}
+
+.dash-nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.dash-nav-link {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  color: rgba(255, 255, 255, 0.72);
+  font-weight: 500;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background-color var(--transition), color var(--transition);
+}
+
+.dash-nav-link i {
+  font-size: 1.05rem;
+  width: 22px;
+  text-align: center;
+  flex-shrink: 0;
+  transition: transform var(--transition);
+}
+
+.dash-nav-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dash-nav-link:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.dash-nav-link:hover i {
+  transform: translateX(1px) scale(1.08);
+}
+
+.dash-nav-link.active {
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+}
+
+.dash-nav-link.active::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 20px;
+  border-radius: 999px;
+  background: #fff;
+  opacity: 0.9;
+}
+
+.dash-sidebar-footer {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dash-nav-link-logout {
+  color: #f87171;
+}
+
+.dash-nav-link-logout:hover {
+  background: rgba(239, 68, 68, 0.16);
+  color: #fca5a5;
+}
+
+/* The top navbar keeps a Logout link for pages without a sidebar (e.g. the
+   profile page); on dashboard pages it's hidden since the sidebar footer
+   above is now the primary, always-visible way to log out. */
+body.dash-body .navbar-logout-item {
+  display: none;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Main content area                                                       */
+/* ---------------------------------------------------------------------- */
+
+.dash-main {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin-left: var(--dash-sidebar-w);
+  display: flex;
+  flex-direction: column;
+  transition: margin-left var(--transition);
+  background: var(--color-bg);
+}
+
+.dash-topbar {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 18px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  position: sticky;
+  top: var(--dash-navbar-h);
+  z-index: 1010;
+}
+
+.dash-mobile-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: 1.15rem;
+  cursor: pointer;
+  transition: background-color var(--transition);
+}
+
+.dash-mobile-toggle:hover {
+  background: var(--color-primary-soft);
+}
+
+.dash-topbar-brand {
+  font-weight: 700;
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dash-content {
+  flex: 1 1 auto;
+  padding: 28px clamp(16px, 3vw, 36px);
+  animation: dashContentIn 0.35s ease;
+  background: var(--color-bg);
+  position: relative;
+  z-index: 0;
+}
+
+@keyframes dashContentIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ---------------------------------------------------------------------- */
+/* Collapsed state (desktop)                                               */
+/* ---------------------------------------------------------------------- */
+
+.dash-layout.collapsed .dash-sidebar {
+  width: var(--dash-sidebar-w-collapsed);
+}
+
+.dash-layout.collapsed .dash-main {
+  margin-left: var(--dash-sidebar-w-collapsed);
+}
+
+.dash-layout.collapsed .dash-sidebar-profile-info,
+.dash-layout.collapsed .dash-nav-text,
+.dash-layout.collapsed .dash-nav-section-label {
+  display: none;
+}
+
+.dash-layout.collapsed .dash-sidebar-header {
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px 8px;
+}
+
+.dash-layout.collapsed .dash-sidebar-collapse-btn i {
+  transform: rotate(180deg);
+}
+
+.dash-layout.collapsed .dash-nav-link {
+  justify-content: center;
+  padding: 12px 0;
+}
+
+.dash-layout.collapsed .dash-nav-link.active::before {
+  left: 6px;
+}
+
+/* Flyout label on hover when collapsed */
+.dash-layout.collapsed .dash-nav-link {
+  position: relative;
+}
+
+.dash-layout.collapsed .dash-nav-link:hover::after {
+  content: attr(data-label);
+  position: absolute;
+  left: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--color-chrome);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+  box-shadow: var(--shadow-lift);
+  pointer-events: none;
+  z-index: 1040;
+}
+
+/* ---------------------------------------------------------------------- */
+/* Mobile drawer                                                           */
+/* ---------------------------------------------------------------------- */
+
+.dash-sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  z-index: 1025;
+  opacity: 0;
+  transition: opacity var(--transition);
+}
+
+@media (max-width: 991.98px) {
+  .dash-topbar {
+    display: flex;
+  }
+
+  .dash-sidebar {
+    top: 0;
+    height: 100vh;
+    width: min(82vw, 300px);
+    transform: translateX(-100%);
+    z-index: 1050;
+    box-shadow: var(--shadow-lift);
+  }
+
+  .dash-layout.mobile-open .dash-sidebar {
+    transform: translateX(0);
+  }
+
+  .dash-layout.mobile-open .dash-sidebar-profile-info {
+    display: flex;
+  }
+
+  .dash-layout.mobile-open .dash-nav-text,
+  .dash-layout.mobile-open .dash-nav-section-label {
+    display: block;
+  }
+
+  .dash-sidebar-collapse-btn {
+    display: none;
+  }
+
+  .dash-main {
+    margin-left: 0 !important;
+  }
+
+  .dash-layout.mobile-open .dash-sidebar-overlay {
+    display: block;
+    opacity: 1;
+  }
+
+  .dash-content {
+    padding: 20px 16px;
+  }
+}
+
+/* ---------------------------------------------------------------------- */
+/* Page header — gradient hero banner                                     */
+/* Shared by every Admin and Instructor panel page (list/detail/dashboard */
+/* screens alike) so headers are visually consistent without each         */
+/* template re-declaring the same rules. Student pages keep their own     */
+/* per-theme hero headers (see individual student templates).             */
+/* ---------------------------------------------------------------------- */
+
+[data-panel="admin"] .dash-content .page-header,
+[data-panel="instructor"] .dash-content .page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 28px 28px 26px;
+  margin: -4px 0 28px;
+  border: none;
+  border-radius: var(--radius-card, 16px);
+  background: var(--theme-gradient-hero, linear-gradient(135deg, #2563EB 0%, #1E293B 100%));
+  box-shadow: var(--shadow-soft, 0 10px 28px rgba(15, 23, 42, 0.18));
+}
+
+[data-panel="admin"] .dash-content .page-header-text h1,
+[data-panel="admin"] .dash-content .page-header-text h2,
+[data-panel="admin"] .dash-content .page-header-text h3,
+[data-panel="instructor"] .dash-content .page-header-text h1,
+[data-panel="instructor"] .dash-content .page-header-text h2,
+[data-panel="instructor"] .dash-content .page-header-text h3 {
+  color: #fff;
+}
+
+[data-panel="admin"] .dash-content .page-header-text h1 svg,
+[data-panel="admin"] .dash-content .page-header-text h2 svg,
+[data-panel="admin"] .dash-content .page-header-text h3 svg,
+[data-panel="admin"] .dash-content .page-header-text h1 i,
+[data-panel="admin"] .dash-content .page-header-text h2 i,
+[data-panel="admin"] .dash-content .page-header-text h3 i,
+[data-panel="instructor"] .dash-content .page-header-text h1 svg,
+[data-panel="instructor"] .dash-content .page-header-text h2 svg,
+[data-panel="instructor"] .dash-content .page-header-text h3 svg,
+[data-panel="instructor"] .dash-content .page-header-text h1 i,
+[data-panel="instructor"] .dash-content .page-header-text h2 i,
+[data-panel="instructor"] .dash-content .page-header-text h3 i {
+  color: #FDE68A;
+}
+
+[data-panel="admin"] .dash-content .page-header .page-subtitle,
+[data-panel="instructor"] .dash-content .page-header .page-subtitle {
+  color: rgba(255, 255, 255, 0.78);
+}
+
+[data-panel="admin"] .dash-content .page-header .page-header-actions .btn-primary,
+[data-panel="instructor"] .dash-content .page-header .page-header-actions .btn-primary {
+  background: #fff;
+  border-color: #fff;
+  color: var(--color-chrome, #0F172A);
+}
+
+[data-panel="admin"] .dash-content .page-header .page-header-actions .btn-primary:hover,
+[data-panel="instructor"] .dash-content .page-header .page-header-actions .btn-primary:hover {
+  background: #FDE68A;
+  border-color: #FDE68A;
+  color: var(--color-chrome, #0F172A);
+}
+
+[data-panel="admin"] .dash-content .page-header .page-header-actions .btn-outline-primary,
+[data-panel="admin"] .dash-content .page-header .page-header-actions .btn-outline-secondary,
+[data-panel="instructor"] .dash-content .page-header .page-header-actions .btn-outline-primary,
+[data-panel="instructor"] .dash-content .page-header .page-header-actions .btn-outline-secondary {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #fff;
+}
+
+[data-panel="admin"] .dash-content .page-header .page-header-actions .btn-outline-primary:hover,
+[data-panel="admin"] .dash-content .page-header .page-header-actions .btn-outline-secondary:hover,
+[data-panel="instructor"] .dash-content .page-header .page-header-actions .btn-outline-primary:hover,
+[data-panel="instructor"] .dash-content .page-header .page-header-actions .btn-outline-secondary:hover {
+  background: #fff;
+  border-color: #fff;
+  color: var(--color-chrome, #0F172A);
+}

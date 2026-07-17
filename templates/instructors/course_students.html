@@ -1,0 +1,92 @@
+{% extends "instructors/instructor_base.html" %}
+{% block title %}Students – {{ course.title }}{% endblock %}
+
+{% block instructor_content %}
+
+<style>
+  .btn-chat {
+    font-size: 0.78rem;
+    font-weight: 500;
+    padding: 5px 14px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .btn-chat svg { width: 13px; height: 13px; }
+</style>
+
+<div class="container">
+
+  <div class="page-header">
+    <div class="page-header-text">
+      <h3>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        {{ course.title }} – Enrolled Students
+      </h3>
+    </div>
+    <div class="page-header-actions">
+      <span class="pill-metric pill-metric-neutral">{{ student_count }}</span>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Student</th>
+            <th>Enrolled At</th>
+            <th class="text-center">Chat</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for e in enrollments %}
+          <tr>
+            <td style="color:var(--color-text-muted); font-size:0.85rem; font-weight:600;">{{ forloop.counter }}</td>
+            <td>
+              <span class="avatar-chip-row">
+                <span class="avatar-chip">{{ e.student.username|first|upper }}</span>
+                <span class="fw-semibold">{{ e.student.username }}</span>
+              </span>
+            </td>
+            <td class="text-muted" style="font-size: 0.85rem;">{{ e.enrolled_at|date:"d M Y" }}</td>
+            <td class="text-center">
+              <a href="{% url 'courses:instructor_student_chat' course.id e.student.id %}"
+                 class="btn btn-sm btn-outline-success btn-chat">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                Chat
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="4">
+              <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                <p>No students enrolled yet</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+
+  <a href="{% url 'instructor_dashboard' %}" class="btn btn-secondary mt-3">← Back</a>
+
+</div>
+{% endblock %}

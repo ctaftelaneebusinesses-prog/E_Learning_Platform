@@ -1,0 +1,709 @@
+/* ==========================================================================
+   GROWTH JOURNEY — Intermediate theme (11-12) animated background.
+   The same "kid travels to school" story from the School theme, continued:
+   the child has grown into a teenager riding a bigger bus to a bigger campus.
+   Loaded only when body.theme-intermediate is active (see templates/base.html).
+   Driven by static/js/intermediate-scene.js for the day/night cycle, the
+   randomized weather rotation, and mouse-parallax.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .intermediate-world-bg * {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.intermediate-world-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: linear-gradient(180deg, #C7D2FE 0%, #E0E7FF 45%, #F5F3FF 75%, #FAF5FF 100%);
+}
+
+[data-theme="dark"] .intermediate-world-bg {
+  background: linear-gradient(180deg, #14122B 0%, #1E1B45 60%, #241F52 100%);
+}
+
+.kw-icon { display: block; width: 100%; height: 100%; }
+
+/* --------------------------------------------------------------------------
+   DAY / NIGHT CYCLE — static/js/intermediate-scene.js sets data-tod
+   ("morning" | "afternoon" | "evening" | "night") on .intermediate-world-bg
+   based on real local time and refreshes it every minute. Four stacked wash
+   overlays cross-fade between states so the lighting change reads as a
+   transition, not a jump cut. A manual site-wide dark-mode toggle always
+   wins and forces the night look.
+   -------------------------------------------------------------------------- */
+.iw-tod-overlay {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 3.5s ease;
+}
+.iw-tod-morning  { background: linear-gradient(180deg, #FED7AA 0%, #FBCFE8 30%, #E0E7FF 70%, transparent 100%); }
+.iw-tod-afternoon{ background: linear-gradient(180deg, #C7D2FE 0%, #E0E7FF 45%, #F5F3FF 75%, transparent 100%); }
+.iw-tod-evening  { background: linear-gradient(180deg, #FDBA74 0%, #F0ABFC 30%, #A5B4FC 70%, transparent 100%); }
+.iw-tod-night    { background: linear-gradient(180deg, #0F1130 0%, #1B1840 55%, #241F52 100%); }
+
+.intermediate-world-bg[data-tod="morning"]   .iw-tod-morning   { opacity: 1; }
+.intermediate-world-bg[data-tod="afternoon"] .iw-tod-afternoon { opacity: 1; }
+.intermediate-world-bg[data-tod="evening"]   .iw-tod-evening   { opacity: 1; }
+.intermediate-world-bg[data-tod="night"]     .iw-tod-night     { opacity: 1; }
+
+/* A manually-toggled dark UI mode always reads as "night", regardless of
+   the real-time auto cycle, so the two systems never visually disagree. */
+[data-theme="dark"] .iw-tod-overlay { opacity: 0 !important; }
+[data-theme="dark"] .iw-tod-night   { opacity: 1 !important; }
+
+.iw-sun, .iw-moon {
+  position: absolute;
+  top: 7%;
+  right: 12%;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 3.5s ease;
+}
+.iw-sun  { background: radial-gradient(circle at 35% 35%, #FDE68A, #FBBF24 70%); box-shadow: 0 0 40px 12px rgba(251, 191, 36, 0.45); animation: iw-pulse 4.5s ease-in-out infinite; }
+.iw-moon { background: radial-gradient(circle at 35% 35%, #F8FAFC, #E0E7FF 75%); box-shadow: 0 0 26px 8px rgba(224, 231, 255, 0.4); }
+
+.intermediate-world-bg[data-tod="morning"] .iw-sun,
+.intermediate-world-bg[data-tod="afternoon"] .iw-sun { opacity: 1; }
+.intermediate-world-bg[data-tod="evening"] .iw-sun { opacity: 1; filter: hue-rotate(-15deg) saturate(1.3); }
+.intermediate-world-bg[data-tod="night"] .iw-moon { opacity: 1; }
+[data-theme="dark"] .iw-sun { opacity: 0 !important; }
+[data-theme="dark"] .iw-moon { opacity: 1 !important; }
+
+.iw-star { position: absolute; color: #E0E7FF; font-size: 12px; opacity: 0; transition: opacity 3.5s ease; }
+.intermediate-world-bg[data-tod="night"] .iw-star,
+[data-theme="dark"] .iw-star { opacity: 1; animation: iw-twinkle 2.8s ease-in-out infinite; }
+.iw-star:nth-child(1) { top: 9%;  left: 18%; animation-delay: 0s; }
+.iw-star:nth-child(2) { top: 16%; left: 44%; animation-delay: 0.7s; }
+.iw-star:nth-child(3) { top: 7%;  left: 68%; animation-delay: 1.3s; }
+.iw-star:nth-child(4) { top: 22%; left: 82%; animation-delay: 1.9s; }
+
+/* Campus window lights — invisible by day, softly lit after dusk. */
+.iw-campus-light {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #FDE047;
+  opacity: 0;
+  transition: opacity 3s ease;
+  box-shadow: 0 0 8px 2px rgba(253, 224, 71, 0.6);
+}
+.intermediate-world-bg[data-tod="evening"] .iw-campus-light,
+.intermediate-world-bg[data-tod="night"] .iw-campus-light,
+[data-theme="dark"] .iw-campus-light { opacity: 0.9; animation: iw-twinkle 3.4s ease-in-out infinite; }
+
+/* --------------------------------------------------------------------------
+   WEATHER — static/js/intermediate-scene.js randomly rotates data-weather
+   ("sunny" | "cloudy" | "rain" | "rainbow" | "winter" | "autumn") on an
+   interval. Every layer defaults to hidden and only one set becomes visible
+   per state, all cross-fading via opacity so nothing pops in abruptly.
+   -------------------------------------------------------------------------- */
+.iw-weather-layer { position: absolute; inset: 0; opacity: 0; transition: opacity 2.5s ease; }
+
+.intermediate-world-bg[data-weather="cloudy"] .iw-weather-dim { opacity: 1; }
+.iw-weather-dim { background: rgba(71, 85, 105, 0.16); }
+
+.intermediate-world-bg[data-weather="cloudy"] .iw-extra-cloud { opacity: 0.9; }
+.iw-extra-cloud { opacity: 0; }
+
+.intermediate-world-bg[data-weather="rain"] .iw-rain { opacity: 1; }
+.iw-rain-drop {
+  position: absolute;
+  top: -10%;
+  width: 2px;
+  height: 16px;
+  background: linear-gradient(180deg, transparent, #93C5FD);
+  animation: iw-rain-fall 0.7s linear infinite;
+}
+@keyframes iw-rain-fall { from { transform: translateY(0); } to { transform: translateY(115vh); } }
+
+.intermediate-world-bg[data-weather="rainbow"] .iw-rainbow-layer { opacity: 0.85; }
+.iw-rainbow {
+  position: absolute;
+  top: -120px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 420px;
+  height: 210px;
+  border-radius: 50%;
+  background: conic-gradient(from 180deg,
+    transparent 0deg, transparent 180deg,
+    #F87171 181deg, #FB923C 190deg, #FDE047 199deg,
+    #4ADE80 208deg, #38BDF8 217deg, #A78BFA 226deg, transparent 227deg);
+  animation: iw-shimmer 6s ease-in-out infinite;
+}
+
+.intermediate-world-bg[data-weather="winter"] .iw-snow { opacity: 1; }
+.intermediate-world-bg[data-weather="winter"] .iw-ground { filter: brightness(1.08) saturate(0.7); }
+.iw-snowflake {
+  position: absolute;
+  top: -5%;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #F8FAFC;
+  opacity: 0.9;
+  animation: iw-snow-fall linear infinite;
+}
+@keyframes iw-snow-fall {
+  from { transform: translate(0, 0) rotate(0deg); }
+  to   { transform: translate(24px, 115vh) rotate(180deg); }
+}
+
+.intermediate-world-bg[data-weather="autumn"] .iw-autumn { opacity: 1; }
+.iw-leaf {
+  position: absolute;
+  top: -6%;
+  width: 12px;
+  height: 12px;
+  animation: iw-leaf-fall linear infinite;
+}
+@keyframes iw-leaf-fall {
+  0%   { transform: translate(0, 0) rotate(0deg); }
+  50%  { transform: translate(30px, 60vh) rotate(180deg); }
+  100% { transform: translate(-10px, 115vh) rotate(360deg); }
+}
+
+/* --------------------------------------------------------------------------
+   SKY LAYER — clouds, birds, butterflies
+   -------------------------------------------------------------------------- */
+.iw-cloud {
+  position: absolute;
+  background: #fff;
+  border-radius: 999px;
+  opacity: 0.8;
+  transform: translateX(calc(var(--iw-mx, 0) * 10px));
+  transition: transform 0.4s ease-out;
+}
+.iw-cloud::before, .iw-cloud::after {
+  content: '';
+  position: absolute;
+  background: #fff;
+  border-radius: 999px;
+}
+.iw-cloud-1 { top: 10%; left: 12%; width: 70px; height: 24px; animation: iw-drift 40s linear infinite; }
+.iw-cloud-1::before { width: 34px; height: 34px; top: -14px; left: 8px; }
+.iw-cloud-1::after  { width: 24px; height: 24px; top: -8px; left: 38px; }
+.iw-cloud-2 { top: 18%; left: 65%; width: 56px; height: 20px; animation: iw-drift 50s linear infinite; animation-delay: -18s; }
+.iw-cloud-2::before { width: 28px; height: 28px; top: -12px; left: 6px; }
+.iw-cloud-2::after  { width: 20px; height: 20px; top: -7px; left: 30px; }
+.iw-cloud-3 { top: 6%; left: 40%; width: 48px; height: 18px; animation: iw-drift 46s linear infinite; animation-delay: -30s; }
+.iw-cloud-3::before { width: 24px; height: 24px; top: -11px; left: 5px; }
+.iw-cloud-3::after  { width: 18px; height: 18px; top: -6px; left: 26px; }
+
+.iw-bird { position: absolute; width: 22px; height: 11px; color: #4338CA; animation: iw-fly-across 24s linear infinite; }
+.iw-bird-1 { top: 14%; animation-delay: 0s; }
+.iw-bird-2 { top: 24%; width: 16px; height: 8px; animation-delay: -12s; animation-duration: 30s; }
+
+.iw-butterfly { position: absolute; width: 20px; height: 20px; animation: iw-flutter 6s ease-in-out infinite; }
+.iw-butterfly-1 { bottom: 32%; left: 16%; color: #A78BFA; }
+.iw-butterfly-2 { bottom: 36%; left: 74%; color: #818CF8; animation-delay: -3s; }
+
+/* --------------------------------------------------------------------------
+   FLOATING CAREER MOTIVATION ICONS — appear and fade subtly, one at a time,
+   never all at once. Graduation cap + books were already part of the scene;
+   the rest (formula, code, medical, engineering, law, commerce) round out
+   the "prepare for future careers" idea from the brief.
+   -------------------------------------------------------------------------- */
+.iw-cap {
+  position: absolute;
+  top: 14%;
+  right: 14%;
+  width: 52px;
+  height: 34px;
+  color: #4F46E5;
+  animation: iw-bob 4s ease-in-out infinite;
+}
+.iw-book {
+  position: absolute;
+  width: 30px;
+  height: 24px;
+  animation: iw-bob 5s ease-in-out infinite;
+}
+.iw-book-1 { top: 26%; left: 20%; color: #7C3AED; animation-delay: -1s; }
+.iw-book-2 { top: 34%; right: 26%; color: #4F46E5; animation-delay: -2.4s; }
+
+.iw-career-icon {
+  position: absolute;
+  font-weight: 800;
+  font-size: 1.3rem;
+  color: #4338CA;
+  opacity: 0;
+  animation: iw-career-fade 22s ease-in-out infinite;
+}
+.iw-career-formula     { top: 30%; left: 8%;  animation-delay: 0s; }
+.iw-career-code        { top: 12%; left: 46%; animation-delay: -4s; }
+.iw-career-medical     { top: 40%; left: 62%; color: #EF4444; animation-delay: -8s; }
+.iw-career-engineering { top: 20%; left: 30%; color: #0EA5E9; animation-delay: -12s; }
+.iw-career-law         { top: 44%; left: 40%; color: #7C3AED; animation-delay: -16s; }
+.iw-career-commerce    { top: 16%; left: 74%; color: #16A34A; animation-delay: -19s; }
+
+@keyframes iw-career-fade {
+  0%, 100% { opacity: 0; transform: translateY(0); }
+  8%  { opacity: 0.8; }
+  16% { opacity: 0.8; transform: translateY(-8px); }
+  24% { opacity: 0; }
+}
+
+/* --------------------------------------------------------------------------
+   GROUND + JOURNEY — the road the bus travels, with the small-town
+   landmarks from the brief (hills, river, bridge, traffic signal, cafe,
+   library, coaching centre) scattered along the route as permanent scenery,
+   the same way the School theme treats its roadside park.
+   -------------------------------------------------------------------------- */
+.iw-ground {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 30%;
+  background: linear-gradient(180deg, #DDD6FE 0%, #C4B5FD 100%);
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  transition: filter 2.5s ease;
+}
+
+.iw-hills {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 38%;
+  background: linear-gradient(180deg, #A5B4FC 0%, #818CF8 100%);
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+  opacity: 0.6;
+}
+
+.iw-river {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: 0;
+  height: 6%;
+  background: linear-gradient(90deg, #38BDF8, #A5B4FC, #38BDF8);
+  background-size: 200% 100%;
+  animation: iw-shimmer-x 5.5s linear infinite;
+}
+
+.iw-bridge {
+  position: absolute;
+  left: 30%;
+  bottom: 5%;
+  width: 90px;
+  height: 22px;
+  border: 3px solid #6366F1;
+  border-bottom: none;
+  border-radius: 40px 40px 0 0 / 30px 30px 0 0;
+  opacity: 0.85;
+}
+
+.iw-traffic-signal {
+  position: absolute;
+  left: 48%;
+  bottom: 7%;
+  width: 8px;
+  height: 30px;
+  background: #4B5563;
+  border-radius: 2px;
+}
+.iw-traffic-signal::before {
+  content: '';
+  position: absolute;
+  top: -22px;
+  left: -5px;
+  width: 18px;
+  height: 22px;
+  background: #1F2937;
+  border-radius: 3px;
+}
+.iw-signal-light {
+  position: absolute;
+  top: -21px;
+  left: -1px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: iw-traffic-cycle 6s steps(1) infinite;
+}
+@keyframes iw-traffic-cycle {
+  0%, 32%  { background: #EF4444; box-shadow: 0 0 6px 2px rgba(239, 68, 68, 0.7); }
+  33%, 65% { background: #FDE047; box-shadow: 0 0 6px 2px rgba(253, 224, 71, 0.7); }
+  66%, 99% { background: #22C55E; box-shadow: 0 0 6px 2px rgba(34, 197, 94, 0.7); }
+}
+
+.iw-cafe, .iw-library-stop, .iw-coaching {
+  position: absolute;
+  bottom: 6%;
+  width: 34px;
+  height: 28px;
+  filter: drop-shadow(0 4px 5px rgba(30, 27, 75, 0.15));
+}
+.iw-cafe { left: 56%; }
+.iw-library-stop { left: 66%; }
+.iw-coaching { left: 74%; }
+
+.iw-park-tree { position: absolute; left: 40%; bottom: 6%; font-size: 26px; color: #4F46E5; }
+.iw-park-bench {
+  position: absolute;
+  left: 43%;
+  bottom: 6.5%;
+  width: 22px;
+  height: 7px;
+  background: #6D28D9;
+  border-radius: 2px;
+}
+
+/* City buildings the bus passes on its route (static scenery) */
+.iw-city {
+  position: absolute;
+  bottom: 6%;
+  width: 46px;
+  background: #A5B4FC;
+  opacity: 0.7;
+}
+.iw-city-1 { left: 84%; height: 60px; }
+.iw-city-2 { left: 90%; height: 44px; background: #818CF8; }
+
+.iw-home {
+  position: absolute;
+  left: 1%;
+  bottom: 7%;
+  width: 42px;
+  height: 34px;
+}
+
+/* Parent waving from the doorway — a continuous idle loop, always present,
+   independent of the 30s bus-route timeline. */
+.iw-parent {
+  position: absolute;
+  left: 6.5%;
+  bottom: 7%;
+  width: 22px;
+  height: 42px;
+}
+.iw-parent-arm {
+  transform-origin: 4px 10px;
+  animation: iw-wave-arm 1.6s ease-in-out infinite;
+}
+
+@keyframes iw-wave-arm {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(-28deg); }
+}
+
+/* --------------------------------------------------------------------------
+   TREES — swaying continuously, drifting slightly further with the mouse
+   -------------------------------------------------------------------------- */
+.iw-tree {
+  position: absolute;
+  bottom: 6%;
+  font-size: 28px;
+  color: #4F46E5;
+  transform-origin: bottom center;
+  animation: iw-sway 4.5s ease-in-out infinite;
+}
+.iw-tree-1 { left: 26%; animation-delay: 0s; }
+.iw-tree-2 { left: 34%; font-size: 22px; color: #6366F1; animation-delay: -1.5s; }
+.iw-tree-3 { left: 86%; font-size: 24px; color: #7C3AED; animation-delay: -2.8s; }
+
+@keyframes iw-sway {
+  0%, 100% { transform: rotate(calc(-2deg + var(--iw-mx, 0) * -2deg)); }
+  50%      { transform: rotate(calc(2deg + var(--iw-mx, 0) * 2deg)); }
+}
+
+/* --------------------------------------------------------------------------
+   TEENS, BUS STOP & BUS — the same 30s master timeline pattern as the
+   School theme: teen leaves home -> waits at the stop with friends already
+   aboard -> doors open -> boards -> doors close -> bus drives the route ->
+   campus comes into view -> doors open -> everyone walks in -> loop.
+   -------------------------------------------------------------------------- */
+.iw-teen {
+  position: absolute;
+  bottom: 7%;
+  width: 30px;
+  height: auto;
+  animation: iw-walk-to-bus 30s ease-in-out infinite;
+}
+.iw-teen-1 { left: 6%; }
+.iw-teen-2 { left: 10%; animation-delay: -0.7s; }
+
+.iw-bus-stop-sign {
+  position: absolute;
+  left: 18%;
+  bottom: 7%;
+  width: 5px;
+  height: 34px;
+  background: #818CF8;
+  border-radius: 2px;
+}
+.iw-bus-stop-sign::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: -8px;
+  width: 20px;
+  height: 14px;
+  background: #E0E7FF;
+  border-radius: 3px;
+  border: 2px solid #4338CA;
+}
+
+.iw-bus {
+  position: absolute;
+  bottom: 7.5%;
+  left: 20%;
+  width: 130px;
+  height: auto;
+  filter: drop-shadow(0 6px 8px rgba(30, 27, 75, 0.2));
+  animation: iw-bus-route 30s ease-in-out infinite;
+  z-index: 2;
+  transition: filter 0.3s ease;
+}
+
+/* Headlights glow a little brighter on mouse move / after dusk. */
+.iw-bus-light {
+  opacity: 0.35;
+  transition: opacity 0.4s ease;
+}
+.intermediate-world-bg.iw-mouse-active .iw-bus-light,
+.intermediate-world-bg[data-tod="evening"] .iw-bus-light,
+.intermediate-world-bg[data-tod="night"] .iw-bus-light { opacity: 1; }
+
+/* Bus door — opens while parked at the stop and again on campus arrival. */
+.iw-bus-door {
+  transform-origin: left center;
+  animation: iw-door-swing 30s ease-in-out infinite;
+}
+@keyframes iw-door-swing {
+  0%, 4%   { transform: scaleX(1); }
+  6%, 30%  { transform: scaleX(0.15); }
+  33%, 76% { transform: scaleX(1); }
+  79%, 88% { transform: scaleX(0.15); }
+  91%, 100% { transform: scaleX(1); }
+}
+
+.iw-enter-campus {
+  position: absolute;
+  bottom: 7%;
+  width: 30px;
+  height: auto;
+  animation: iw-enter-to-campus 30s ease-in-out infinite;
+}
+.iw-enter-campus-1 { right: 10%; }
+.iw-enter-campus-2 { right: 6%; animation-delay: -0.6s; }
+
+@keyframes iw-drift { from { transform: translateX(-120px); } to { transform: translateX(calc(100vw + 120px)); } }
+@keyframes iw-bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+@keyframes iw-fly-across {
+  0%   { transform: translate(-50px, 0) scaleX(1); }
+  49%  { transform: translate(calc(100vw + 50px), -14px) scaleX(1); }
+  50%  { transform: translate(calc(100vw + 50px), -14px) scaleX(-1); }
+  99%  { transform: translate(-50px, 0) scaleX(-1); }
+  100% { transform: translate(-50px, 0) scaleX(1); }
+}
+@keyframes iw-flutter {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(18px, -14px) rotate(8deg); }
+  50% { transform: translate(36px, 0) rotate(-6deg); }
+  75% { transform: translate(18px, 12px) rotate(6deg); }
+}
+@keyframes iw-twinkle { 0%, 100% { opacity: 0.2; transform: scale(0.85); } 50% { opacity: 1; transform: scale(1.15); } }
+@keyframes iw-shimmer { 0%, 100% { opacity: 0.75; } 50% { opacity: 1; } }
+@keyframes iw-shimmer-x { from { background-position: 0 0; } to { background-position: -200% 0; } }
+@keyframes iw-pulse { 0%, 100% { box-shadow: 0 0 40px 12px rgba(251, 191, 36, 0.45); } 50% { box-shadow: 0 0 52px 18px rgba(251, 191, 36, 0.65); } }
+
+@keyframes iw-walk-to-bus {
+  0%   { transform: translateX(0); opacity: 0; }
+  8%   { opacity: 1; }
+  24%  { transform: translateX(11vw); opacity: 1; }
+  29%  { transform: translateX(11vw); opacity: 0; }
+  100% { transform: translateX(11vw); opacity: 0; }
+}
+
+@keyframes iw-bus-route {
+  0%   { transform: translateX(0); opacity: 1; }
+  30%  { transform: translateX(0); opacity: 1; }
+  35%  { transform: translateX(0); opacity: 1; }
+  70%  { transform: translateX(48vw); opacity: 1; }
+  76%  { transform: translateX(54vw); opacity: 1; }
+  88%  { transform: translateX(54vw); opacity: 1; }
+  92%  { transform: translateX(54vw); opacity: 0; }
+  95%  { transform: translateX(0); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes iw-enter-to-campus {
+  0%   { transform: translateX(0); opacity: 0; }
+  76%  { transform: translateX(0); opacity: 0; }
+  80%  { transform: translateX(0); opacity: 1; }
+  89%  { transform: translateX(4vw); opacity: 1; }
+  94%  { transform: translateX(6vw); opacity: 0; }
+  100% { transform: translateX(6vw); opacity: 0; }
+}
+
+/* --------------------------------------------------------------------------
+   CAMPUS — the permanent landmark, richer than a single building: gate,
+   flag, fountain, garden, bicycles, sports courts and a library entrance,
+   all animating continuously and independently of the bus timeline so the
+   campus always "feels alive" even while the bus is mid-journey.
+   -------------------------------------------------------------------------- */
+.iw-campus {
+  position: absolute;
+  right: 3%;
+  bottom: 6%;
+  width: 200px;
+  height: auto;
+  color: #4338CA;
+  filter: drop-shadow(0 8px 10px rgba(30, 27, 75, 0.18));
+  opacity: 1;
+}
+
+.iw-gate {
+  position: absolute;
+  right: 27%;
+  bottom: 6%;
+  width: 30px;
+  height: 26px;
+  border: 3px solid #6366F1;
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  opacity: 0.9;
+}
+
+.iw-flagpole {
+  position: absolute;
+  right: 8%;
+  bottom: 22%;
+  width: 3px;
+  height: 34px;
+  background: #94A3B8;
+}
+.iw-flag {
+  position: absolute;
+  top: 0;
+  left: 3px;
+  width: 20px;
+  height: 13px;
+  background: linear-gradient(90deg, #FB923C, #4F46E5, #16A34A);
+  transform-origin: left center;
+  animation: iw-flag-wave 2.2s ease-in-out infinite;
+  clip-path: polygon(0 0, 100% 15%, 80% 50%, 100% 85%, 0 100%);
+}
+@keyframes iw-flag-wave {
+  0%, 100% { transform: skewY(0deg) scaleX(1); }
+  50% { transform: skewY(-6deg) scaleX(0.94); }
+}
+
+.iw-fountain {
+  position: absolute;
+  right: 32%;
+  bottom: 6.5%;
+  width: 26px;
+  height: 10px;
+  background: #A5B4FC;
+  border-radius: 50%;
+  opacity: 0.9;
+}
+.iw-fountain::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  width: 3px;
+  height: 14px;
+  background: linear-gradient(180deg, transparent, #7DD3FC);
+  transform: translateX(-50%) scaleY(calc(1 + var(--iw-my, 0) * 0.25));
+  animation: iw-fountain-spray 1.3s ease-in-out infinite;
+}
+@keyframes iw-fountain-spray {
+  0%, 100% { opacity: 0.6; height: 10px; }
+  50% { opacity: 1; height: 16px; }
+}
+
+.iw-garden { position: absolute; right: 34%; bottom: 6%; font-size: 18px; color: #22C55E; }
+.iw-garden-2 { position: absolute; right: 22%; bottom: 6%; font-size: 15px; color: #16A34A; }
+
+.iw-bicycle { position: absolute; bottom: 6.3%; font-size: 15px; color: #4338CA; opacity: 0.85; }
+.iw-bicycle-1 { right: 18%; }
+.iw-bicycle-2 { right: 15%; }
+
+.iw-basketball-court {
+  position: absolute;
+  right: 12%;
+  bottom: 6.4%;
+  font-size: 16px;
+  color: #F97316;
+}
+
+.iw-library-entrance {
+  position: absolute;
+  right: 24%;
+  bottom: 6.2%;
+  font-size: 15px;
+  color: #7C3AED;
+}
+
+/* Two campus figures who stroll back and forth along the same path forever
+   — independent of the 30s bus loop, so the campus never sits still. */
+.iw-campus-walker {
+  position: absolute;
+  bottom: 6%;
+  width: 16px;
+  height: auto;
+  color: #4338CA;
+  animation: iw-campus-stroll 14s ease-in-out infinite;
+}
+.iw-campus-walker-1 { right: 20%; animation-delay: 0s; }
+.iw-campus-walker-2 { right: 16%; color: #7C3AED; animation-delay: -6s; animation-direction: reverse; }
+
+@keyframes iw-campus-stroll {
+  0%, 100% { transform: translateX(0) scaleX(1); }
+  48%      { transform: translateX(3.4vw) scaleX(1); }
+  50%      { transform: translateX(3.4vw) scaleX(-1); }
+  98%      { transform: translateX(0) scaleX(-1); }
+}
+
+/* Cultural / debate posters — small banners pinned near the entrance. */
+.iw-poster {
+  position: absolute;
+  bottom: 12%;
+  width: 16px;
+  height: 20px;
+  border-radius: 2px;
+  opacity: 0.9;
+}
+.iw-poster-1 { right: 30%; background: #FBCFE8; }
+.iw-poster-2 { right: 27%; background: #BFDBFE; }
+
+/* --------------------------------------------------------------------------
+   MOUSE INTERACTIVITY — static/js/intermediate-scene.js sets --iw-mx/--iw-my
+   custom properties (normalized -1..1) on .intermediate-world-bg as the
+   cursor moves, plus a transient .iw-mouse-active class. Trees, clouds and
+   the fountain read the variables directly above; the wave/scatter/glow
+   flourishes below key off the transient class.
+   -------------------------------------------------------------------------- */
+.intermediate-world-bg.iw-mouse-active .iw-flag {
+  animation-duration: 1s;
+}
+.intermediate-world-bg.iw-mouse-active .iw-parent-arm {
+  animation-duration: 0.8s;
+}
+.intermediate-world-bg.iw-mouse-active .iw-leaf,
+.intermediate-world-bg.iw-mouse-active .iw-snowflake {
+  transform: translateX(calc(var(--iw-mx, 0) * 30px));
+}
+.intermediate-world-bg.iw-mouse-active .iw-butterfly {
+  animation-duration: 3.2s;
+}
+
+/* dashboard-sidebar.css fills .dash-content/.dash-main with an opaque
+   --color-bg site-wide — override it to fully transparent here so the
+   animated city/campus story behind is the dominant, always-visible
+   background, not hidden behind a fill. Cards stay legible via their own
+   solid --color-surface background + shadow. */
+body.theme-intermediate .dash-content,
+body.theme-intermediate .dash-main {
+  background: transparent;
+}

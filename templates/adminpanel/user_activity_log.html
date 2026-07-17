@@ -1,0 +1,475 @@
+{% extends 'adminpanel/admin_base.html' %}
+{% block title %}Registered Users{% endblock %}
+
+{% block admin_content %}
+
+<style>
+  .metric-badge {
+    font-size: 0.73rem;
+    padding: 4px 12px;
+    border-radius: var(--radius-pill);
+    font-weight: 600;
+    display: inline-block;
+  }
+
+  .metric-role-student { background: var(--color-primary-soft); color: var(--color-primary-hover); border: 1px solid #c7d2fe; }
+  .metric-role-instructor { background: rgba(234, 179, 8, 0.12); color: #a16207; border: 1px solid rgba(234, 179, 8, 0.3); }
+  .metric-role-admin { background: rgba(34, 197, 94, 0.12); color: #15803d; border: 1px solid rgba(34, 197, 94, 0.3); }
+
+  .reg-toolbar {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  .reg-toolbar input[type="search"],
+  .reg-toolbar select {
+    padding: 7px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-size: 0.88rem;
+  }
+
+  .reg-toolbar input[type="search"] { flex: 1 1 220px; min-width: 180px; }
+
+  .reg-count { font-size: 0.82rem; color: var(--color-text-muted); margin-left: auto; }
+
+  th[data-sort-key] { cursor: pointer; user-select: none; white-space: nowrap; }
+  th[data-sort-key]:hover { color: var(--color-primary); }
+  th.sorted-asc::after { content: " \25B2"; font-size: 0.7em; }
+  th.sorted-desc::after { content: " \25BC"; font-size: 0.7em; }
+
+  .live-excel-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.55);
+    z-index: 2000;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .live-excel-overlay.open { display: flex; }
+
+  .live-excel-modal {
+    background: var(--color-surface, #fff);
+    border-radius: 12px;
+    width: min(1100px, 100%);
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  }
+
+  .live-excel-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .live-excel-modal-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    color: var(--color-text);
+  }
+  .live-excel-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #15803d;
+    background: rgba(34, 197, 94, 0.12);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    padding: 2px 9px;
+    border-radius: var(--radius-pill);
+  }
+  .live-excel-badge::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #22c55e;
+  }
+  .live-excel-modal-actions { display: flex; align-items: center; gap: 8px; }
+  .live-excel-close {
+    background: none;
+    border: none;
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+    color: var(--color-text-muted);
+    padding: 2px 6px;
+  }
+  .live-excel-close:hover { color: var(--color-text); }
+
+  .live-excel-grid-wrap {
+    overflow: auto;
+    flex: 1 1 auto;
+    background: #f6f7f9;
+  }
+  .live-excel-loading {
+    padding: 40px;
+    text-align: center;
+    color: var(--color-text-muted);
+  }
+
+  table.live-excel-grid {
+    border-collapse: collapse;
+    font-size: 0.8rem;
+    background: #fff;
+  }
+  table.live-excel-grid th,
+  table.live-excel-grid td {
+    border: 1px solid #d7dae0;
+    padding: 5px 10px;
+    white-space: nowrap;
+  }
+  table.live-excel-grid thead tr.colref th {
+    background: #eef0f3;
+    color: #5b6472;
+    font-weight: 600;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 2;
+  }
+  table.live-excel-grid thead tr.headerrow th {
+    background: #f8f9fb;
+    color: #1f2937;
+    font-weight: 700;
+    text-align: left;
+    position: sticky;
+    top: 28px;
+    z-index: 2;
+  }
+  table.live-excel-grid tbody th.rownum {
+    background: #eef0f3;
+    color: #5b6472;
+    font-weight: 600;
+    text-align: center;
+    position: sticky;
+    left: 0;
+  }
+  table.live-excel-grid tbody tr:nth-child(even) td { background: #fafbfc; }
+
+  .live-excel-modal-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 18px;
+    border-top: 1px solid var(--color-border);
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+  }
+</style>
+
+<div class="page-header">
+  <div class="page-header-text">
+    <h2>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <line x1="19" y1="8" x2="19" y2="14"/>
+        <line x1="22" y1="11" x2="16" y2="11"/>
+      </svg>
+      Registered Users
+    </h2>
+    <p class="page-subtitle">One record per new registration (Student, Instructor or Admin) — logins are not tracked here</p>
+  </div>
+
+  <div class="page-header-actions">
+    <form action="{% url 'admin_backfill_user_activity_log' %}" method="post" class="d-inline">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-outline-secondary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <polyline points="1 4 1 10 7 10"/>
+          <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/>
+        </svg>
+        Import Existing Users
+      </button>
+    </form>
+    <button type="button" class="btn btn-outline-secondary" id="viewLiveExcelBtn">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/>
+        <circle cx="12" cy="12" r="3"/>
+      </svg>
+      View Live Excel
+    </button>
+    <a href="{% url 'admin_download_user_activity_log' %}" class="btn btn-primary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Download Excel
+    </a>
+  </div>
+</div>
+
+<div class="live-excel-overlay" id="liveExcelOverlay">
+  <div class="live-excel-modal">
+    <div class="live-excel-modal-header">
+      <div class="live-excel-modal-title">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+        <span>user_activity.xlsx</span>
+        <span class="live-excel-badge" id="liveExcelStatus">Live</span>
+      </div>
+      <div class="live-excel-modal-actions">
+        <button type="button" class="btn btn-sm btn-outline-secondary" id="liveExcelRefreshBtn">Refresh</button>
+        <button type="button" class="live-excel-close" id="liveExcelCloseBtn" aria-label="Close">&times;</button>
+      </div>
+    </div>
+    <div class="live-excel-grid-wrap" id="liveExcelGridWrap">
+      <div class="live-excel-loading" id="liveExcelLoading">Loading live sheet…</div>
+    </div>
+    <div class="live-excel-modal-footer">
+      <span id="liveExcelMeta"></span>
+      <span class="text-muted" style="font-size:0.78rem;">Read-only preview — refreshes from the file on disk, no download required.</span>
+    </div>
+  </div>
+</div>
+
+{% if pending_count %}
+<div class="alert alert-warning d-flex align-items-center justify-content-between flex-wrap gap-2" style="margin-bottom:16px;">
+  <span>
+    <strong>{{ pending_count }}</strong> entr{{ pending_count|pluralize:"y,ies" }} couldn't be saved last time
+    (the Excel file was probably open elsewhere) and {{ pending_count|pluralize:"is,are" }} waiting to sync.
+    Close the file if it's open, then retry.
+  </span>
+  <form action="{% url 'admin_sync_user_activity_log' %}" method="post" class="d-inline">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-sm btn-warning">Retry Sync</button>
+  </form>
+</div>
+{% endif %}
+
+<div class="section-card">
+  <div class="reg-toolbar">
+    <input type="search" id="regSearch" placeholder="Search name, email, IP...">
+    <select id="roleFilter">
+      <option value="">All roles</option>
+      <option value="Student">Student</option>
+      <option value="Instructor">Instructor</option>
+      <option value="Admin">Admin</option>
+    </select>
+    <span class="reg-count" id="regCount"></span>
+  </div>
+
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table mb-0" id="regTable">
+        <thead>
+          <tr>
+            <th data-sort-key="datetime">Registered On</th>
+            <th data-sort-key="name">Full Name</th>
+            <th data-sort-key="email">Email</th>
+            <th data-sort-key="role">Role</th>
+            <th data-sort-key="education">Education</th>
+            <th data-sort-key="ip">IP Address</th>
+            <th data-sort-key="browser">Browser</th>
+            <th data-sort-key="os">OS</th>
+            <th data-sort-key="device">Device</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+          <tr
+            data-row
+            data-datetime="{{ row.0 }} {{ row.1 }}"
+            data-name="{{ row.2|lower }}"
+            data-email="{{ row.3|lower }}"
+            data-role="{{ row.4 }}"
+            data-education="{{ row.5|default:'' }}"
+            data-ip="{{ row.7|default:'' }}"
+            data-browser="{{ row.8|default:'' }}"
+            data-os="{{ row.9|default:'' }}"
+            data-device="{{ row.10|default:'' }}"
+            data-search="{{ row.2|lower }} {{ row.3|lower }} {{ row.7|lower }}"
+          >
+            <td class="text-muted" style="font-size:0.85rem;">{{ row.0 }} {{ row.1 }}</td>
+            <td class="fw-semibold">{{ row.2 }}</td>
+            <td>{{ row.3 }}</td>
+            <td>
+              <span class="metric-badge metric-role-{{ row.4|lower }}">{{ row.4 }}</span>
+            </td>
+            <td>{{ row.5|default:"—" }}</td>
+            <td>{{ row.7 }}</td>
+            <td>{{ row.8 }}</td>
+            <td>{{ row.9 }}</td>
+            <td>{{ row.10 }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="9">
+              <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                </svg>
+                <p>{% if log_exists %}No registrations recorded yet{% else %}No users have registered yet{% endif %}</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const table = document.getElementById('regTable');
+  const tbody = table.querySelector('tbody');
+  const rows = Array.from(tbody.querySelectorAll('tr[data-row]'));
+  const searchInput = document.getElementById('regSearch');
+  const roleFilter = document.getElementById('roleFilter');
+  const countEl = document.getElementById('regCount');
+
+  function updateCount() {
+    const visible = rows.filter(r => r.style.display !== 'none').length;
+    countEl.textContent = rows.length ? `${visible} of ${rows.length} shown` : '';
+  }
+
+  function applyFilters() {
+    const term = (searchInput.value || '').trim().toLowerCase();
+    const role = roleFilter.value;
+
+    rows.forEach(row => {
+      const matchesText = !term || row.dataset.search.includes(term);
+      const matchesRole = !role || row.dataset.role === role;
+      row.style.display = (matchesText && matchesRole) ? '' : 'none';
+    });
+    updateCount();
+  }
+
+  searchInput.addEventListener('input', applyFilters);
+  roleFilter.addEventListener('change', applyFilters);
+  updateCount();
+
+  let sortKey = null;
+  let sortDir = 1;
+
+  table.querySelectorAll('th[data-sort-key]').forEach(th => {
+    th.addEventListener('click', () => {
+      const key = th.dataset.sortKey;
+      sortDir = (sortKey === key) ? -sortDir : 1;
+      sortKey = key;
+
+      const sorted = rows.slice().sort((a, b) => {
+        const av = a.dataset[key] || '';
+        const bv = b.dataset[key] || '';
+        return av.localeCompare(bv, undefined, { numeric: true }) * sortDir;
+      });
+      sorted.forEach(r => tbody.appendChild(r));
+
+      table.querySelectorAll('th[data-sort-key]').forEach(h => h.classList.remove('sorted-asc', 'sorted-desc'));
+      th.classList.add(sortDir === 1 ? 'sorted-asc' : 'sorted-desc');
+    });
+  });
+})();
+
+(function () {
+  const overlay = document.getElementById('liveExcelOverlay');
+  const openBtn = document.getElementById('viewLiveExcelBtn');
+  const closeBtn = document.getElementById('liveExcelCloseBtn');
+  const refreshBtn = document.getElementById('liveExcelRefreshBtn');
+  const gridWrap = document.getElementById('liveExcelGridWrap');
+  const statusEl = document.getElementById('liveExcelStatus');
+  const metaEl = document.getElementById('liveExcelMeta');
+
+  function colLetter(index) {
+    let n = index + 1, s = '';
+    while (n > 0) {
+      const rem = (n - 1) % 26;
+      s = String.fromCharCode(65 + rem) + s;
+      n = Math.floor((n - 1) / 26);
+    }
+    return s;
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, c => ({
+      '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+    }[c]));
+  }
+
+  function renderGrid(data) {
+    const headers = data.headers || [];
+    const rows = data.rows || [];
+
+    if (!headers.length) {
+      gridWrap.innerHTML = '<div class="live-excel-loading">No data in the sheet yet.</div>';
+      metaEl.textContent = '';
+      return;
+    }
+
+    let html = '<table class="live-excel-grid"><thead><tr class="colref"><th></th>';
+    headers.forEach((_, i) => { html += `<th>${colLetter(i)}</th>`; });
+    html += '</tr><tr class="headerrow"><th>#</th>';
+    headers.forEach(h => { html += `<th>${escapeHtml(h)}</th>`; });
+    html += '</tr></thead><tbody>';
+
+    rows.forEach((row, rIdx) => {
+      html += `<tr><th class="rownum">${rIdx + 1}</th>`;
+      headers.forEach((_, cIdx) => {
+        html += `<td>${escapeHtml(row[cIdx])}</td>`;
+      });
+      html += '</tr>';
+    });
+    html += '</tbody></table>';
+
+    gridWrap.innerHTML = html;
+    metaEl.textContent = `${rows.length} row${rows.length === 1 ? '' : 's'} · ${headers.length} column${headers.length === 1 ? '' : 's'}`;
+  }
+
+  function loadLiveData() {
+    gridWrap.innerHTML = '<div class="live-excel-loading">Loading live sheet…</div>';
+    statusEl.textContent = 'Loading';
+    fetch("{% url 'admin_live_user_activity_log' %}", { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(res => res.json())
+      .then(data => {
+        renderGrid(data);
+        statusEl.textContent = 'Live';
+      })
+      .catch(() => {
+        gridWrap.innerHTML = '<div class="live-excel-loading">Couldn\'t load the sheet. Try refreshing.</div>';
+        statusEl.textContent = 'Error';
+      });
+  }
+
+  function openModal() {
+    overlay.classList.add('open');
+    loadLiveData();
+  }
+
+  function closeModal() {
+    overlay.classList.remove('open');
+  }
+
+  openBtn.addEventListener('click', openModal);
+  closeBtn.addEventListener('click', closeModal);
+  refreshBtn.addEventListener('click', loadLiveData);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.classList.contains('open')) closeModal(); });
+})();
+</script>
+
+{% endblock %}

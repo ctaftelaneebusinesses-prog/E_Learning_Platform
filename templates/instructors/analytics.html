@@ -1,0 +1,158 @@
+{% extends 'instructors/instructor_base.html' %}
+{% block title %}Instructor Analytics{% endblock %}
+
+{% block instructor_content %}
+
+<style>
+  .section-card-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--color-border);
+    background: var(--color-surface);
+  }
+
+  .section-card-header h5 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--color-secondary);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-card-header h5 svg {
+    width: 17px;
+    height: 17px;
+    color: var(--color-primary);
+  }
+
+  .chart-body {
+    padding: 24px;
+  }
+</style>
+
+<div class="page-header">
+  <div class="page-header-text">
+    <h3>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="20" x2="18" y2="10"/>
+        <line x1="12" y1="20" x2="12" y2="4"/>
+        <line x1="6" y1="20" x2="6" y2="14"/>
+        <line x1="2" y1="20" x2="22" y2="20"/>
+      </svg>
+      Instructor Analytics
+    </h3>
+    <p class="page-subtitle">Track student engagement, completion trends, and course performance</p>
+  </div>
+</div>
+
+<div class="section-card">
+  <div class="section-card-header">
+    <h5>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+      </svg>
+      Average Completion Percentage
+    </h5>
+  </div>
+  <div class="chart-body">
+    <canvas id="completionChart" height="110"></canvas>
+  </div>
+</div>
+
+<div class="section-card">
+  <div class="section-card-header">
+    <h5>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/>
+        <rect x="9" y="3" width="6" height="4" rx="1"/>
+        <line x1="9" y1="12" x2="15" y2="12"/>
+        <line x1="9" y1="16" x2="13" y2="16"/>
+      </svg>
+      Course-wise Performance
+    </h5>
+  </div>
+
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>Course</th>
+            <th>Students</th>
+            <th>Avg Completion</th>
+            <th>Avg XP</th>
+            <th>Low Progress</th>
+            <th>Quizzes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in analytics %}
+          <tr>
+            <td class="fw-semibold" style="color:var(--color-secondary);">{{ row.course.title }}</td>
+            <td>{{ row.students }}</td>
+            <td><span class="pill-metric pill-metric-primary">{{ row.avg_completion }}%</span></td>
+            <td>{{ row.avg_xp }}</td>
+            <td>
+              {% if row.low_progress > 0 %}
+                <span class="pill-metric pill-metric-danger">{{ row.low_progress }}</span>
+              {% else %}
+                <span class="pill-metric pill-metric-success">0</span>
+              {% endif %}
+            </td>
+            <td>{{ row.quiz_count }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6">
+              <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M9 9h6M9 12h6M9 15h4"/></svg>
+                <p>No analytics data available</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="mt-4">
+  <a href="{% url 'instructor_dashboard' %}" class="btn btn-secondary">← Back to Dashboard</a>
+</div>
+
+{{ course_labels|json_script:"course-labels" }}
+{{ completion_values|json_script:"completion-values" }}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const labels = JSON.parse(document.getElementById('course-labels').textContent);
+    const values = JSON.parse(document.getElementById('completion-values').textContent);
+    const ctx = document.getElementById('completionChart');
+    new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Average Completion %',
+          data: values,
+          backgroundColor: '#4f46e5',
+          borderRadius: 6,
+          borderSkipped: false,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { beginAtZero: true, max: 100, grid: { color: '#f1f5f9' } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+  });
+</script>
+
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends 'adminpanel/admin_base.html' %}
+{% load static %}
+{% block title %}New Broadcast Message{% endblock %}
+
+{% block admin_content %}
+<link rel="stylesheet" href="{% static 'css/messaging.css' %}">
+
+<div class="page-header">
+  <div class="page-header-text">
+    <h3><i class="bi bi-envelope-plus-fill"></i> New Broadcast Message</h3>
+    <p class="page-subtitle">Compose an announcement for your learners and instructors</p>
+  </div>
+  <div class="page-header-actions">
+    <a href="{% url 'admin_broadcast_list' %}" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left"></i> Back
+    </a>
+  </div>
+</div>
+
+<div class="section-card">
+  <div class="form-body">
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Recipient</label>
+          <select name="recipient_type" class="form-select" required>
+            {% for value, label in recipient_choices %}
+              <option value="{{ value }}">{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Priority</label>
+          <select name="priority" class="form-select">
+            {% for value, label in priority_choices %}
+              <option value="{{ value }}" {% if value == 'NORMAL' %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="col-12">
+          <label class="form-label">Subject</label>
+          <input type="text" name="subject" class="form-control" placeholder="Message subject" required maxlength="255">
+        </div>
+        <div class="col-12">
+          <label class="form-label">Message</label>
+          <textarea name="message" class="form-control" rows="6" placeholder="Write your announcement..." required></textarea>
+        </div>
+        <div class="col-12">
+          <label class="form-label">Attachment (optional)</label>
+          <input type="file" name="attachment" class="form-control">
+        </div>
+      </div>
+      <div class="mt-3">
+        <button type="submit" class="btn btn-primary">
+          <i class="bi bi-send-fill"></i> Send
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

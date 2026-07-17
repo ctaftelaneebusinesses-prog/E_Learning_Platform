@@ -1,0 +1,375 @@
+/* ==========================================================================
+   EDUCATION-LEVEL THEME ENGINE
+   Redefines the design tokens from style.css per body.theme-* class, driven
+   by Profile.education_type (see accounts/themes.py + context_processors.py).
+   Dark mode overrides live under [data-theme="dark"] (see theme-toggle.js).
+   ========================================================================== */
+
+body {
+  transition: background-color 350ms ease, color 350ms ease;
+}
+
+.theme-toggle-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: var(--color-text);
+  padding: 0 6px;
+  cursor: pointer;
+}
+
+.navbar, .dash-sidebar, .btn, .card, .dashboard-title, .welcome-banner {
+  transition: background-color 350ms ease, color 350ms ease, box-shadow 350ms ease, border-color 350ms ease;
+}
+
+/* -------------------------------------------------------------------------
+   SCHOOL (Classes 1-10) — bright, playful, rounded, gamified
+   ------------------------------------------------------------------------- */
+body.theme-school {
+  --color-primary: #0EA5E9;
+  --color-primary-hover: #0284C7;
+  --color-primary-soft: #E0F2FE;
+  --color-secondary: #EC4899;
+  --color-chrome: #A21CAF;
+
+  --color-bg: #FFFBEB;
+  --color-surface: #FFFFFF;
+  --color-border: #FDE68A;
+
+  --color-text: #1E293B;
+  --color-text-muted: #78716C;
+
+  --color-success: #22C55E;
+  --color-warning: #F59E0B;
+  --color-error: #EF4444;
+
+  --radius-card: 26px;
+  --radius-btn: 999px;
+  --radius-input: 16px;
+  --radius-modal: 26px;
+
+  --shadow-soft: 0 8px 24px rgba(251, 191, 36, 0.25);
+  --shadow-lift: 0 16px 36px rgba(236, 72, 153, 0.25);
+
+  --font-sans: 'Baloo 2', var(--font-sans);
+  --theme-gradient-hero: linear-gradient(135deg, #38BDF8 0%, #FB923C 50%, #EC4899 100%);
+}
+
+[data-theme="dark"] body.theme-school {
+  --color-bg: #1F1B2E;
+  --color-surface: #2B2440;
+  --color-border: #45375C;
+  --color-text: #FDF4FF;
+  --color-text-muted: #C4B5D6;
+  --color-primary-soft: #33294D;
+}
+
+/* -------------------------------------------------------------------------
+   INTERMEDIATE (11-12) — modern student, blue/purple/white
+   ------------------------------------------------------------------------- */
+body.theme-intermediate {
+  --color-primary: #4F46E5;
+  --color-primary-hover: #4338CA;
+  --color-primary-soft: #EEF2FF;
+  --color-secondary: #7C3AED;
+  --color-chrome: #312E81;
+
+  --color-bg: #F8FAFF;
+  --color-surface: #FFFFFF;
+  --color-border: #E0E7FF;
+
+  --color-text: #1E1B4B;
+  --color-text-muted: #6366A6;
+
+  --radius-card: 18px;
+  --radius-btn: 12px;
+  --radius-input: 10px;
+  --radius-modal: 20px;
+
+  --shadow-soft: 0 4px 20px rgba(79, 70, 229, 0.12);
+  --shadow-lift: 0 12px 32px rgba(124, 58, 237, 0.18);
+
+  --theme-gradient-hero: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+}
+
+[data-theme="dark"] body.theme-intermediate {
+  --color-bg: #14122B;
+  --color-surface: #1E1B45;
+  --color-border: #34306B;
+  --color-text: #EEF0FF;
+  --color-text-muted: #A5AAE0;
+  --color-primary-soft: #241F52;
+}
+
+/* -------------------------------------------------------------------------
+   COLLEGE — tech-inspired, indigo/blue/cyan, GitHub/Coursera vibe
+   ------------------------------------------------------------------------- */
+body.theme-college {
+  --color-primary: #4338CA;
+  --color-primary-hover: #3730A3;
+  --color-primary-soft: #EEF2FF;
+  --color-secondary: #0891B2;
+  --color-chrome: #0F172A;
+
+  --color-bg: #F5F7FA;
+  --color-surface: #FFFFFF;
+  --color-border: #DCE3ED;
+
+  --color-text: #0F172A;
+  --color-text-muted: #56657A;
+
+  --radius-card: 14px;
+  --radius-btn: 8px;
+  --radius-input: 8px;
+  --radius-modal: 16px;
+
+  --shadow-soft: 0 4px 20px rgba(15, 23, 42, 0.08);
+  --shadow-lift: 0 12px 32px rgba(8, 145, 178, 0.16);
+
+  --theme-gradient-hero: linear-gradient(135deg, #4338CA 0%, #0891B2 100%);
+}
+
+[data-theme="dark"] body.theme-college {
+  --color-bg: #0B1220;
+  --color-surface: #131C2E;
+  --color-border: #253048;
+  --color-text: #E6EBF5;
+  --color-text-muted: #8C9BB5;
+  --color-primary-soft: #1B2540;
+}
+
+/* -------------------------------------------------------------------------
+   UNIVERSITY — premium, academic, navy/dark-purple/gold
+   ------------------------------------------------------------------------- */
+body.theme-university {
+  --color-primary: #1E1B4B;
+  --color-primary-hover: #14123A;
+  --color-primary-soft: #FDF6E3;
+  --color-secondary: #B08D57;
+  --color-chrome: #0B0A23;
+
+  --color-bg: #FAF8F3;
+  --color-surface: #FFFFFF;
+  --color-border: #E7DFC9;
+
+  --color-text: #1A1730;
+  --color-text-muted: #6B6579;
+
+  --radius-card: 10px;
+  --radius-btn: 6px;
+  --radius-input: 6px;
+  --radius-modal: 12px;
+
+  --shadow-soft: 0 6px 24px rgba(26, 23, 48, 0.14);
+  --shadow-lift: 0 16px 40px rgba(176, 141, 87, 0.22);
+
+  --font-sans: 'Playfair Display', var(--font-sans);
+  --theme-gradient-hero: linear-gradient(135deg, #1E1B4B 0%, #3B2F5E 60%, #B08D57 100%);
+}
+
+[data-theme="dark"] body.theme-university {
+  --color-bg: #0A0918;
+  --color-surface: #15132A;
+  --color-border: #2C2846;
+  --color-text: #F3EFE3;
+  --color-text-muted: #A79EC2;
+  --color-primary-soft: #221E3D;
+}
+
+/* -------------------------------------------------------------------------
+   OTHER — clean, minimal, professional (also the site default)
+   ------------------------------------------------------------------------- */
+body.theme-other {
+  --color-primary: #2563EB;
+  --color-primary-hover: #1D4ED8;
+  --color-primary-soft: #EFF6FF;
+  --color-secondary: #1E293B;
+  --color-chrome: #0F172A;
+
+  --color-bg: #F8FAFC;
+  --color-surface: #FFFFFF;
+  --color-border: #E2E8F0;
+
+  --color-text: #0F172A;
+  --color-text-muted: #64748B;
+
+  --radius-card: 16px;
+  --radius-btn: 10px;
+  --radius-input: 10px;
+  --radius-modal: 18px;
+
+  --shadow-soft: 0 4px 20px rgba(15, 23, 42, 0.08);
+  --shadow-lift: 0 12px 32px rgba(15, 23, 42, 0.12);
+
+  --theme-gradient-hero: linear-gradient(135deg, #2563EB 0%, #1E293B 100%);
+}
+
+[data-theme="dark"] body.theme-other {
+  --color-bg: #0F172A;
+  --color-surface: #1A2436;
+  --color-border: #2C3B52;
+  --color-text: #EEF2F8;
+  --color-text-muted: #94A3B8;
+  --color-primary-soft: #1E2A44;
+}
+
+/* -------------------------------------------------------------------------
+   Shared dark-mode base (applies regardless of theme, for anything not
+   covered by the per-theme overrides above).
+   ------------------------------------------------------------------------- */
+[data-theme="dark"] body {
+  color-scheme: dark;
+}
+
+/* -------------------------------------------------------------------------
+   Themed illustration slots — flat placeholder art, ready to be swapped
+   for real illustrations at the same static paths (see themes.py).
+   ------------------------------------------------------------------------- */
+.theme-banner-illustration,
+.theme-badge-illustration,
+.theme-empty-illustration {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ==========================================================================
+   PAGE-WIDE REDESIGN PASS — Courses, Lessons, Quizzes, Learning Path, etc.
+   These pages define their own local :root aliases (e.g. --navy, --gold)
+   that resolve to the tokens above, so this section only needs to add each
+   theme's distinct *treatment* (glass, academic, minimal, bold) on top of
+   the shared class names (.course-card, .lesson-card, .quiz-card,
+   .tech-card, .page-header, .status-badge, .btn-*) — no template forking.
+   ========================================================================== */
+
+/* Any page's .page-header/.course-hero gets forced to a colored/dark
+   background below for College/University/Other/Intermediate — but not
+   every page's .page-title assumes a dark header (only courses/quizzes/
+   ai-learning-path do; achievements/leaderboard/skills/etc. normally sit on
+   a plain background with dark navy title text). Force light, readable
+   title text wherever we force a colored header, regardless of the page's
+   own assumption, so nothing ever renders dark-on-dark. */
+body.theme-college .page-header,
+body.theme-college .course-hero,
+body.theme-university .page-header,
+body.theme-university .course-hero,
+body.theme-other .page-header,
+body.theme-other .course-hero,
+body.theme-intermediate .page-header,
+body.theme-intermediate .course-hero {
+  color: #fff !important;
+}
+body.theme-college .page-header .page-title,
+body.theme-college .page-header .page-subtitle,
+body.theme-college .page-header .hero-title,
+body.theme-college .page-header .hero-label,
+body.theme-college .course-hero .hero-title,
+body.theme-college .course-hero .hero-label,
+body.theme-university .page-header .page-title,
+body.theme-university .page-header .page-subtitle,
+body.theme-university .page-header .hero-title,
+body.theme-university .page-header .hero-label,
+body.theme-university .course-hero .hero-title,
+body.theme-university .course-hero .hero-label,
+body.theme-other .page-header .page-title,
+body.theme-other .page-header .page-subtitle,
+body.theme-other .page-header .hero-title,
+body.theme-other .page-header .hero-label,
+body.theme-other .course-hero .hero-title,
+body.theme-other .course-hero .hero-label,
+body.theme-intermediate .page-header .page-title,
+body.theme-intermediate .page-header .page-subtitle,
+body.theme-intermediate .page-header .hero-title,
+body.theme-intermediate .page-header .hero-label,
+body.theme-intermediate .course-hero .hero-title,
+body.theme-intermediate .course-hero .hero-label {
+  color: #fff !important;
+}
+body.theme-college .page-header .page-title span,
+body.theme-university .page-header .page-title span,
+body.theme-other .page-header .page-title span,
+body.theme-intermediate .page-header .page-title span {
+  color: #FDE68A !important;
+}
+
+/* --- COLLEGE — tech-inspired glassmorphism, dark gradient hero --- */
+body.theme-college .page-header,
+body.theme-college .course-hero {
+  background: linear-gradient(120deg, #0F172A 0%, #1E1B4B 60%, #0891B2 130%) !important;
+}
+body.theme-college .course-card,
+body.theme-college .lesson-card,
+body.theme-college .quiz-card,
+body.theme-college .tech-card,
+body.theme-college .question-card,
+body.theme-college .ai-panel {
+  background: rgba(255, 255, 255, 0.55) !important;
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  border: 1px solid rgba(67, 56, 202, 0.18) !important;
+}
+[data-theme="dark"] body.theme-college .course-card,
+[data-theme="dark"] body.theme-college .lesson-card,
+[data-theme="dark"] body.theme-college .quiz-card,
+[data-theme="dark"] body.theme-college .tech-card,
+[data-theme="dark"] body.theme-college .question-card,
+[data-theme="dark"] body.theme-college .ai-panel {
+  background: rgba(19, 28, 46, 0.55) !important;
+  border: 1px solid rgba(8, 145, 178, 0.25) !important;
+}
+body.theme-college .status-badge,
+body.theme-college .cert-eyebrow {
+  letter-spacing: 0.08em;
+}
+
+/* --- UNIVERSITY — premium academic, serif accents, hairline gold rules --- */
+body.theme-university .page-title,
+body.theme-university .hero-title,
+body.theme-university .results-title,
+body.theme-university .quiz-title,
+body.theme-university .course-title {
+  font-family: 'Playfair Display', serif !important;
+}
+body.theme-university .course-card,
+body.theme-university .lesson-card,
+body.theme-university .quiz-card,
+body.theme-university .tech-card,
+body.theme-university .question-card {
+  border-width: 1px !important;
+  border-top: 3px solid var(--color-secondary) !important;
+  box-shadow: none !important;
+}
+body.theme-university .page-header,
+body.theme-university .course-hero {
+  background: linear-gradient(120deg, #1E1B4B 0%, #3B2F5E 100%) !important;
+  border: 1px solid var(--color-secondary);
+}
+
+/* --- OTHER — clean, minimal, flat corporate (closest to the site default) --- */
+body.theme-other .course-card,
+body.theme-other .lesson-card,
+body.theme-other .quiz-card,
+body.theme-other .tech-card,
+body.theme-other .question-card {
+  box-shadow: none !important;
+  border-radius: 8px !important;
+}
+body.theme-other .page-header,
+body.theme-other .course-hero {
+  background: var(--color-secondary) !important;
+}
+
+/* --- INTERMEDIATE — youthful academic, bolder gradient accents --- */
+body.theme-intermediate .page-header,
+body.theme-intermediate .course-hero {
+  background: linear-gradient(120deg, #4F46E5 0%, #7C3AED 100%) !important;
+}
+body.theme-intermediate .course-card:hover,
+body.theme-intermediate .lesson-card:hover,
+body.theme-intermediate .quiz-card:hover,
+body.theme-intermediate .tech-card:hover {
+  border-color: var(--color-secondary) !important;
+}
+body.theme-intermediate .progress-fill,
+body.theme-intermediate .kw-xp-bar-fill {
+  background: linear-gradient(90deg, #4F46E5, #7C3AED) !important;
+}

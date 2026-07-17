@@ -1,0 +1,98 @@
+{% extends 'instructors/instructor_base.html' %}
+{% block title %}Job Roles{% endblock %}
+
+{% block instructor_content %}
+
+<style>
+  .skill-pill {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 100px;
+    background: #e0e7ff;
+    color: #3730a3;
+    border: 1px solid #c7d2fe;
+    margin: 2px 2px 2px 0;
+  }
+</style>
+
+<div class="container-fluid">
+
+  <div class="page-header">
+    <div class="page-header-text">
+      <h2>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="2" y="7" width="20" height="14" rx="2"/>
+          <path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/>
+        </svg>
+        Job Roles
+      </h2>
+      <p class="page-subtitle">Manage career roles and required skills</p>
+    </div>
+
+    <div class="page-header-actions">
+      <a href="{% url 'instructor_job_role_create' %}" class="btn btn-primary">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Add Job Role
+      </a>
+    </div>
+  </div>
+
+  <div class="section-card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>Role</th>
+            <th>Min Readiness</th>
+            <th>Skills</th>
+            <th>Status</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for role in roles %}
+          <tr>
+            <td class="fw-semibold">{{ role.title }}</td>
+            <td><span class="pill-metric pill-metric-success">{{ role.min_readiness }}%</span></td>
+            <td>
+              {% for skill in role.required_skills.all %}
+                <span class="skill-pill">{{ skill.name }}</span>
+              {% empty %}
+                <span class="text-muted" style="font-size:0.82rem;">No skills</span>
+              {% endfor %}
+            </td>
+            <td>
+              {% if role.is_active %}
+                <span class="badge bg-success">Active</span>
+              {% else %}
+                <span class="badge bg-danger">Inactive</span>
+              {% endif %}
+            </td>
+            <td class="text-end">
+              <a href="{% url 'instructor_job_role_edit' role.id %}" class="btn btn-sm btn-outline-primary">Edit</a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="5">
+              <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+                <p>No job roles created yet</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

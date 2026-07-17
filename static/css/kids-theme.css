@@ -1,0 +1,903 @@
+/* ==========================================================================
+   KIDS WORLD — School theme (Classes 1-10) animated scene, gamification
+   widgets, and celebration effects. Loaded only when body.theme-school is
+   active (see templates/base.html) so no other theme pays this cost.
+   All illustrations here are original CSS/SVG shapes — no copyrighted
+   characters. Mascot artwork is a placeholder slot (accounts/themes.py
+   mascot_illustration) ready to swap for real art later.
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .kids-world-bg *,
+  body.theme-school .btn,
+  body.theme-school .stat-card,
+  body.theme-school .course-card,
+  body.theme-school .job-card,
+  .kw-mascot-img {
+    animation: none !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   BACKGROUND SCENE
+   -------------------------------------------------------------------------- */
+
+.kids-world-bg {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+  background: linear-gradient(180deg, #7DD3FC 0%, #BAE6FD 35%, #FEF9C3 70%, #FDE68A 100%);
+}
+
+[data-theme="dark"] .kids-world-bg {
+  background: linear-gradient(180deg, #0B1230 0%, #1E1B4B 55%, #2B2450 100%);
+}
+
+.kw-layer { position: absolute; inset: 0; }
+
+/* Sun / Moon */
+.kw-sun {
+  position: absolute;
+  top: 6%;
+  right: 10%;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #FEF08A, #FBBF24 70%);
+  box-shadow: 0 0 50px 14px rgba(251, 191, 36, 0.55);
+  animation: kw-pulse 4s ease-in-out infinite;
+}
+
+.kw-moon {
+  position: absolute;
+  top: 6%;
+  right: 12%;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #F8FAFC, #E2E8F0 75%);
+  box-shadow: 0 0 30px 8px rgba(226, 232, 240, 0.35);
+  display: none;
+}
+
+[data-theme="dark"] .kw-sun { display: none; }
+[data-theme="dark"] .kw-moon { display: block; }
+
+.kw-star { position: absolute; color: #FDE68A; font-size: 14px; opacity: 0; display: none; }
+[data-theme="dark"] .kw-star { display: block; animation: kw-twinkle 2.6s ease-in-out infinite; }
+.kw-star:nth-child(1) { top: 10%; left: 15%; animation-delay: 0s; }
+.kw-star:nth-child(2) { top: 18%; left: 40%; animation-delay: 0.6s; }
+.kw-star:nth-child(3) { top: 8%;  left: 65%; animation-delay: 1.2s; }
+.kw-star:nth-child(4) { top: 25%; left: 80%; animation-delay: 1.8s; }
+.kw-star:nth-child(5) { top: 14%; left: 28%; animation-delay: 2.2s; }
+
+/* Rainbow */
+.kw-rainbow {
+  position: absolute;
+  top: -140px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 480px;
+  height: 240px;
+  border-radius: 50%;
+  background:
+    conic-gradient(from 180deg,
+      transparent 0deg, transparent 180deg,
+      #F87171 181deg, #FB923C 190deg, #FDE047 199deg,
+      #4ADE80 208deg, #38BDF8 217deg, #A78BFA 226deg, transparent 227deg);
+  opacity: 0.85;
+  animation: kw-shimmer 6s ease-in-out infinite;
+}
+
+/* Clouds */
+.kw-cloud {
+  position: absolute;
+  background: #FFFFFF;
+  border-radius: 999px;
+  opacity: 0.92;
+  filter: drop-shadow(0 6px 10px rgba(15, 23, 42, 0.08));
+}
+.kw-cloud::before, .kw-cloud::after {
+  content: '';
+  position: absolute;
+  background: #FFFFFF;
+  border-radius: 999px;
+}
+.kw-cloud-1 { top: 12%; left: 8%;  width: 90px; height: 32px; animation: kw-drift 34s linear infinite; }
+.kw-cloud-1::before { width: 46px; height: 46px; top: -20px; left: 10px; }
+.kw-cloud-1::after  { width: 34px; height: 34px; top: -12px; left: 50px; }
+
+.kw-cloud-2 { top: 22%; left: 55%; width: 70px; height: 26px; animation: kw-drift 46s linear infinite; animation-delay: -10s; }
+.kw-cloud-2::before { width: 36px; height: 36px; top: -16px; left: 8px; }
+.kw-cloud-2::after  { width: 26px; height: 26px; top: -10px; left: 40px; }
+
+.kw-cloud-3 { top: 8%; left: 72%; width: 60px; height: 22px; animation: kw-drift 40s linear infinite; animation-delay: -22s; }
+.kw-cloud-3::before { width: 30px; height: 30px; top: -14px; left: 6px; }
+.kw-cloud-3::after  { width: 22px; height: 22px; top: -8px; left: 32px; }
+
+/* Icon sizing helper for the inline SVGs (birds, butterflies, castle) */
+.kw-icon { display: block; width: 100%; height: 100%; }
+
+/* Birds — simple original double-arc silhouette, not an emoji glyph */
+.kw-bird { position: absolute; width: 26px; height: 13px; color: #334155; animation: kw-fly-across 22s linear infinite; }
+.kw-bird-1 { top: 16%; animation-delay: 0s; }
+.kw-bird-2 { top: 26%; width: 18px; height: 9px; animation-delay: -11s; animation-duration: 28s; }
+
+/* Butterflies — original 4-wing SVG shape */
+.kw-butterfly { position: absolute; width: 26px; height: 26px; animation: kw-flutter 6s ease-in-out infinite; }
+.kw-butterfly-1 { bottom: 30%; left: 12%; animation-delay: 0s; color: #F472B6; }
+.kw-butterfly-2 { bottom: 34%; left: 78%; animation-delay: -3s; color: #38BDF8; }
+
+/* Balloons (Bootstrap Icons bi-balloon-fill) */
+.kw-balloon { position: absolute; bottom: -60px; font-size: 30px; animation: kw-balloon-rise 16s ease-in infinite; }
+.kw-balloon-1 { left: 18%; animation-delay: 0s; color: #F87171; }
+.kw-balloon-2 { left: 48%; animation-delay: -5s; font-size: 24px; color: #FDE047; }
+.kw-balloon-3 { left: 85%; animation-delay: -10s; font-size: 26px; color: #A78BFA; }
+
+/* Ground scene: mountains, hills, houses, castle, trees, flowers, river */
+.kw-ground { position: absolute; left: 0; right: 0; bottom: 0; height: 34%; }
+
+.kw-mountains {
+  position: absolute;
+  left: 0; right: 0; bottom: 12%;
+  height: 60%;
+  background:
+    linear-gradient(135deg, transparent 49%, #A5B4FC 50%) 0 0 / 22% 100%,
+    linear-gradient(225deg, transparent 49%, #A5B4FC 50%) 0 0 / 22% 100%;
+  background-repeat: repeat-x;
+  opacity: 0.55;
+}
+
+.kw-hills {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 45%;
+  background: linear-gradient(180deg, #86EFAC 0%, #4ADE80 100%);
+  border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+}
+
+.kw-river {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 8%;
+  background: linear-gradient(90deg, #38BDF8, #7DD3FC, #38BDF8);
+  background-size: 200% 100%;
+  animation: kw-shimmer-x 5s linear infinite;
+}
+
+.kw-house, .kw-castle, .kw-tree, .kw-flower {
+  position: absolute;
+  bottom: 8%;
+  font-size: 42px;
+  filter: drop-shadow(0 6px 6px rgba(15, 23, 42, 0.12));
+}
+.kw-house  { left: 6%;  font-size: 46px; color: #FB923C; }
+.kw-castle { right: 6%; width: 56px; height: 50px; color: #A78BFA; }
+.kw-tree-1 { left: 22%; font-size: 40px; color: #22C55E; }
+.kw-tree-2 { left: 62%; font-size: 36px; color: #16A34A; }
+.kw-tree-3 { right: 24%; font-size: 32px; color: #4ADE80; }
+.kw-flower-1 { left: 34%; bottom: 6%; font-size: 20px; color: #F472B6; }
+.kw-flower-2 { left: 50%; bottom: 5%; font-size: 18px; color: #FDE047; }
+.kw-flower-3 { right: 38%; bottom: 6%; font-size: 20px; color: #38BDF8; }
+
+/* ============================================================================
+   "OFF TO SCHOOL" STORY — one synchronized 30s master timeline (never stops,
+   loops seamlessly since every element's 0% state === its 100% state):
+
+   sunrise -> mother & child leave the house -> walk to the stop -> other
+   kids arrive -> everyone boards -> bus drives the route past the trees,
+   park and houses -> the school building comes into view -> bus arrives ->
+   kids get off -> everyone walks in -> scene resets to sunrise.
+   ============================================================================ */
+
+.kw-sunrise-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #FED7AA 0%, #FCA5A5 35%, #FDE68A 70%, transparent 100%);
+  animation: kw-sunrise 30s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.kw-story-house {
+  position: absolute;
+  left: 1%;
+  bottom: 8.5%;
+  width: 46px;
+  height: 40px;
+}
+
+.kw-mom-child {
+  position: absolute;
+  left: 5%;
+  bottom: 9%;
+  width: 46px;
+  height: auto;
+  animation: kw-mom-child-journey 30s ease-in-out infinite;
+}
+
+.kw-bus-stop-sign {
+  position: absolute;
+  left: 22%;
+  bottom: 9%;
+  width: 6px;
+  height: 40px;
+  background: #94A3B8;
+  border-radius: 2px;
+  z-index: 1;
+}
+.kw-bus-stop-sign::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: -9px;
+  width: 24px;
+  height: 16px;
+  background: #FDE047;
+  border-radius: 4px;
+  border: 2px solid #F59E0B;
+}
+
+.kw-road {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: 8%;
+  height: 10px;
+  background: repeating-linear-gradient(90deg, #FDE047 0 24px, transparent 24px 48px);
+  opacity: 0.55;
+}
+
+.kw-park-tree {
+  position: absolute;
+  left: 44%;
+  bottom: 8%;
+  font-size: 30px;
+  color: #16A34A;
+}
+.kw-park-bench {
+  position: absolute;
+  left: 47%;
+  bottom: 8.5%;
+  width: 26px;
+  height: 8px;
+  background: #B45309;
+  border-radius: 2px;
+}
+.kw-park-bench::before, .kw-park-bench::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  width: 3px;
+  height: 6px;
+  background: #78350F;
+}
+.kw-park-bench::before { left: 2px; }
+.kw-park-bench::after { right: 2px; }
+
+.kw-walking-kid {
+  position: absolute;
+  bottom: 9%;
+  width: 30px;
+  height: auto;
+  animation: kw-walk-to-bus 30s ease-in-out infinite;
+}
+.kw-walking-kid-1 { left: 10%; }
+.kw-walking-kid-2 { left: 14%; animation-delay: -0.6s; }
+
+.kw-school-bus {
+  position: absolute;
+  bottom: 8.5%;
+  left: 20%;
+  width: 130px;
+  height: auto;
+  filter: drop-shadow(0 6px 8px rgba(15, 23, 42, 0.18));
+  animation: kw-bus-route 30s ease-in-out infinite;
+  z-index: 2;
+}
+
+/* The school is a permanent landmark on the route — always visible, not
+   something that only flashes in during part of the loop. */
+.kw-school-building {
+  position: absolute;
+  right: 3%;
+  bottom: 8%;
+  width: 210px;
+  height: auto;
+  filter: drop-shadow(0 8px 10px rgba(15, 23, 42, 0.2));
+  opacity: 1;
+}
+
+.kw-exit-kid {
+  position: absolute;
+  bottom: 9%;
+  width: 30px;
+  height: auto;
+  animation: kw-exit-to-school 30s ease-in-out infinite;
+}
+.kw-exit-kid-1 { right: 12%; }
+.kw-exit-kid-2 { right: 8%; animation-delay: -0.5s; }
+
+@keyframes kw-sunrise {
+  0%   { opacity: 1; }
+  10%  { opacity: 0; }
+  92%  { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes kw-mom-child-journey {
+  0%   { transform: translateX(0); opacity: 0; }
+  3%   { opacity: 1; }
+  22%  { transform: translateX(17vw); opacity: 1; }
+  27%  { transform: translateX(17vw); opacity: 1; }
+  31%  { transform: translateX(17vw); opacity: 0; }
+  100% { transform: translateX(17vw); opacity: 0; }
+}
+
+@keyframes kw-walk-to-bus {
+  0%   { transform: translateX(0); opacity: 0; }
+  9%   { opacity: 1; }
+  25%  { transform: translateX(11vw); opacity: 1; }
+  30%  { transform: translateX(11vw); opacity: 0; }
+  100% { transform: translateX(11vw); opacity: 0; }
+}
+
+@keyframes kw-bus-route {
+  0%   { transform: translateX(0); opacity: 1; }
+  30%  { transform: translateX(0); opacity: 1; }
+  34%  { transform: translateX(0); opacity: 1; }
+  68%  { transform: translateX(52vw); opacity: 1; }
+  74%  { transform: translateX(58vw); opacity: 1; }
+  88%  { transform: translateX(58vw); opacity: 1; }
+  92%  { transform: translateX(58vw); opacity: 0; }
+  95%  { transform: translateX(0); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes kw-exit-to-school {
+  0%   { transform: translateX(0); opacity: 0; }
+  75%  { transform: translateX(0); opacity: 0; }
+  79%  { transform: translateX(0); opacity: 1; }
+  88%  { transform: translateX(4vw); opacity: 1; }
+  93%  { transform: translateX(6vw); opacity: 0; }
+  100% { transform: translateX(6vw); opacity: 0; }
+}
+
+/* --------------------------------------------------------------------------
+   KEYFRAMES
+   -------------------------------------------------------------------------- */
+@keyframes kw-drift { from { transform: translateX(-140px); } to { transform: translateX(calc(100vw + 140px)); } }
+@keyframes kw-fly-across {
+  0%   { transform: translate(-60px, 0) scaleX(1); }
+  49%  { transform: translate(calc(100vw + 60px), -18px) scaleX(1); }
+  50%  { transform: translate(calc(100vw + 60px), -18px) scaleX(-1); }
+  99%  { transform: translate(-60px, 0) scaleX(-1); }
+  100% { transform: translate(-60px, 0) scaleX(1); }
+}
+@keyframes kw-flutter {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(20px, -16px) rotate(8deg); }
+  50% { transform: translate(40px, 0) rotate(-6deg); }
+  75% { transform: translate(20px, 14px) rotate(6deg); }
+}
+@keyframes kw-balloon-rise {
+  0%   { transform: translateY(0) translateX(0); opacity: 0; }
+  8%   { opacity: 0.95; }
+  92%  { opacity: 0.95; }
+  100% { transform: translateY(-115vh) translateX(30px); opacity: 0; }
+}
+@keyframes kw-twinkle { 0%, 100% { opacity: 0.15; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.15); } }
+@keyframes kw-shimmer { 0%, 100% { opacity: 0.75; } 50% { opacity: 1; } }
+@keyframes kw-shimmer-x { from { background-position: 0 0; } to { background-position: -200% 0; } }
+@keyframes kw-pulse { 0%, 100% { box-shadow: 0 0 50px 14px rgba(251, 191, 36, 0.55); } 50% { box-shadow: 0 0 62px 20px rgba(251, 191, 36, 0.75); } }
+
+/* --------------------------------------------------------------------------
+   BUTTONS & CARDS — bouncy, ripple-ready, gently floating
+   -------------------------------------------------------------------------- */
+body.theme-school .btn,
+body.theme-school [class*="btn-"] {
+  border-radius: var(--radius-btn);
+  position: relative;
+  overflow: hidden;
+  font-weight: 700;
+  transition: transform 180ms cubic-bezier(.34,1.56,.64,1), box-shadow 180ms ease;
+}
+body.theme-school .btn:hover,
+body.theme-school [class*="btn-"]:hover { transform: translateY(-3px) scale(1.03); box-shadow: var(--shadow-lift); }
+body.theme-school .btn:active,
+body.theme-school [class*="btn-"]:active { transform: translateY(0) scale(0.97); }
+
+body.theme-school .kw-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+  transform: scale(0);
+  animation: kw-ripple 550ms ease-out;
+  pointer-events: none;
+}
+@keyframes kw-ripple { to { transform: scale(3); opacity: 0; } }
+
+body.theme-school .stat-card,
+body.theme-school .course-card,
+body.theme-school .job-card,
+body.theme-school .lesson-card,
+body.theme-school .quiz-card,
+body.theme-school .tech-card,
+body.theme-school .achievement-card,
+body.theme-school .streak-stat-card,
+body.theme-school .reward-card,
+body.theme-school .skill-card,
+body.theme-school .timeline-card,
+body.theme-school .leaderboard-card {
+  animation: kw-card-float 5s ease-in-out infinite;
+}
+body.theme-school .stat-card:nth-child(2n),
+body.theme-school .lesson-card:nth-child(2n),
+body.theme-school .quiz-card:nth-child(2n),
+body.theme-school .tech-card:nth-child(2n),
+body.theme-school .achievement-card:nth-child(2n),
+body.theme-school .reward-card:nth-child(2n),
+body.theme-school .skill-card:nth-child(2n) { animation-delay: -1.6s; }
+body.theme-school .stat-card:nth-child(3n),
+body.theme-school .lesson-card:nth-child(3n),
+body.theme-school .quiz-card:nth-child(3n),
+body.theme-school .achievement-card:nth-child(3n),
+body.theme-school .reward-card:nth-child(3n),
+body.theme-school .skill-card:nth-child(3n),
+body.theme-school .tech-card:nth-child(3n) { animation-delay: -3.2s; }
+@keyframes kw-card-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+
+/* Illustrated course/lesson thumbnails + progress get bigger, rounder, and
+   a bit more playful without changing the underlying DOM structure. */
+body.theme-school .course-image,
+body.theme-school .course-placeholder,
+body.theme-school .lesson-thumb,
+body.theme-school .lesson-thumb-placeholder,
+body.theme-school .lesson-image {
+  border-radius: var(--radius-card);
+}
+body.theme-school .course-placeholder,
+body.theme-school .lesson-thumb-placeholder {
+  background: var(--theme-gradient-hero, linear-gradient(135deg, #38BDF8, #EC4899));
+}
+body.theme-school .course-progress-badge,
+body.theme-school .status-badge {
+  border-radius: 999px;
+  font-weight: 800;
+}
+
+/* --------------------------------------------------------------------------
+   AI LEARNING PATH — Start -> Forest -> Castle -> Rainbow Bridge -> Space -> Treasure
+   -------------------------------------------------------------------------- */
+.kw-road {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 8px;
+}
+
+.kw-road-node {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  position: relative;
+  padding: 14px 0;
+}
+
+.kw-road-node:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 27px;
+  top: 56px;
+  bottom: -14px;
+  width: 3px;
+  border-left: 3px dashed var(--color-secondary);
+  opacity: 0.5;
+}
+
+.kw-road-icon {
+  width: 56px;
+  height: 56px;
+  min-width: 56px;
+  border-radius: 50%;
+  background: var(--color-surface);
+  border: 3px solid var(--color-secondary);
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  color: var(--color-primary);
+  z-index: 1;
+}
+
+.kw-road-icon .kw-icon { width: 28px; height: 28px; }
+
+.kw-road-rainbow {
+  width: 32px;
+  height: 16px;
+  border-radius: 32px 32px 0 0;
+  background: conic-gradient(from 180deg, #F87171, #FB923C, #FDE047, #4ADE80, #38BDF8, #A78BFA);
+}
+
+.kw-road-label {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-card);
+  padding: 10px 18px;
+  box-shadow: var(--shadow-soft);
+  flex: 1;
+}
+
+.kw-road-step-name {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--color-secondary);
+}
+
+.kw-road-tech {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+/* --------------------------------------------------------------------------
+   GAMIFICATION DASHBOARD WIDGETS
+   -------------------------------------------------------------------------- */
+.kw-mascot-corner {
+  position: fixed;
+  right: 18px;
+  bottom: 18px;
+  z-index: 1040;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.kw-mascot-img {
+  width: 72px;
+  height: auto;
+  animation: kw-wave 2.4s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+@keyframes kw-wave { 0%, 100% { transform: rotate(0deg); } 25% { transform: rotate(-6deg); } 75% { transform: rotate(6deg); } }
+
+.kw-mascot-bubble {
+  background: #FFFFFF;
+  border: 2px solid var(--color-primary-soft);
+  border-radius: 18px;
+  padding: 10px 14px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--color-text);
+  box-shadow: var(--shadow-soft);
+  max-width: 200px;
+  margin-bottom: 6px;
+}
+
+.kw-widget-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 18px; margin-bottom: 28px; }
+
+.kw-widget-card {
+  background: var(--color-surface);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-card);
+  padding: 20px;
+  box-shadow: var(--shadow-soft);
+  position: relative;
+  overflow: hidden;
+}
+
+.kw-widget-card .kw-widget-emoji { font-size: 1.8rem; margin-bottom: 6px; display: block; }
+.kw-widget-card h6 { font-weight: 800; margin: 0 0 4px; }
+.kw-widget-card p { margin: 0; font-size: 0.82rem; color: var(--color-text-muted); }
+
+.kw-xp-bar {
+  height: 14px;
+  border-radius: 999px;
+  background: var(--color-primary-soft);
+  overflow: hidden;
+  margin-top: 10px;
+}
+.kw-xp-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #FDE047, #FB923C, #EC4899);
+  background-size: 200% 100%;
+  animation: kw-shimmer-x 3s linear infinite;
+}
+
+.kw-level-badge, .kw-star-counter, .kw-coin-counter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 800;
+  font-size: 0.85rem;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: var(--color-primary-soft);
+  color: var(--color-text);
+}
+
+.kw-claim-btn {
+  margin-top: 12px;
+  width: 100%;
+  border: none;
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-weight: 800;
+  color: #fff;
+  background: linear-gradient(135deg, #FB923C, #EC4899);
+  cursor: pointer;
+}
+
+/* --------------------------------------------------------------------------
+   CELEBRATIONS — confetti, fireworks, treasure chest, coins, glow
+   Spawned/removed by static/js/kids-celebrations.js
+   -------------------------------------------------------------------------- */
+.kw-fx-layer { position: fixed; inset: 0; z-index: 2000; pointer-events: none; overflow: hidden; }
+
+.kw-confetti-piece {
+  position: absolute;
+  top: -20px;
+  width: 10px;
+  height: 14px;
+  opacity: 0.95;
+  animation: kw-confetti-fall linear forwards;
+}
+@keyframes kw-confetti-fall {
+  to { transform: translateY(110vh) rotate(540deg); opacity: 0; }
+}
+
+.kw-firework-particle {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  animation: kw-firework-burst 900ms ease-out forwards;
+}
+@keyframes kw-firework-burst {
+  to { transform: translate(var(--fx-x), var(--fx-y)) scale(0.2); opacity: 0; }
+}
+
+.kw-coin {
+  position: absolute;
+  font-size: 22px;
+  color: #FDE047;
+  animation: kw-coin-fly 900ms cubic-bezier(.34,1.56,.64,1) forwards;
+}
+@keyframes kw-coin-fly {
+  0%   { transform: translate(0, 0) scale(0.6) rotate(0deg); opacity: 1; }
+  60%  { transform: translate(var(--fx-x, 0), calc(var(--fx-y, -60px) - 20px)) scale(1.1) rotate(180deg); opacity: 1; }
+  100% { transform: translate(var(--fx-x, 0), var(--fx-y, -60px)) scale(0.9) rotate(320deg); opacity: 0; }
+}
+
+.kw-treasure-chest {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: 96px;
+  height: 84px;
+  transform: translate(-50%, -50%);
+  z-index: 2001;
+  animation: kw-chest-pop 900ms ease-out forwards;
+}
+.kw-treasure-chest svg { width: 100%; height: 100%; }
+@keyframes kw-chest-pop {
+  0%   { transform: translate(-50%, -50%) scale(0.4) rotate(-8deg); opacity: 0; }
+  50%  { transform: translate(-50%, -50%) scale(1.15) rotate(6deg); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); opacity: 1; }
+}
+
+.kw-glow {
+  animation: kw-glow-pulse 1.4s ease-in-out infinite;
+}
+@keyframes kw-glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 rgba(251, 191, 36, 0); }
+  50% { box-shadow: 0 0 22px 8px rgba(251, 191, 36, 0.55); }
+}
+
+/* --------------------------------------------------------------------------
+   SIDEBAR — same sky-blue -> orange -> pink gradient as the welcome banner
+   (--theme-gradient-hero), with a dark scrim underneath so text/icons stay
+   fully readable regardless of how bright the gradient is.
+   -------------------------------------------------------------------------- */
+body.theme-school .dash-sidebar {
+  background:
+    linear-gradient(180deg, rgba(15, 6, 30, 0.18) 0%, rgba(15, 6, 30, 0.05) 40%, rgba(15, 6, 30, 0.22) 100%),
+    var(--theme-gradient-hero, linear-gradient(160deg, #38BDF8 0%, #FB923C 50%, #EC4899 100%));
+  background-size: 100% 100%;
+}
+
+body.theme-school .dash-sidebar-header {
+  border-bottom-color: rgba(255, 255, 255, 0.18);
+}
+
+body.theme-school .dash-sidebar-profile-role {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+body.theme-school .dash-nav-section-label {
+  color: rgba(255, 255, 255, 0.65);
+}
+
+body.theme-school .dash-nav-link {
+  color: #fff;
+  font-weight: 700;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+body.theme-school .dash-nav-link i {
+  color: #fff;
+}
+
+body.theme-school .dash-nav-link:hover {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+
+/* "Selected sticker" look: a bright white pill with colorful text/icon,
+   instead of the default hardcoded blue box that clashed with the gradient. */
+body.theme-school .dash-nav-link.active {
+  background: #fff;
+  color: #EA580C;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  text-shadow: none;
+}
+
+body.theme-school .dash-nav-link.active i {
+  color: #EA580C;
+}
+
+body.theme-school .dash-nav-link.active::before {
+  background: #FDE047;
+}
+
+body.theme-school .dash-sidebar-footer {
+  border-top-color: rgba(255, 255, 255, 0.18);
+}
+
+/* Logout needs to stay clearly visible at all times, not just on hover. */
+body.theme-school .dash-nav-link-logout {
+  color: #fff;
+  background: rgba(239, 68, 68, 0.9);
+  font-weight: 800;
+}
+
+body.theme-school .dash-nav-link-logout i {
+  color: #fff;
+}
+
+body.theme-school .dash-nav-link-logout:hover {
+  background: #EF4444;
+  color: #fff;
+}
+
+body.theme-school .dash-sidebar-collapse-btn {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #fff;
+}
+
+body.theme-school .dash-sidebar-collapse-btn:hover {
+  background: rgba(255, 255, 255, 0.32);
+}
+
+/* .dash-content/.dash-main get a solid --color-bg fill site-wide
+   (dashboard-sidebar.css) — override it to fully transparent here so the
+   animated story scene behind is the dominant, always-visible background
+   on every dashboard page, not something hidden behind a fill. Cards stay
+   legible on their own since each has its own solid --color-surface
+   background + shadow. */
+body.theme-school .dash-content,
+body.theme-school .dash-main {
+  background: transparent;
+}
+
+/* --------------------------------------------------------------------------
+   FOOTER — the flat --color-chrome band read as a hard, jarring cut against
+   the animated ground scene behind it. Turn it into an intentional floating
+   "card" in the theme gradient instead of trying to blend into the fixed
+   background (which is scroll/viewport-position dependent and fragile).
+   -------------------------------------------------------------------------- */
+body.theme-school footer {
+  background: var(--theme-gradient-hero, linear-gradient(135deg, #38BDF8, #FB923C, #EC4899)) !important;
+  border-radius: var(--radius-card, 26px) var(--radius-card, 26px) 0 0;
+  margin: 0 clamp(8px, 2vw, 24px) 0;
+  box-shadow: 0 -10px 28px rgba(0, 0, 0, 0.18);
+  color: #fff;
+}
+
+body.theme-school footer small {
+  color: #fff;
+  font-weight: 600;
+}
+
+/* --------------------------------------------------------------------------
+   PAGE BANNERS — blanket override so EVERY page's banner (Courses, My
+   Courses, Quizzes, AI Learning Path, Messages, Achievements, etc.) uses the
+   same sky-blue -> orange -> pink gradient as the dashboard welcome banner,
+   instead of each template's own flat navy-blue gradient. Two DOM patterns
+   exist site-wide: the "card banner" (.page-header/.course-hero with
+   .page-title/.hero-title inside) and the plain global .page-header from
+   style.css (.page-header-text h1/h2/h3 + .page-subtitle, used by Messages
+   and other simpler pages) — both get the same treatment here.
+   -------------------------------------------------------------------------- */
+body.theme-school .page-header,
+body.theme-school .course-hero {
+  background: var(--theme-gradient-hero) !important;
+  border: none !important;
+  border-radius: var(--radius-card, 26px) !important;
+  box-shadow: var(--shadow-soft) !important;
+  padding: 24px 28px !important;
+  margin-bottom: 28px !important;
+}
+
+body.theme-school .page-title,
+body.theme-school .page-header .hero-title,
+body.theme-school .course-hero .hero-title,
+body.theme-school .page-header .hero-label,
+body.theme-school .course-hero .hero-label,
+body.theme-school .page-header-text h1,
+body.theme-school .page-header-text h2,
+body.theme-school .page-header-text h3 {
+  color: #fff !important;
+}
+
+body.theme-school .page-title span {
+  color: #FDE68A !important;
+}
+
+body.theme-school .page-title i,
+body.theme-school .page-header .hero-label i,
+body.theme-school .course-hero .hero-label i,
+body.theme-school .page-header-text h1 i,
+body.theme-school .page-header-text h2 i,
+body.theme-school .page-header-text h3 i,
+body.theme-school .page-header-text h1 svg,
+body.theme-school .page-header-text h2 svg,
+body.theme-school .page-header-text h3 svg {
+  color: #FDE68A !important;
+}
+
+body.theme-school .page-subtitle {
+  color: rgba(255, 255, 255, 0.85) !important;
+}
+
+/* Leaderboard's table header row was a flat solid blue — match the banner. */
+body.theme-school .leaderboard-page table.table thead {
+  background: var(--theme-gradient-hero) !important;
+}
+
+/* --------------------------------------------------------------------------
+   AI MENTOR CHATBOT — mascot avatar instead of a plain chat icon
+   -------------------------------------------------------------------------- */
+.kw-chat-mascot {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  animation: kw-wave 2.4s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+.kw-chat-mascot-sm {
+  width: 22px;
+  height: 22px;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+/* --------------------------------------------------------------------------
+   SOUND TOGGLE BUTTON (see static/js/kids-sound.js)
+   -------------------------------------------------------------------------- */
+.kw-sound-toggle {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: var(--color-text);
+}

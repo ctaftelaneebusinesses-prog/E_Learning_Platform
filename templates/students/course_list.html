@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% block title %}Courses{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+  :root {
+    --navy: #0f172a; --navy-mid: #1e293b; --navy-light: #334155;
+    --gold: #c9a84c; --gold-light: #e6c87a;
+    --surface: #f8fafc; --white: #ffffff; --border: #e2e8f0;
+    --text-primary: #0f172a; --text-secondary: #64748b;
+    --success: #059669; --radius: 12px;
+
+    /* Typography scale — kept identical across every template */
+    --fs-xs: 0.72rem;
+    --fs-sm: 0.8rem;
+    --fs-base: 0.85rem;
+    --fs-md: 0.95rem;
+    --fs-lg: 1.375rem;
+  }
+
+  .courses-page {
+    font-family: 'Inter', sans-serif !important;
+    background: var(--surface);
+    color: var(--text-primary) !important;
+    padding-bottom: 40px;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  .courses-page * { font-family: 'Inter', sans-serif; }
+
+  .page-header { padding: 32px 0 24px; border-bottom: 1px solid var(--border); margin-bottom: 32px; }
+
+  .page-title {
+    font-size: var(--fs-lg); font-weight: 700;
+    color: var(--navy) !important; letter-spacing: -0.02em; margin: 0;
+  }
+  .page-title span { color: var(--gold) !important; }
+  .page-subtitle { font-size: var(--fs-base); font-weight: 400; color: var(--text-secondary) !important; margin-top: 6px; }
+
+  .course-card {
+    background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
+    overflow: hidden; height: 100%; display: flex; flex-direction: column;
+    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: 0 1px 3px rgba(15,23,42,0.06);
+  }
+  .course-card:hover {
+    transform: translateY(-6px); box-shadow: 0 20px 40px rgba(15,23,42,0.10);
+    border-color: rgba(201,168,76,0.4);
+  }
+
+  .course-image { width: 100%; height: 172px; object-fit: cover; }
+
+  .course-placeholder {
+    height: 172px; background: linear-gradient(135deg, var(--navy-mid), var(--navy-light));
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .course-placeholder i { font-size: 2rem; color: rgba(201,168,76,0.55) !important; }
+
+  .course-body { padding: 20px; display: flex; flex-direction: column; flex: 1; }
+
+  .course-title {
+    font-size: var(--fs-md); font-weight: 600;
+    color: var(--navy) !important; letter-spacing: -0.01em; margin-bottom: 8px; line-height: 1.35;
+  }
+
+  .course-meta {
+    display: flex; align-items: center; gap: 6px;
+    font-size: var(--fs-sm); color: var(--text-secondary) !important; margin-bottom: 6px;
+  }
+  .course-meta i { flex-shrink: 0; color: var(--gold) !important; font-size: var(--fs-sm); }
+
+  .course-actions {
+    margin-top: auto; padding-top: 16px; border-top: 1px solid var(--border);
+  }
+
+  .badge-enrolled {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    text-align: center; padding: 10px;
+    background: #dcfce7; color: #15803d !important;
+    font-size: var(--fs-xs); font-weight: 700;
+    letter-spacing: 0.06em; text-transform: uppercase; border-radius: 7px;
+  }
+
+  .btn-enroll {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    text-align: center; padding: 10px;
+    background: var(--navy); color: var(--white) !important;
+    font-size: var(--fs-sm); font-weight: 600;
+    letter-spacing: 0.02em; border-radius: 7px; text-decoration: none;
+    transition: all 0.2s ease;
+  }
+  .btn-enroll:hover { background: var(--gold); color: var(--navy) !important; }
+
+  .empty-state {
+    background: var(--white); border: 1px dashed var(--border); border-radius: var(--radius);
+    padding: 60px 24px; text-align: center; color: var(--text-secondary) !important; font-size: var(--fs-sm);
+  }
+  .empty-state i { font-size: 2.5rem; color: var(--border); display: block; margin-bottom: 12px; }
+
+  .btn-back {
+    display: inline-flex; align-items: center; gap: 8px; padding: 10px 20px;
+    border-radius: 8px; font-size: var(--fs-sm); font-weight: 500;
+    background: var(--white); color: var(--navy) !important; border: 1px solid var(--border);
+    text-decoration: none; transition: all 0.2s ease; margin-top: 32px;
+  }
+  .btn-back:hover { background: var(--navy); color: var(--white) !important; border-color: var(--navy); transform: translateX(-3px); }
+</style>
+
+<div class="courses-page">
+
+  <div class="page-header">
+    <h1 class="page-title">Available <span>Courses</span></h1>
+    <p class="page-subtitle">Explore the skills you can start learning today</p>
+  </div>
+
+  <div class="row g-4">
+    {% for course in courses %}
+      <div class="col-lg-4 col-md-6">
+        <div class="course-card">
+
+          {% if course.image %}
+            <img src="{{ course.image.url }}" class="course-image" alt="{{ course.title }}">
+          {% else %}
+            <div class="course-placeholder">
+              <i class="bi bi-mortarboard-fill"></i>
+            </div>
+          {% endif %}
+
+          <div class="course-body">
+            <div class="course-title">{{ course.title }}</div>
+
+            <div class="course-meta">
+              <i class="bi bi-person-fill"></i>
+              {{ course.instructor.username|default:"Instructor TBD" }}
+            </div>
+
+            <div class="course-meta">
+              <i class="bi bi-journal-text"></i>
+              {{ course.lessons.count }} Lessons
+            </div>
+
+            <div class="course-actions">
+              {% if course.id in enrolled_course_ids %}
+                <span class="badge-enrolled"><i class="bi bi-check-circle-fill"></i> Enrolled</span>
+              {% else %}
+                <a href="{% url 'enroll_course' course.id %}" class="btn-enroll">
+                  <i class="bi bi-plus-circle-fill"></i> Enroll Now
+                </a>
+              {% endif %}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    {% empty %}
+      <div class="col-12">
+        <div class="empty-state">
+          <i class="bi bi-inbox"></i>
+          No courses available at the moment.
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+
+  <a href="{% url 'student_dashboard' %}" class="btn-back">
+    <i class="bi bi-arrow-left"></i> Back to Dashboard
+  </a>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,758 @@
+{% extends 'adminpanel/admin_base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block admin_content %}
+
+<style>
+  .page-header-text h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .page-header-date {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.25);
+    color: #fff;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  /* STAT CARDS */
+  .stat-card {
+    border-radius: var(--radius-card);
+    padding: 22px 24px;
+    color: #fff;
+    box-shadow: var(--shadow-soft);
+    transition: var(--transition);
+    min-width: 200px;
+    border: none;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    right: -12px;
+    top: -12px;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.12);
+  }
+
+  .stat-card:nth-child(1) { background: linear-gradient(135deg, #f43f5e, #ec4899); }
+  .stat-card:nth-child(2) { background: linear-gradient(135deg, #3b82f6, #06b6d4); }
+
+  .stat-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 32px rgba(0,0,0,0.16);
+  }
+
+  .stat-card h6 {
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.85;
+    margin-bottom: 6px;
+  }
+
+  .stat-card h3 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    line-height: 1;
+  }
+
+  .stat-icon {
+    opacity: 0.22;
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .stat-icon i { font-size: 3rem; }
+
+  /* ==============================
+     ANALYTICS
+  ============================== */
+  .viz-root {
+    --viz-role-student: #2563EB;
+    --viz-role-instructor: #0D9488;
+    --viz-role-admin: #7C3AED;
+    --viz-good: #22C55E;
+    --viz-good-track: rgba(34, 197, 94, 0.15);
+    --viz-critical: #EF4444;
+    --viz-critical-track: rgba(239, 68, 68, 0.15);
+    --viz-grid: var(--color-border);
+    --viz-ink-secondary: var(--color-text-muted);
+  }
+
+  .analytics-section-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin: 8px 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .analytics-section-title i { color: var(--color-primary); }
+
+  .viz-card {
+    border-radius: var(--radius-card);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-soft);
+    padding: 20px 22px;
+    height: 100%;
+  }
+
+  .viz-card-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--color-text);
+    margin-bottom: 2px;
+  }
+
+  .viz-card-subtitle {
+    font-size: 0.76rem;
+    color: var(--viz-ink-secondary);
+    margin-bottom: 18px;
+  }
+
+  /* Role distribution */
+  .role-legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+
+  .role-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.82rem;
+    color: var(--viz-ink-secondary);
+  }
+
+  .role-legend-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .role-legend-item strong {
+    color: var(--color-text);
+    font-weight: 700;
+  }
+
+  /* Donut charts (role distribution, certificate status) */
+  .donut-wrap {
+    display: flex;
+    align-items: center;
+    gap: 22px;
+    flex-wrap: wrap;
+  }
+
+  .donut-svg {
+    width: 116px;
+    height: 116px;
+    flex-shrink: 0;
+  }
+
+  .donut-track {
+    fill: none;
+    stroke: var(--color-bg);
+    stroke-width: 14;
+  }
+
+  .donut-segment {
+    fill: none;
+    stroke-width: 14;
+    stroke-linecap: round;
+    transform: rotate(-90deg);
+    transform-origin: 60px 60px;
+    transition: stroke-dasharray 0.2s ease;
+  }
+
+  .donut-center-value {
+    font-size: 1.35rem;
+    font-weight: 800;
+    fill: var(--color-text);
+  }
+
+  .donut-center-label {
+    font-size: 0.5rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    fill: var(--viz-ink-secondary);
+  }
+
+  .donut-legend {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    flex: 1;
+    min-width: 140px;
+  }
+
+  .donut-legend-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 0.82rem;
+    color: var(--viz-ink-secondary);
+  }
+
+  .donut-legend-key {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+
+  .donut-legend-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .donut-legend-item strong {
+    color: var(--color-text);
+    font-weight: 700;
+  }
+
+  .donut-legend-pct {
+    font-size: 0.74rem;
+    color: var(--viz-ink-secondary);
+  }
+
+  /* Horizontal bar-list charts (skill coverage, streak distribution) */
+  .bar-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .bar-list-row {
+    display: grid;
+    grid-template-columns: 84px 1fr 28px;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .bar-list-label {
+    font-size: 0.78rem;
+    color: var(--viz-ink-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .bar-list-track {
+    height: 10px;
+    border-radius: 999px;
+    background: var(--color-bg);
+    overflow: hidden;
+  }
+
+  .bar-list-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--color-primary);
+    min-width: 4px;
+  }
+
+  .bar-list-value {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--color-text);
+    text-align: right;
+  }
+
+  .viz-empty {
+    text-align: center;
+    padding: 24px 10px;
+    color: var(--viz-ink-secondary);
+    font-size: 0.85rem;
+  }
+
+  /* Course status meter */
+  .meter-value {
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: var(--color-text);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .meter-value small {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--viz-ink-secondary);
+  }
+
+  .meter-track {
+    height: 10px;
+    border-radius: 999px;
+    background: var(--viz-good-track);
+    margin: 14px 0 10px;
+    overflow: hidden;
+  }
+
+  .meter-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--viz-good);
+  }
+
+  .meter-caption {
+    font-size: 0.8rem;
+    color: var(--viz-ink-secondary);
+  }
+
+  /* Enrollment trend */
+  .trend-chart-wrap {
+    position: relative;
+  }
+
+  .trend-chart-wrap svg {
+    width: 100%;
+    height: auto;
+    display: block;
+    overflow: visible;
+  }
+
+  .trend-chart-wrap-lg svg {
+    height: 300px;
+  }
+
+  .trend-line {
+    fill: none;
+    stroke: var(--color-primary);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .trend-area {
+    fill: var(--color-primary);
+    opacity: 0.1;
+  }
+
+  .trend-grid {
+    stroke: var(--viz-grid);
+    stroke-width: 1;
+  }
+
+  .trend-y-label {
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    fill: var(--viz-ink-secondary);
+  }
+
+  .trend-crosshair {
+    stroke: var(--viz-grid);
+    stroke-width: 1;
+    opacity: 0;
+    transition: opacity 0.1s ease;
+    pointer-events: none;
+  }
+
+  .trend-crosshair.visible {
+    opacity: 1;
+  }
+
+  .trend-dot {
+    fill: var(--color-primary);
+    stroke: var(--color-surface);
+    stroke-width: 2;
+    transition: r 0.15s ease;
+  }
+
+  .trend-point:hover .trend-dot,
+  .trend-point:focus .trend-dot {
+    r: 7;
+  }
+
+  .trend-hit {
+    fill: transparent;
+    cursor: pointer;
+  }
+
+  .trend-hit:focus {
+    outline: none;
+  }
+
+  .trend-axis-label {
+    font-size: 12px;
+    fill: var(--viz-ink-secondary);
+  }
+
+  .trend-end-label {
+    font-size: 13px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    fill: var(--color-text);
+  }
+
+  .trend-empty {
+    text-align: center;
+    padding: 30px 10px;
+    color: var(--viz-ink-secondary);
+    font-size: 0.85rem;
+  }
+
+  .viz-tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: var(--color-chrome);
+    color: #fff;
+    font-size: 0.76rem;
+    font-weight: 600;
+    padding: 6px 10px;
+    border-radius: 8px;
+    box-shadow: var(--shadow-lift);
+    transform: translate(-50%, -125%);
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    white-space: nowrap;
+    z-index: 5;
+  }
+
+  .viz-tooltip.visible {
+    opacity: 1;
+  }
+
+  .viz-tooltip .tt-label {
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 500;
+    margin-left: 4px;
+  }
+
+  .welcome-card {
+    border-radius: var(--radius-card);
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-soft);
+    padding: 18px 22px;
+    color: var(--color-text-muted);
+    font-size: 0.86rem;
+  }
+
+  @media (max-width: 768px) {
+    .stat-card { min-width: 100%; }
+  }
+</style>
+
+<div class="page-header">
+  <div class="page-header-text">
+    <h2><i class="bi bi-speedometer2"></i>Admin Dashboard</h2>
+    <p class="page-subtitle">System overview &amp; administration controls</p>
+  </div>
+  <div class="page-header-actions">
+    <span class="page-header-date">
+      <i class="bi bi-calendar3"></i> {% now "F d, Y" %}
+    </span>
+  </div>
+</div>
+
+<!-- Stats -->
+<div class="row g-4 mb-4">
+  <div class="col-xl-3 col-md-6">
+    <div class="card stat-card bg-primary shadow-sm">
+      <div class="card-body d-flex justify-content-between align-items-center">
+        <div>
+          <h6 class="text-uppercase small mb-1">Total Users</h6>
+          <h3 class="fw-bold mb-0">{{ total_users }}</h3>
+        </div>
+        <div class="stat-icon"><i class="bi bi-people-fill"></i></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-xl-3 col-md-6">
+    <div class="card stat-card bg-success shadow-sm">
+      <div class="card-body d-flex justify-content-between align-items-center">
+        <div>
+          <h6 class="text-uppercase small mb-1">Total Courses</h6>
+          <h3 class="fw-bold mb-0">{{ total_courses }}</h3>
+        </div>
+        <div class="stat-icon"><i class="bi bi-journal-bookmark-fill"></i></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Analytics -->
+<div class="viz-root">
+
+  <h5 class="analytics-section-title"><i class="bi bi-bar-chart-line-fill"></i> Analytics</h5>
+
+  <div class="row g-4 mb-4">
+
+    <div class="col-lg-4 col-md-6">
+      <div class="viz-card">
+        <div class="viz-card-title">User Role Distribution</div>
+        <div class="viz-card-subtitle">{{ total_users }} total users</div>
+
+        {% if total_users %}
+          <div class="donut-wrap">
+            <svg class="donut-svg" viewBox="0 0 120 120" role="img" aria-label="User role distribution donut chart">
+              <circle class="donut-track" cx="60" cy="60" r="54"></circle>
+              {% with s0=role_segments.0 s1=role_segments.1 s2=role_segments.2 %}
+                {% if s0.visible %}
+                <circle class="donut-segment" cx="60" cy="60" r="54" stroke="var(--viz-role-student)"
+                  stroke-dasharray="{{ s0.dasharray }}" stroke-dashoffset="{{ s0.dashoffset }}"></circle>
+                {% endif %}
+                {% if s1.visible %}
+                <circle class="donut-segment" cx="60" cy="60" r="54" stroke="var(--viz-role-instructor)"
+                  stroke-dasharray="{{ s1.dasharray }}" stroke-dashoffset="{{ s1.dashoffset }}"></circle>
+                {% endif %}
+                {% if s2.visible %}
+                <circle class="donut-segment" cx="60" cy="60" r="54" stroke="var(--viz-role-admin)"
+                  stroke-dasharray="{{ s2.dasharray }}" stroke-dashoffset="{{ s2.dashoffset }}"></circle>
+                {% endif %}
+              {% endwith %}
+              <text class="donut-center-value" x="60" y="57" text-anchor="middle">{{ total_users }}</text>
+              <text class="donut-center-label" x="60" y="72" text-anchor="middle">users</text>
+            </svg>
+
+            <div class="donut-legend">
+              <span class="donut-legend-item">
+                <span class="donut-legend-key"><span class="donut-legend-dot" style="background: var(--viz-role-student);"></span>Students <strong>{{ role_counts.STUDENT }}</strong></span>
+                <span class="donut-legend-pct">{{ role_segments.0.pct }}%</span>
+              </span>
+              <span class="donut-legend-item">
+                <span class="donut-legend-key"><span class="donut-legend-dot" style="background: var(--viz-role-instructor);"></span>Instructors <strong>{{ role_counts.INSTRUCTOR }}</strong></span>
+                <span class="donut-legend-pct">{{ role_segments.1.pct }}%</span>
+              </span>
+              <span class="donut-legend-item">
+                <span class="donut-legend-key"><span class="donut-legend-dot" style="background: var(--viz-role-admin);"></span>Admins <strong>{{ role_counts.ADMIN }}</strong></span>
+                <span class="donut-legend-pct">{{ role_segments.2.pct }}%</span>
+              </span>
+            </div>
+          </div>
+        {% else %}
+          <div class="viz-empty">No users yet</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+      <div class="viz-card">
+        <div class="viz-card-title">Course Status</div>
+        <div class="viz-card-subtitle">Active vs total courses</div>
+
+        {% if total_courses %}
+          <div class="meter-value">{{ active_courses }} <small>/ {{ total_courses }} active</small></div>
+          <div class="meter-track">
+            <div class="meter-fill" style="width: {% widthratio active_courses total_courses 100 %}%;"></div>
+          </div>
+          <div class="meter-caption">{{ inactive_courses }} inactive</div>
+        {% else %}
+          <div class="meter-caption">No courses yet</div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+
+  <div class="row g-4 mb-4">
+
+    <div class="col-12">
+      <div class="viz-card">
+        <div class="viz-card-title">Enrollment Trend</div>
+        <div class="viz-card-subtitle">Last 6 months</div>
+
+        {% if enrollment_has_activity %}
+          <div class="trend-chart-wrap trend-chart-wrap-lg">
+            <svg viewBox="0 0 {{ enrollment_chart_w }} {{ enrollment_chart_h }}" preserveAspectRatio="none">
+              {% for g in enrollment_gridlines %}
+                <line class="trend-grid" x1="0" y1="{{ g.y }}" x2="{{ enrollment_chart_w }}" y2="{{ g.y }}"></line>
+                <text class="trend-y-label" x="0" y="{{ g.y }}" dy="-4">{{ g.label }}</text>
+              {% endfor %}
+              <path class="trend-area" d="{{ enrollment_area_points }}"></path>
+              <path class="trend-line" d="{{ enrollment_line_points }}"></path>
+              <line class="trend-crosshair" id="dashTrendCrosshair" x1="0" y1="{{ enrollment_plot_top }}" x2="0" y2="{{ enrollment_baseline_y }}"></line>
+              {% for p in enrollment_points %}
+                <text class="trend-axis-label" x="{{ p.x }}" y="{{ enrollment_chart_h }}" text-anchor="middle">{{ p.label }}</text>
+                <g class="trend-point" tabindex="0" data-count="{{ p.count }}" data-label="{{ p.label }}" data-x="{{ p.x }}" data-y="{{ p.y }}">
+                  <circle class="trend-hit" cx="{{ p.x }}" cy="{{ p.y }}" r="16"></circle>
+                  <circle class="trend-dot" cx="{{ p.x }}" cy="{{ p.y }}" r="5"></circle>
+                </g>
+              {% endfor %}
+              {% if enrollment_last_point %}
+                <text class="trend-end-label" x="{{ enrollment_last_point.x }}" y="{{ enrollment_last_point.y }}" dy="-14" text-anchor="end">{{ enrollment_last_point.count }}</text>
+              {% endif %}
+            </svg>
+            <div class="viz-tooltip" id="dashTrendTooltip"><span class="tt-value"></span><span class="tt-label"></span></div>
+          </div>
+        {% else %}
+          <div class="trend-empty"><i class="bi bi-graph-up d-block mb-2" style="font-size:1.5rem;"></i>No enrollments in the last 6 months</div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+
+  <div class="row g-4 mb-4">
+
+    <div class="col-lg-5 col-md-6">
+      <div class="viz-card">
+        <div class="viz-card-title">Top Skill Coverage</div>
+        <div class="viz-card-subtitle">Skills by number of courses mapped</div>
+
+        {% if skill_has_data %}
+          <div class="bar-list">
+            {% for bar in skill_bars %}
+              <div class="bar-list-row">
+                <span class="bar-list-label" title="{{ bar.label }}">{{ bar.label }}</span>
+                <span class="bar-list-track"><span class="bar-list-fill" style="width: {{ bar.pct }}%;"></span></span>
+                <span class="bar-list-value">{{ bar.value }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="viz-empty"><i class="bi bi-diagram-3 d-block mb-2" style="font-size:1.5rem;"></i>No skills mapped to courses yet</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6">
+      <div class="viz-card">
+        <div class="viz-card-title">Certificate Status</div>
+        <div class="viz-card-subtitle">Active vs revoked</div>
+
+        {% if total_certificates %}
+          <div class="donut-wrap">
+            <svg class="donut-svg" viewBox="0 0 120 120" role="img" aria-label="Certificate status donut chart">
+              <circle class="donut-track" cx="60" cy="60" r="54"></circle>
+              {% with s0=certificate_segments.0 s1=certificate_segments.1 %}
+                {% if s0.visible %}
+                <circle class="donut-segment" cx="60" cy="60" r="54" stroke="var(--viz-good)"
+                  stroke-dasharray="{{ s0.dasharray }}" stroke-dashoffset="{{ s0.dashoffset }}"></circle>
+                {% endif %}
+                {% if s1.visible %}
+                <circle class="donut-segment" cx="60" cy="60" r="54" stroke="var(--viz-critical)"
+                  stroke-dasharray="{{ s1.dasharray }}" stroke-dashoffset="{{ s1.dashoffset }}"></circle>
+                {% endif %}
+              {% endwith %}
+              <text class="donut-center-value" x="60" y="57" text-anchor="middle">{{ total_certificates }}</text>
+              <text class="donut-center-label" x="60" y="72" text-anchor="middle">issued</text>
+            </svg>
+
+            <div class="donut-legend">
+              <span class="donut-legend-item">
+                <span class="donut-legend-key"><span class="donut-legend-dot" style="background: var(--viz-good);"></span>Active <strong>{{ active_certificates }}</strong></span>
+                <span class="donut-legend-pct">{{ certificate_segments.0.pct }}%</span>
+              </span>
+              <span class="donut-legend-item">
+                <span class="donut-legend-key"><span class="donut-legend-dot" style="background: var(--viz-critical);"></span>Revoked <strong>{{ revoked_certificates }}</strong></span>
+                <span class="donut-legend-pct">{{ certificate_segments.1.pct }}%</span>
+              </span>
+            </div>
+          </div>
+        {% else %}
+          <div class="viz-empty">No certificates issued yet</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col-lg-4 col-md-12">
+      <div class="viz-card">
+        <div class="viz-card-title">Learning Streak Distribution</div>
+        <div class="viz-card-subtitle">Students by current streak length</div>
+
+        {% if streak_has_activity %}
+          <div class="bar-list">
+            {% for bar in streak_bars %}
+              <div class="bar-list-row">
+                <span class="bar-list-label">{{ bar.label }}</span>
+                <span class="bar-list-track"><span class="bar-list-fill" style="width: {{ bar.pct }}%;"></span></span>
+                <span class="bar-list-value">{{ bar.value }}</span>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="viz-empty"><i class="bi bi-fire d-block mb-2" style="font-size:1.5rem;"></i>No active learning streaks yet</div>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+
+  <div class="welcome-card">
+    <i class="bi bi-info-circle me-1"></i>
+    Use the sidebar to manage users, courses, progress, achievements, streaks, skills, time tracking, certificates and job roles.
+  </div>
+
+</div>
+
+<script>
+(function () {
+  var tooltip = document.getElementById('dashTrendTooltip');
+  var wrap = tooltip ? tooltip.closest('.trend-chart-wrap') : null;
+  if (!tooltip || !wrap) return;
+
+  var svg = wrap.querySelector('svg');
+  var crosshair = wrap.querySelector('.trend-crosshair');
+  var valueEl = tooltip.querySelector('.tt-value');
+  var labelEl = tooltip.querySelector('.tt-label');
+
+  function showTooltip(point) {
+    var x = parseFloat(point.dataset.x);
+    var y = parseFloat(point.dataset.y);
+    var rect = svg.getBoundingClientRect();
+    var wrapRect = wrap.getBoundingClientRect();
+    var scaleX = rect.width / {{ enrollment_chart_w|default:960 }};
+    var scaleY = rect.height / {{ enrollment_chart_h|default:320 }};
+    var left = (rect.left - wrapRect.left) + x * scaleX;
+    var top = (rect.top - wrapRect.top) + y * scaleY;
+
+    valueEl.textContent = point.dataset.count;
+    labelEl.textContent = point.dataset.label;
+    tooltip.style.left = left + 'px';
+    tooltip.style.top = top + 'px';
+    tooltip.classList.add('visible');
+
+    if (crosshair) {
+      crosshair.setAttribute('x1', x);
+      crosshair.setAttribute('x2', x);
+      crosshair.classList.add('visible');
+    }
+  }
+
+  function hideTooltip() {
+    tooltip.classList.remove('visible');
+    if (crosshair) crosshair.classList.remove('visible');
+  }
+
+  wrap.querySelectorAll('.trend-point').forEach(function (point) {
+    point.addEventListener('mouseenter', function () { showTooltip(point); });
+    point.addEventListener('mouseleave', hideTooltip);
+    point.addEventListener('focus', function () { showTooltip(point); });
+    point.addEventListener('blur', hideTooltip);
+  });
+})();
+</script>
+
+{% endblock %}

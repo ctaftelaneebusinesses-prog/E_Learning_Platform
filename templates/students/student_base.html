@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block body_class %}dash-body{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="{% static 'css/dashboard-sidebar.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dash-layout" id="dashLayout" data-panel="student">
+
+  {% include 'students/includes/sidebar_nav.html' %}
+
+  <div class="dash-sidebar-overlay" id="dashSidebarOverlay"></div>
+
+  <div class="dash-main">
+    <div class="dash-topbar">
+      <button type="button" class="dash-mobile-toggle" id="dashMobileToggle" aria-label="Open menu">
+        <i class="bi bi-list"></i>
+      </button>
+      <span class="dash-topbar-brand">
+        <i class="bi bi-mortarboard-fill"></i> Student Panel
+      </span>
+    </div>
+
+    <div class="dash-content">
+      {% block student_content %}{% endblock %}
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/dashboard-sidebar.js' %}" defer></script>
+{% endblock %}

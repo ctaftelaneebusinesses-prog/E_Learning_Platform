@@ -1,0 +1,549 @@
+{% extends 'students/student_base.html' %}
+{% load student_extras %}
+{% block title %}AI Learning Path{% endblock %}
+
+{% block student_content %}
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    /* Theme-driven aliases — colors/radius come from body.theme-* (static/css/themes.css) */
+    --navy: var(--color-primary);
+    --navy-mid: var(--color-secondary);
+    --gold: var(--color-secondary);
+    --gold-light: var(--color-secondary);
+    --surface: var(--color-bg);
+    --white: var(--color-surface);
+    --border: var(--color-border);
+    --text-primary: var(--color-text);
+    --text-secondary: var(--color-text-muted);
+    --radius: var(--radius-card, 12px);
+  }
+
+  body { font-family: var(--font-sans, 'DM Sans', sans-serif); background: var(--surface); }
+
+  .page-header {
+    padding: 28px 28px 26px;
+    margin: -4px 0 32px;
+    border-radius: var(--radius);
+    background: var(--theme-gradient-hero, linear-gradient(120deg, var(--navy) 0%, var(--navy-mid) 100%));
+    box-shadow: var(--shadow-soft, 0 10px 28px rgba(15,23,42,0.18));
+  }
+
+  .page-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.375rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+
+  .page-title span { color: #FDE68A; }
+
+  .page-subtitle {
+    font-size: 0.8125rem;
+    color: rgba(255,255,255,0.75);
+    margin-top: 4px;
+  }
+
+  .ai-panel {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 28px 32px;
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ai-panel::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle at top right, #fef9ec 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .ai-panel-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+
+  .ai-panel-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.0625rem;
+    font-weight: 700;
+    color: var(--navy);
+    letter-spacing: -0.01em;
+    margin-bottom: 6px;
+  }
+
+  .ai-panel-desc {
+    font-size: 0.8125rem;
+    color: var(--text-secondary);
+    margin-bottom: 22px;
+    line-height: 1.6;
+  }
+
+  .form-label-styled {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.71rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--navy);
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .form-control-styled {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 15px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    color: var(--text-primary);
+    background: var(--surface);
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .form-control-styled:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.12);
+    background: var(--white);
+  }
+
+  .btn-generate {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 11px 24px;
+    background: var(--navy);
+    color: var(--white);
+    border: none;
+    border-radius: 8px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .btn-generate:hover {
+    background: var(--gold);
+    color: var(--navy);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(201, 168, 76, 0.25);
+  }
+
+  .results-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+  }
+
+  .results-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 22px;
+    letter-spacing: -0.01em;
+  }
+
+  .results-title strong {
+    color: var(--gold);
+  }
+
+  .tech-card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 14px;
+    text-align: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.8125rem;
+    color: var(--navy);
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .tech-card::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+  }
+
+  .tech-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 24px rgba(15,23,42,0.08);
+    border-color: var(--gold);
+  }
+
+  .tech-card:hover::before {
+    transform: scaleX(1);
+  }
+
+  .tech-number {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .tech-icon-wrap {
+    width: 36px;
+    height: 36px;
+    background: #f1f5f9;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px;
+  }
+
+  .empty-state {
+    background: var(--white);
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    padding: 44px 24px;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.8125rem;
+  }
+
+  .btn-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 18px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    background: var(--white);
+    color: var(--navy);
+    border: 1px solid var(--border);
+    text-decoration: none;
+    transition: all 0.2s ease;
+    margin-top: 28px;
+  }
+
+  .btn-back:hover {
+    background: var(--navy);
+    color: var(--white);
+    border-color: var(--navy);
+    transform: translateX(-3px);
+  }
+
+  .page-header-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .btn-history {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 18px;
+    border-radius: 8px;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    border: 1.5px solid rgba(255,255,255,0.35);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+  }
+
+  .btn-history:hover {
+    background: #fff;
+    border-color: #fff;
+    color: var(--navy);
+  }
+
+  .btn-history .badge-count {
+    background: #FDE68A;
+    color: var(--navy);
+    border-radius: 999px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    padding: 1px 7px;
+  }
+
+  #historyModal .modal-content {
+    border-radius: var(--radius);
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  #historyModal .modal-header {
+    border-bottom: 1px solid var(--border);
+    padding: 20px 24px;
+  }
+
+  #historyModal .modal-title {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    color: var(--navy);
+    font-size: 1.05rem;
+  }
+
+  #historyModal .modal-body {
+    padding: 20px 24px;
+    max-height: 65vh;
+    overflow-y: auto;
+  }
+
+  .history-item {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+
+  .history-item-header {
+    width: 100%;
+    background: var(--surface);
+    border: none;
+    padding: 13px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .history-item-role {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--navy);
+  }
+
+  .history-item-date {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+
+  .history-item-body {
+    display: none;
+    padding: 14px 16px 16px;
+    border-top: 1px solid var(--border);
+    background: var(--white);
+  }
+
+  .history-item.open .history-item-body { display: block; }
+
+  .history-item.open .history-item-header .chevron { transform: rotate(180deg); }
+
+  .history-item-header .chevron {
+    transition: transform 0.2s ease;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+  }
+
+  .history-chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .history-chip {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 5px 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--navy);
+  }
+
+  .history-empty {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.8125rem;
+    padding: 32px 0;
+  }
+</style>
+
+<div class="page-header page-header-row">
+  <div>
+    <h1 class="page-title">AI <span>Learning Path</span></h1>
+    <p class="page-subtitle">Get a personalized roadmap powered by AI for your career goal</p>
+  </div>
+  <button type="button" class="btn-history" data-bs-toggle="modal" data-bs-target="#historyModal">
+    <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-9-9 9 9 0 019 9z"/>
+    </svg>
+    History
+    {% if history %}<span class="badge-count">{{ history|length }}</span>{% endif %}
+  </button>
+</div>
+
+<div class="ai-panel">
+  <div class="ai-panel-label">Powered by AI</div>
+  <div class="ai-panel-title">Define Your Career Goal</div>
+  <p class="ai-panel-desc">Enter your target role and let AI suggest a personalized learning roadmap tailored to industry requirements.</p>
+
+  <form method="post">
+    {% csrf_token %}
+    <label class="form-label-styled">Target Role</label>
+    <input type="text" name="role" class="form-control-styled"
+           placeholder="e.g. DevOps Engineer, Data Scientist" required>
+    <button type="submit" class="btn-generate">
+      <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>
+      </svg>
+      Generate Learning Path
+    </button>
+  </form>
+</div>
+
+{% if role %}
+  <div class="results-label">Results for your query</div>
+  <div class="results-title">Suggested Technologies for <strong>{{ role }}</strong></div>
+
+  {% if active_theme.is_kids_world %}
+    <!-- KIDS WORLD ROADMAP: Start -> Forest -> Castle -> Rainbow Bridge -> Space -> Treasure -->
+    <div class="kw-road">
+      {% for tech in suggestions %}
+        {% with step=forloop.counter0|mod:6 %}
+          <div class="kw-road-node">
+            <div class="kw-road-icon">
+              {% if step == 0 %}<i class="bi bi-flag-fill"></i>
+              {% elif step == 1 %}<i class="bi bi-tree-fill"></i>
+              {% elif step == 2 %}
+                <svg viewBox="0 0 48 44" class="kw-icon">
+                  <rect x="6" y="20" width="10" height="24" fill="currentColor"/>
+                  <rect x="32" y="20" width="10" height="24" fill="currentColor"/>
+                  <rect x="17" y="12" width="14" height="32" fill="currentColor"/>
+                  <rect x="4" y="14" width="4" height="6" fill="currentColor"/>
+                  <rect x="12" y="14" width="4" height="6" fill="currentColor"/>
+                  <rect x="32" y="14" width="4" height="6" fill="currentColor"/>
+                  <rect x="40" y="14" width="4" height="6" fill="currentColor"/>
+                  <rect x="17" y="6" width="4" height="6" fill="currentColor"/>
+                  <rect x="27" y="6" width="4" height="6" fill="currentColor"/>
+                </svg>
+              {% elif step == 3 %}<span class="kw-road-rainbow"></span>
+              {% elif step == 4 %}<i class="bi bi-rocket-takeoff-fill"></i>
+              {% else %}
+                <svg viewBox="0 0 48 40" class="kw-icon">
+                  <path d="M2 16 Q24 2 46 16" fill="#B45309" stroke="#78350F" stroke-width="2"/>
+                  <rect x="2" y="16" width="44" height="22" rx="4" fill="#B45309"/>
+                  <rect x="2" y="16" width="44" height="8" fill="#92400E"/>
+                  <rect x="20" y="16" width="8" height="10" rx="2" fill="#FDE047" stroke="#B45309" stroke-width="1.5"/>
+                </svg>
+              {% endif %}
+            </div>
+            <div class="kw-road-label">
+              <span class="kw-road-step-name">
+                {% if step == 0 %}Start{% elif step == 1 %}Forest{% elif step == 2 %}Castle
+                {% elif step == 3 %}Rainbow Bridge{% elif step == 4 %}Space{% else %}Treasure{% endif %}
+              </span>
+              <span class="kw-road-tech">{{ tech }}</span>
+            </div>
+          </div>
+        {% endwith %}
+      {% empty %}
+        <div class="empty-state">AI could not generate suggestions for this role. Please try a different role.</div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="row g-4">
+      {% for tech in suggestions %}
+        <div class="col-lg-3 col-md-4 col-sm-6">
+          <div class="tech-card">
+            <div class="tech-number">{{ forloop.counter|stringformat:"02d" }}</div>
+            <div class="tech-icon-wrap">
+              <svg width="16" height="16" fill="none" stroke="#c9a84c" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/>
+              </svg>
+            </div>
+            {{ tech }}
+          </div>
+        </div>
+      {% empty %}
+        <div class="col-12">
+          <div class="empty-state">AI could not generate suggestions for this role. Please try a different role.</div>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endif %}
+
+<a href="{% url 'student_dashboard' %}" class="btn-back">
+  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>
+  </svg>
+  Back to Dashboard
+</a>
+
+<div class="modal fade" id="historyModal" tabindex="-1" aria-labelledby="historyModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-scrollable modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="historyModalLabel">Your Learning Path History</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {% for item in history %}
+          <div class="history-item">
+            <button type="button" class="history-item-header" onclick="this.closest('.history-item').classList.toggle('open')">
+              <div>
+                <div class="history-item-role">{{ item.role }}</div>
+                <div class="history-item-date">{{ item.created_at|date:"M d, Y \a\t g:i A" }}</div>
+              </div>
+              <svg class="chevron" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+              </svg>
+            </button>
+            <div class="history-item-body">
+              {% if item.suggestions %}
+                <div class="history-chip-list">
+                  {% for tech in item.suggestions %}
+                    <span class="history-chip">{{ tech }}</span>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <div class="history-empty">No suggestions were generated for this query.</div>
+              {% endif %}
+            </div>
+          </div>
+        {% empty %}
+          <div class="history-empty">You haven't asked the AI for a learning path yet. Your questions and their results will show up here.</div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,75 @@
+{% extends 'adminpanel/admin_base.html' %}
+{% block title %}Student Progress{% endblock %}
+
+{% block admin_content %}
+
+<div class="page-header">
+  <div class="page-header-text">
+    <h3>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <line x1="18" y1="20" x2="18" y2="10"/>
+        <line x1="12" y1="20" x2="12" y2="4"/>
+        <line x1="6" y1="20" x2="6" y2="14"/>
+        <line x1="2" y1="20" x2="22" y2="20"/>
+      </svg>
+      Student Progress Overview
+    </h3>
+  </div>
+</div>
+
+<div class="section-card">
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>Student</th>
+            <th>Course</th>
+            <th>Lessons</th>
+            <th style="width:18%">Completion %</th>
+            <th>XP Earned</th>
+            <th>Last Updated</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for p in progress_records %}
+          <tr>
+            <td>
+              <span class="avatar-chip-row">
+                <span class="avatar-chip">{{ p.student.username|first|upper }}</span>
+                <span class="fw-semibold">{{ p.student.username }}</span>
+              </span>
+            </td>
+            <td>{{ p.course.title }}</td>
+            <td style="font-weight:500;">{{ p.completed_lessons }}/{{ p.total_lessons }}</td>
+            <td>
+              <div class="meter-row">
+                <div class="meter-bar">
+                  <div class="meter-bar-fill" style="width: {{ p.completion_percentage }}%"></div>
+                </div>
+                <span class="meter-pct{% if p.completion_percentage == 0 %} is-zero{% endif %}">{{ p.completion_percentage }}%</span>
+              </div>
+            </td>
+            <td>
+              <span class="pill-metric {% if p.xp_earned == 0 %}pill-metric-neutral{% else %}pill-metric-primary{% endif %}">{{ p.xp_earned }} XP</span>
+              {% if p.completion_percentage == 0 %}<span class="pill-metric pill-metric-warning ms-1">Not started</span>{% endif %}
+            </td>
+            <td class="text-muted" style="font-size: 0.85rem;">{{ p.last_updated|date:"d M Y H:i" }}</td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6">
+              <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>
+                <p>No progress data available</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

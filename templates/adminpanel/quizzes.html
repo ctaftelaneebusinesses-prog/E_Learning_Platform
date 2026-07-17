@@ -1,0 +1,172 @@
+{% extends 'adminpanel/admin_base.html' %}
+{% block title %}Quiz Management{% endblock %}
+
+{% block admin_content %}
+
+<style>
+  .action-group {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .section-title {
+    font-weight: 600;
+    margin-bottom: 12px;
+  }
+</style>
+
+<div class="page-header">
+  <div class="page-header-text">
+    <h2><i class="bi bi-pencil-square"></i> Quiz Management</h2>
+    <p class="page-subtitle">Managing quizzes for <strong>{{ course.title }}</strong></p>
+  </div>
+</div>
+
+<!-- Create Quiz -->
+<div class="card shadow-sm mb-4">
+  <div class="card-body">
+    <h5 class="section-title">Create Quiz</h5>
+
+    <form method="post" action="{% url 'admin_create_quiz' course.id %}">
+      {% csrf_token %}
+
+      <div class="row g-3">
+        <div class="col-md-3">
+          <label class="form-label">Quiz Title</label>
+          <input name="title"
+                 class="form-control"
+                 placeholder="Quiz title"
+                 required>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label">Difficulty</label>
+          <select name="difficulty" class="form-select" required>
+            <option value="">Select</option>
+            <option value="EASY">Easy</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="HARD">Hard</option>
+          </select>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label">Time Limit</label>
+          <input name="time_limit"
+                 type="number"
+                 class="form-control"
+                 placeholder="Minutes"
+                 required>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label">Total Marks</label>
+          <input name="total_marks"
+                 type="number"
+                 class="form-control"
+                 required>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label">Pass Marks</label>
+          <input name="pass_mark"
+                 type="number"
+                 class="form-control"
+                 required>
+        </div>
+
+        <div class="col-md-1 d-flex align-items-end">
+          <button class="btn btn-primary w-100">
+            Create
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Quiz List -->
+<div class="card shadow-sm">
+  <div class="card-header bg-white">
+    <h5 class="fw-semibold mb-0"><i class="bi bi-list-ul me-1"></i> Quizzes</h5>
+  </div>
+
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>Title</th>
+            <th>Difficulty</th>
+            <th>Time</th>
+            <th>Total</th>
+            <th>Pass</th>
+            <th>Pass %</th>
+            <th>Status</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for quiz in quizzes %}
+          <tr>
+            <td class="fw-semibold">{{ quiz.title }}</td>
+            <td>
+              <span class="badge bg-secondary">
+                {{ quiz.get_difficulty_display }}
+              </span>
+            </td>
+            <td>{{ quiz.time_limit }} min</td>
+            <td>{{ quiz.total_marks }}</td>
+            <td>{{ quiz.pass_mark }}</td>
+            <td>
+              <span class="badge bg-info">
+                {{ quiz.pass_percentage }}%
+              </span>
+            </td>
+            <td>
+              {% if quiz.is_active %}
+                <span class="badge bg-success">Active</span>
+              {% else %}
+                <span class="badge bg-danger">Inactive</span>
+              {% endif %}
+            </td>
+            <td>
+              <div class="action-group justify-content-center">
+                <a href="{% url 'admin_question_list' quiz.id %}"
+                   class="btn btn-sm btn-outline-info">
+                  Questions
+                </a>
+
+                <a href="{% url 'toggle_quiz_status' quiz.id %}"
+                   class="btn btn-sm {% if quiz.is_active %}btn-outline-danger{% else %}btn-outline-success{% endif %}">
+                  {% if quiz.is_active %}Disable{% else %}Enable{% endif %}
+                </a>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="8">
+              <div class="empty-state">
+                <i class="bi bi-pencil-square"></i>
+                <p>No quizzes created yet</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Back -->
+<div class="mt-4">
+  <a href="{% url 'admin_course_list' %}"
+     class="btn btn-secondary">
+    ← Back to Courses
+  </a>
+</div>
+
+{% endblock %}

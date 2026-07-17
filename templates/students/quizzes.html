@@ -1,0 +1,159 @@
+{% extends 'students/student_base.html' %}
+{% load student_extras %}
+{% block title %}Quizzes{% endblock %}
+
+{% block student_content %}
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+  :root {
+    /* Theme-driven aliases — colors/radius come from body.theme-* (static/css/themes.css) */
+    --navy: var(--color-primary); --gold: var(--color-secondary); --surface: var(--color-bg);
+    --white: var(--color-surface); --border: var(--color-border); --text-primary: var(--color-text);
+    --text-secondary: var(--color-text-muted); --success: var(--color-success); --danger: var(--color-error);
+    --warning: var(--color-warning); --radius: var(--radius-card, 12px);
+  }
+
+  body { font-family: var(--font-sans, 'DM Sans', sans-serif); background: var(--surface); }
+
+  .page-header { padding: 32px 0 24px; border-bottom: 1px solid var(--border); margin-bottom: 32px; }
+  .page-title { font-family: 'Syne', sans-serif; font-size: 1.375rem; font-weight: 700; color: var(--navy); letter-spacing: -0.01em; margin: 0; }
+  .page-title span { color: var(--gold); }
+  .page-subtitle { font-size: 0.8125rem; color: var(--text-secondary); margin-top: 4px; }
+
+  .quiz-card {
+    background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
+    height: 100%; display: flex; flex-direction: column;
+    transition: all 0.25s ease; overflow: hidden; position: relative;
+  }
+  .quiz-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--gold), #e6c87a); opacity: 0; transition: opacity 0.3s;
+  }
+  .quiz-card:hover { transform: translateY(-3px); box-shadow: 0 12px 28px rgba(15,23,42,0.07); border-color: rgba(201,168,76,0.35); }
+  .quiz-card:hover::before { opacity: 1; }
+
+  .quiz-body { padding: 20px; display: flex; flex-direction: column; flex: 1; }
+
+  .quiz-title { font-family: 'Syne', sans-serif; font-size: 0.875rem; font-weight: 700; color: var(--navy); letter-spacing: -0.01em; margin-bottom: 8px; line-height: 1.35; }
+
+  .quiz-meta { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 12px; }
+  .quiz-meta svg { color: var(--gold); flex-shrink: 0; }
+  .quiz-meta strong { color: var(--navy); font-weight: 600; }
+
+  .status-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 0.66rem; font-weight: 700; letter-spacing: 0.05em;
+    text-transform: uppercase; padding: 4px 9px; border-radius: 5px; margin-bottom: 12px;
+  }
+  .status-not-attempted { background: #f1f5f9; color: #64748b; }
+  .status-passed { background: #dcfce7; color: #15803d; }
+  .status-failed { background: #fee2e2; color: #b91c1c; }
+
+  .quiz-actions { margin-top: auto; }
+
+  .btn-quiz {
+    display: block; text-align: center; padding: 9px;
+    border-radius: 7px; font-family: 'Syne', sans-serif; font-size: 0.75rem; font-weight: 700;
+    letter-spacing: 0.03em; text-decoration: none; transition: all 0.2s ease; border: none; cursor: pointer; width: 100%;
+  }
+  .btn-start { background: var(--navy); color: var(--white); }
+  .btn-start:hover { background: var(--gold); color: var(--navy); }
+  .btn-completed { background: #f1f5f9; color: #94a3b8; cursor: not-allowed; }
+  .btn-retry { background: var(--warning); color: var(--white); }
+  .btn-retry:hover { background: #b45309; }
+
+  .empty-state { background: var(--white); border: 1px dashed var(--border); border-radius: var(--radius); padding: 48px 24px; text-align: center; color: var(--text-secondary); font-size: 0.8125rem; }
+
+  .btn-back { display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; border-radius: 8px; font-size: 0.8125rem; font-weight: 500; background: var(--white); color: var(--navy); border: 1px solid var(--border); text-decoration: none; transition: all 0.2s ease; margin-top: 28px; }
+  .btn-back:hover { background: var(--navy); color: var(--white); border-color: var(--navy); transform: translateX(-3px); }
+</style>
+
+<div class="page-header">
+  <h1 class="page-title">Quizzes &mdash; <span>{{ course.title }}</span></h1>
+  <p class="page-subtitle">Test your knowledge and track your progress</p>
+</div>
+
+<div class="row g-4">
+  {% for quiz in quizzes %}
+    {% with attempt=attempts|get_item:quiz.id %}
+      <div class="col-lg-4 col-md-6">
+        <div class="quiz-card">
+          <div class="quiz-body">
+
+            <div class="quiz-title">{{ quiz.title }}</div>
+
+            <div class="quiz-meta">
+              <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+              </svg>
+              Pass Mark: <strong>{{ quiz.pass_percentage }}%</strong>
+            </div>
+
+            {% if not attempt %}
+              <span class="status-badge status-not-attempted">Not Attempted</span>
+            {% elif attempt.passed %}
+              <span class="status-badge status-passed">Passed</span>
+            {% else %}
+              <span class="status-badge status-failed">Failed</span>
+            {% endif %}
+
+            <div class="quiz-actions">
+              {% if not attempt %}
+                <a href="{% url 'attempt_quiz' quiz.id %}" class="btn-quiz btn-start">Start Quiz</a>
+              {% elif attempt.passed %}
+                <button class="btn-quiz btn-completed" disabled>Completed</button>
+              {% else %}
+                <a href="{% url 'attempt_quiz' quiz.id %}" class="btn-quiz btn-retry">Retry Quiz</a>
+              {% endif %}
+            </div>
+
+          </div>
+        </div>
+      </div>
+    {% endwith %}
+  {% empty %}
+    <div class="col-12"><div class="empty-state">No quizzes available for this course.</div></div>
+  {% endfor %}
+</div>
+
+<a href="{% url 'student_dashboard' %}" class="btn-back">
+  <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>
+  </svg>
+  Back to Dashboard
+</a>
+
+<script>
+window.IS_KIDS_WORLD = {{ active_theme.is_kids_world|yesno:"true,false" }};
+(function () {
+  var params = new URLSearchParams(window.location.search);
+  if (!params.has('just_attempted')) return;
+
+  var passed = params.get('passed') === '1';
+
+  if (window.IS_KIDS_WORLD && window.KidsCelebrations) {
+    if (passed) {
+      window.KidsCelebrations.confetti(60);
+      window.KidsCelebrations.fireworks(2);
+    }
+  } else {
+    var toast = document.createElement('div');
+    toast.textContent = passed ? 'Quiz passed! Nicely done.' : 'Quiz submitted — keep practicing!';
+    toast.style.cssText = 'position:fixed;bottom:24px;right:24px;color:#fff;' +
+      'background:' + (passed ? 'var(--color-success)' : 'var(--color-text-muted)') + ';' +
+      'padding:12px 20px;border-radius:var(--radius-btn,10px);box-shadow:0 8px 24px rgba(0,0,0,.15);z-index:2000;font-size:0.85rem;font-weight:600;';
+    document.body.appendChild(toast);
+    setTimeout(function () { toast.style.opacity = '0'; toast.style.transition = 'opacity .3s'; }, 2500);
+    setTimeout(function () { toast.remove(); }, 2900);
+  }
+
+  params.delete('just_attempted');
+  params.delete('passed');
+  var newUrl = window.location.pathname + (params.toString() ? '?' + params.toString() : '');
+  window.history.replaceState({}, '', newUrl);
+})();
+</script>
+
+{% endblock %}

@@ -1,0 +1,191 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Complete Your Profile{% endblock %}
+
+{% block content %}
+<style>
+  :root {
+    --primary: #4f46e5;
+    --primary-light: #ede9fe;
+    --danger: #ef4444;
+
+    --bg-card: #ffffff;
+    --bg-subtle: #f1f5f9;
+
+    --text-main: #0f172a;
+    --text-secondary: #475569;
+    --text-muted: #94a3b8;
+
+    --border: 1px solid #e2e8f0;
+    --radius-sm: 10px;
+    --radius-lg: 20px;
+
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --transition: 220ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  #completeProfilePage {
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  .page-header { padding: 8px 0 24px; margin-bottom: 8px; text-align: center; }
+
+  .page-header h3 {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-bottom: 6px;
+  }
+
+  .page-header h3 i { color: var(--primary); }
+
+  .page-subtitle { font-size: 0.92rem; color: var(--text-secondary); }
+
+  .profile-card {
+    background: var(--bg-card);
+    border-radius: var(--radius-lg);
+    border: var(--border);
+    box-shadow: var(--shadow-sm);
+    padding: 32px;
+  }
+
+  .avatar-wrapper { position: relative; width: 96px; height: 96px; margin: 0 auto 20px; }
+
+  .avatar-img, .avatar-fallback {
+    width: 96px; height: 96px; border-radius: 50%; object-fit: cover;
+    border: 3px solid var(--primary-light);
+  }
+
+  .avatar-fallback {
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, var(--primary) 0%, #818cf8 100%);
+    color: #fff; font-size: 2rem; font-weight: 700;
+  }
+
+  .avatar-upload-btn {
+    position: absolute; bottom: -2px; right: -2px; width: 32px; height: 32px;
+    border-radius: 50%; background: var(--primary); color: #fff;
+    display: flex; align-items: center; justify-content: center; cursor: pointer;
+    border: 2px solid #fff; box-shadow: var(--shadow-sm);
+  }
+
+  .field-group { margin-bottom: 18px; }
+
+  .field-group label {
+    font-size: 0.8rem; font-weight: 600; color: var(--text-secondary);
+    margin-bottom: 6px; display: block;
+  }
+
+  .field-group label .required { color: var(--danger); }
+
+  .field-group .form-control, .field-group .form-select {
+    border-radius: var(--radius-sm);
+    border: 1px solid #cbd5e1;
+    padding: 10px 14px;
+    font-size: 0.92rem;
+  }
+
+  .field-group .form-control:disabled { background: var(--bg-subtle); color: var(--text-main); }
+
+  .field-error { color: var(--danger); font-size: 0.78rem; margin-top: 4px; }
+
+  .btn-primary-custom {
+    background: linear-gradient(135deg, var(--primary) 0%, #6366f1 100%);
+    border: none; color: #fff; border-radius: var(--radius-sm);
+    font-weight: 600; font-size: 0.92rem; padding: 12px 22px; width: 100%;
+    transition: opacity var(--transition);
+  }
+
+  .btn-primary-custom:hover { opacity: 0.92; color: #fff; }
+
+  .skip-hint { text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-top: 14px; }
+</style>
+
+<div id="completeProfilePage">
+  <div class="page-header">
+    <h3><i class="bi bi-person-check-fill"></i> Complete Your Profile</h3>
+    <p class="page-subtitle">One quick step before you get to your dashboard.</p>
+  </div>
+
+  <div class="profile-card">
+    <form method="post" enctype="multipart/form-data" novalidate>
+      {% csrf_token %}
+
+      <div class="avatar-wrapper">
+        <div class="avatar-fallback" id="avatarPreview">{{ request.user.username|slice:":1"|upper }}</div>
+        <label class="avatar-upload-btn" for="{{ form.profile_image.id_for_label }}" title="Add a photo">
+          <i class="bi bi-camera-fill" style="font-size:0.85rem;"></i>
+        </label>
+        {{ form.profile_image }}
+      </div>
+      {% if form.profile_image.errors %}
+        <div class="field-error text-center">{{ form.profile_image.errors.0 }}</div>
+      {% endif %}
+
+      <div class="field-group">
+        <label for="{{ form.full_name.id_for_label }}">Full Name <span class="required">*</span></label>
+        {{ form.full_name }}
+        {% if form.full_name.errors %}<div class="field-error">{{ form.full_name.errors.0 }}</div>{% endif %}
+      </div>
+
+      <div class="field-group">
+        <label>Email</label>
+        <input type="email" class="form-control" value="{{ request.user.email }}" disabled>
+      </div>
+
+      {% if form.phone_number %}
+      <div class="field-group">
+        <label for="{{ form.phone_number.id_for_label }}">Phone Number <span class="required">*</span></label>
+        {{ form.phone_number }}
+        {% if form.phone_number.errors %}<div class="field-error">{{ form.phone_number.errors.0 }}</div>{% endif %}
+      </div>
+      {% endif %}
+
+      {% if form.education_type %}
+      <div class="field-group">
+        <label for="{{ form.education_type.id_for_label }}">Education Type <span class="required">*</span></label>
+        {{ form.education_type }}
+        {% if form.education_type.errors %}<div class="field-error">{{ form.education_type.errors.0 }}</div>{% endif %}
+      </div>
+      {% endif %}
+
+      <button type="submit" class="btn-primary-custom">
+        <i class="bi bi-check2-circle me-1"></i> Save &amp; Continue
+      </button>
+    </form>
+  </div>
+
+  <p class="skip-hint">You can update these details anytime from your Profile page.</p>
+</div>
+
+<script>
+(function () {
+  const fileInput = document.getElementById('{{ form.profile_image.id_for_label }}');
+  const preview = document.getElementById('avatarPreview');
+  if (!fileInput) return;
+
+  fileInput.setAttribute('accept', 'image/png,image/jpeg,image/jpg,image/webp');
+  fileInput.setAttribute('hidden', 'hidden');
+
+  fileInput.addEventListener('change', function () {
+    const file = fileInput.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function (e) {
+      let img = document.getElementById('avatarPreview');
+      if (img.tagName === 'DIV') {
+        const newImg = document.createElement('img');
+        newImg.id = 'avatarPreview';
+        newImg.className = 'avatar-img';
+        newImg.alt = 'Profile picture';
+        img.replaceWith(newImg);
+        img = newImg;
+      }
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+})();
+</script>
+{% endblock %}
