@@ -1,1 +1,1 @@
-web: python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn elearning_platform.wsgi --bind 0.0.0.0:$PORT --log-file -
+web: echo "DEBUG_VARS DB_HOST=[$DB_HOST] DB_NAME=[$DB_NAME] DB_USER=[$DB_USER] DB_PORT=[$DB_PORT] DB_PASSWORD_SET=[${DB_PASSWORD:+yes}]" && python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn elearning_platform.wsgi --bind 0.0.0.0:$PORT --log-file -
