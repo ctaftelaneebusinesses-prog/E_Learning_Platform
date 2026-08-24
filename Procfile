@@ -1,1 +1,1 @@
-web: echo "DEBUG_VARS DB_HOST=[$DB_HOST] SECRET_KEY_SET=[${SECRET_KEY:+yes}] DEBUG=[$DEBUG] PORT=[$PORT] RAILWAY_ENVIRONMENT=[$RAILWAY_ENVIRONMENT_NAME] ALL_VARS_COUNT=[$(env | wc -l)]" && python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn elearning_platform.wsgi --bind 0.0.0.0:$PORT --log-file -
+web: gunicorn elearning_platform.wsgi --bind 0.0.0.0:$PORT --log-file -
