@@ -1,1 +1,1 @@
-web: gunicorn elearning_platform.wsgi --bind 0.0.0.0:$PORT --log-file -
+web: python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn elearning_platform.wsgi --bind 0.0.0.0:$PORT --log-file -
