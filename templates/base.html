@@ -698,7 +698,7 @@
 
 {% if active_theme.is_kids_world %}
 {{ active_theme.sounds|json_script:"kw-sounds-data" }}
-<script>window.KIDS_THEME_STATIC_URL = "{% static '' %}";</script>
+<script>window.KIDS_THEME_STATIC_URL = "{% get_static_prefix %}";</script>
 <script src="{% static 'js/kids-sound.js' %}"></script>
 <script src="{% static 'js/kids-celebrations.js' %}"></script>
 <script src="{% static 'js/kids-ripple.js' %}"></script>
