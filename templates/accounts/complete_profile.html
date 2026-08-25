@@ -29,18 +29,29 @@
     margin: 0 auto;
   }
 
-  .page-header { padding: 8px 0 24px; margin-bottom: 8px; text-align: center; }
-
-  .page-header h3 {
-    font-size: 1.5rem;
-    font-weight: 800;
-    color: var(--text-main);
-    margin-bottom: 6px;
+  .page-header {
+    padding: 28px 28px 26px;
+    margin-bottom: 28px;
+    text-align: center;
+    border: none;
+    border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, #2563EB 0%, #1E293B 100%);
+    box-shadow: 0 10px 28px rgba(15, 23, 42, 0.18);
   }
 
-  .page-header h3 i { color: var(--primary); }
+  .page-header-text { width: 100%; }
 
-  .page-subtitle { font-size: 0.92rem; color: var(--text-secondary); }
+  .page-header-text h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.02em;
+    margin-bottom: 4px;
+  }
+
+  .page-header-text h3 i { color: #FDE68A; }
+
+  .page-header .page-subtitle { font-size: 0.92rem; color: rgba(255, 255, 255, 0.78); }
 
   .profile-card {
     background: var(--bg-card);
@@ -104,8 +115,10 @@
 
 <div id="completeProfilePage">
   <div class="page-header">
-    <h3><i class="bi bi-person-check-fill"></i> Complete Your Profile</h3>
-    <p class="page-subtitle">One quick step before you get to your dashboard.</p>
+    <div class="page-header-text">
+      <h3><i class="bi bi-person-check-fill"></i> Complete Your Profile</h3>
+      <p class="page-subtitle">One quick step before you get to your dashboard.</p>
+    </div>
   </div>
 
   <div class="profile-card">
