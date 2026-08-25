@@ -213,6 +213,17 @@ body.theme-other {
   --color-primary-soft: #1E2A44;
 }
 
+/* --color-secondary doubles as this theme's page-header background (see the
+   "Other" rule further down), so it can't just be redefined light here — that
+   would make page headers invisible instead. Retarget only the navbar text,
+   which is the sole other user of --color-secondary that needs a light color
+   against the dark navbar in this theme (the other themes use bright accent
+   colors for --color-secondary, so they read fine against a dark navbar
+   already). */
+[data-theme="dark"] body.theme-other .navbar .nav-link {
+  color: var(--color-text-muted) !important;
+}
+
 /* -------------------------------------------------------------------------
    Shared dark-mode base (applies regardless of theme, for anything not
    covered by the per-theme overrides above).
