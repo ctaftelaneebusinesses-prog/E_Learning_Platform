@@ -1,6 +1,6 @@
 {% load static %}
 <div id="chatbot-icon">
-  {% if active_theme.is_kids_world %}
+  {% if active_theme.is_kids_world and active_theme.mascot_illustration %}
     <img src="{% static active_theme.mascot_illustration %}" alt="" class="kw-chat-mascot">
   {% else %}
     <i class="bi bi-chat-dots-fill"></i>
@@ -10,7 +10,7 @@
 <div id="chatbot-box" class="d-none">
   <div class="chat-header">
     <span class="chat-header-title">
-      {% if active_theme.is_kids_world %}
+      {% if active_theme.is_kids_world and active_theme.mascot_illustration %}
         <img src="{% static active_theme.mascot_illustration %}" alt="" class="kw-chat-mascot kw-chat-mascot-sm"> Buddy the Mentor
       {% else %}
         <i class="bi bi-stars"></i> AI Mentor
