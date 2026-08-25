@@ -616,6 +616,11 @@ textarea:focus-visible {
   display: block;
 }
 
+.navbar-brand .brand-logo-dark { display: none; }
+
+[data-theme="dark"] .navbar-brand .brand-logo-light { display: none; }
+[data-theme="dark"] .navbar-brand .brand-logo-dark { display: block; }
+
 .navbar .nav-link {
   font-weight: 500;
   padding: 0.5rem 0.9rem;
