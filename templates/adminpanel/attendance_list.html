@@ -1,0 +1,105 @@
+{% extends 'adminpanel/admin_base.html' %}
+{% block title %}Attendance{% endblock %}
+
+{% block admin_content %}
+<style>
+  .metric-badge {
+    font-size: 0.73rem; padding: 4px 12px; border-radius: var(--radius-pill);
+    font-weight: 600; display: inline-block;
+  }
+  .metric-present { background: rgba(34, 197, 94, 0.12); color: #15803d; border: 1px solid rgba(34, 197, 94, 0.3); }
+  .metric-absent { background: rgba(239, 68, 68, 0.12); color: #b91c1c; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+  .attn-toolbar {
+    display: flex; gap: 10px; flex-wrap: wrap; align-items: center;
+    padding: 14px 20px; border-bottom: 1px solid var(--color-border);
+  }
+  .attn-toolbar select {
+    padding: 7px 12px; border-radius: 8px; border: 1px solid var(--color-border);
+    background: var(--color-surface); color: var(--color-text); font-size: 0.88rem;
+  }
+  .attn-count { font-size: 0.82rem; color: var(--color-text-muted); margin-left: auto; }
+</style>
+
+<div class="page-header">
+  <div class="page-header-text">
+    <h2><i class="bi bi-calendar-check"></i> Attendance</h2>
+    <p class="page-subtitle">Today, {{ today|date:"F j, Y" }} — who has tapped in</p>
+  </div>
+  <div class="page-header-actions">
+    <a href="{% url 'admin_download_attendance_excel' %}?education={{ education_filter }}" class="btn btn-primary">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Download Excel
+    </a>
+  </div>
+</div>
+
+<div class="section-card">
+  <form method="get" class="attn-toolbar">
+    <select name="education" onchange="this.form.submit()">
+      <option value="">All Students</option>
+      {% for value, label in education_choices %}
+      <option value="{{ value }}" {% if education_filter == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <span class="metric-badge metric-present">Present: {{ present_count }}</span>
+    <span class="metric-badge metric-absent">Absent: {{ absent_count }}</span>
+    <span class="attn-count">{{ total_count }} student{{ total_count|pluralize }}</span>
+  </form>
+
+  <div class="card-body p-0">
+    <div class="table-responsive">
+      <table class="table mb-0">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Username</th>
+            <th>Education</th>
+            <th>Today's Status</th>
+            <th>Tap-In Time</th>
+            <th>Calendar</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+          <tr>
+            <td class="fw-semibold">{{ row.profile.user.get_full_name|default:row.profile.user.username }}</td>
+            <td>{{ row.profile.user.username }}</td>
+            <td>{{ row.profile.get_education_type_display|default:"—" }}</td>
+            <td>
+              {% if row.is_present %}
+                <span class="metric-badge metric-present"><i class="bi bi-check-circle"></i> Present</span>
+              {% else %}
+                <span class="metric-badge metric-absent"><i class="bi bi-x-circle"></i> Absent</span>
+              {% endif %}
+            </td>
+            <td>{% if row.tap_time %}{{ row.tap_time|time:"H:i" }}{% else %}—{% endif %}</td>
+            <td>
+              <a href="{% url 'admin_student_attendance_detail' row.profile.user.id %}" class="btn btn-sm btn-outline-secondary">
+                <i class="bi bi-calendar3"></i> View
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6">
+              <div class="empty-state">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                  <circle cx="9" cy="7" r="4"/>
+                </svg>
+                <p>No students found for this filter.</p>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

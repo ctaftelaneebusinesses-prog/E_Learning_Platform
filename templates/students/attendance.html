@@ -1,0 +1,123 @@
+{% extends 'students/student_base.html' %}
+{% block title %}My Attendance{% endblock %}
+
+{% block student_content %}
+<style>
+  .attn-tap-btn { display: flex; align-items: center; gap: 8px; font-size: 1rem; padding: 10px 22px; }
+
+  .metric-badge {
+    font-size: 0.78rem; padding: 4px 12px; border-radius: var(--radius-pill);
+    font-weight: 600; display: inline-block;
+  }
+  .metric-present { background: rgba(34, 197, 94, 0.12); color: #15803d; border: 1px solid rgba(34, 197, 94, 0.3); }
+  .metric-absent { background: rgba(239, 68, 68, 0.12); color: #b91c1c; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+  .cal-nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 20px; border-bottom: 1px solid var(--color-border);
+  }
+  .cal-nav h4 { margin: 0; font-size: 1.05rem; }
+  .cal-stats { display: flex; gap: 8px; padding: 14px 20px; flex-wrap: wrap; }
+
+  table.attendance-calendar { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  table.attendance-calendar th {
+    padding: 8px 4px; text-align: center; font-size: 0.78rem; color: var(--color-text-muted);
+    border-bottom: 1px solid var(--color-border);
+  }
+  table.attendance-calendar td {
+    height: 56px; text-align: center; vertical-align: middle; font-size: 0.88rem;
+    border: 1px solid var(--color-border); position: relative;
+  }
+  td.cal-other-month, td.cal-future { color: var(--color-text-muted); background: transparent; }
+  td.cal-present { background: rgba(34, 197, 94, 0.15); color: #15803d; font-weight: 700; }
+  td.cal-absent { background: rgba(239, 68, 68, 0.12); color: #b91c1c; font-weight: 700; }
+  td.cal-today { outline: 2px solid var(--color-primary); outline-offset: -2px; }
+
+  .year-nav { display: flex; align-items: center; gap: 14px; padding: 4px 20px 18px; }
+  .year-nav a {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--color-text); text-decoration: none; font-weight: 700; font-size: 1rem;
+    padding: 9px 20px; border: 1px solid var(--color-border); border-radius: var(--radius-pill);
+    background: var(--color-surface); transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .year-nav a:hover { background: var(--color-primary-soft); border-color: var(--color-primary); color: var(--color-primary); }
+</style>
+
+<div class="page-header">
+  <div class="page-header-text">
+    <h2>
+      <i class="bi bi-calendar-check"></i>
+      My Attendance
+    </h2>
+    <p class="page-subtitle">Tap in once each day to mark yourself present. No tap-in by end of day counts as absent.</p>
+  </div>
+  <div class="page-header-actions">
+    <form method="post" action="{% url 'attendance_tap_in' %}">
+      {% csrf_token %}
+      <button type="submit" class="btn attn-tap-btn {% if tapped_in_today %}btn-outline-secondary{% else %}btn-primary{% endif %}" {% if tapped_in_today %}disabled{% endif %}>
+        <i class="bi {% if tapped_in_today %}bi-check2-circle{% else %}bi-hand-index-thumb{% endif %}"></i>
+        {% if tapped_in_today %}Tapped In Today{% else %}Tap In{% endif %}
+      </button>
+    </form>
+  </div>
+</div>
+
+<div class="section-card" style="margin-bottom: 20px;">
+  <div class="cal-nav">
+    <a href="?year={{ prev_year }}&month={{ prev_month }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-chevron-left"></i></a>
+    <h4>{{ month_data.month_name }} {{ month_data.year }}</h4>
+    <a href="?year={{ next_year }}&month={{ next_month }}" class="btn btn-sm btn-outline-secondary"><i class="bi bi-chevron-right"></i></a>
+  </div>
+  <div class="cal-stats">
+    <span class="metric-badge metric-present">Present: {{ month_data.present_count }}</span>
+    <span class="metric-badge metric-absent">Absent: {{ month_data.absent_count }}</span>
+  </div>
+  <div class="table-responsive" style="padding: 0 20px 20px;">
+    <table class="attendance-calendar">
+      <thead>
+        <tr><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th><th>Sat</th><th>Sun</th></tr>
+      </thead>
+      <tbody>
+        {% for week in month_data.weeks %}
+        <tr>
+          {% for day in week %}
+          <td class="cal-{{ day.status }} {% if day.is_today %}cal-today{% endif %}">
+            {% if day.in_month %}{{ day.day }}{% endif %}
+          </td>
+          {% endfor %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="section-card">
+  <div class="cal-nav">
+    <h4>Yearly Summary — {{ yearly.year }}</h4>
+  </div>
+  <div class="year-nav">
+    <a href="?year={{ yearly.year|add:-1 }}&month={{ month_data.month }}"><i class="bi bi-chevron-left"></i> {{ yearly.year|add:-1 }}</a>
+    <a href="?year={{ yearly.year|add:1 }}&month={{ month_data.month }}">{{ yearly.year|add:1 }} <i class="bi bi-chevron-right"></i></a>
+  </div>
+  <div class="table-responsive">
+    <table class="table mb-0">
+      <thead><tr><th>Month</th><th>Present</th><th>Absent</th></tr></thead>
+      <tbody>
+        {% for row in yearly.rows %}
+        <tr>
+          <td>{{ row.month }}</td>
+          <td>{% if row.present is not None %}{{ row.present }}{% else %}—{% endif %}</td>
+          <td>{% if row.absent is not None %}{{ row.absent }}{% else %}—{% endif %}</td>
+        </tr>
+        {% endfor %}
+        <tr class="fw-bold">
+          <td>Total</td>
+          <td>{{ yearly.total_present }}</td>
+          <td>{{ yearly.total_absent }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

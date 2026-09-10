@@ -411,3 +411,20 @@ class AILearningPathQuery(models.Model):
 
     def __str__(self):
         return f"{self.student.username} → {self.role}"
+
+
+class Attendance(models.Model):
+    student = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="attendance_records"
+    )
+    date = models.DateField()
+    tapped_in_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("student", "date")
+        ordering = ["-date"]
+
+    def __str__(self):
+        return f"{self.student.username} - {self.date} (Present)"

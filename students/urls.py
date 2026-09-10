@@ -77,6 +77,8 @@ urlpatterns = [
         download_certificate_pdf,
         name='student_download_certificate'
     ),
+    path('attendance/', views.student_attendance, name='student_attendance'),
+    path('attendance/tap-in/', views.attendance_tap_in, name='attendance_tap_in'),
 
 
 

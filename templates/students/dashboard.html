@@ -111,6 +111,46 @@
     gap: 6px;
   }
 
+  .welcome-right {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+  }
+
+  .welcome-tapin-btn {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #fff;
+    color: var(--navy);
+    border: none;
+    padding: 9px 20px;
+    border-radius: 999px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: 0 8px 18px -6px rgba(0, 0, 0, 0.35);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .welcome-tapin-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px -6px rgba(0, 0, 0, 0.4);
+  }
+
+  .welcome-tapin-btn.done {
+    background: rgba(34, 197, 94, 0.9);
+    color: #fff;
+    cursor: default;
+    box-shadow: none;
+  }
+
   /* ==============================
      DASHBOARD HEADER
   ============================== */
@@ -539,7 +579,16 @@
       <p>{{ active_theme.tagline|default:"Keep up the momentum, you're doing wonderfully." }}</p>
     </div>
   </div>
-  <div class="welcome-date"><i class="bi bi-calendar3"></i> {% now "l, F j, Y" %} &nbsp;|&nbsp; <i class="bi bi-clock"></i> {% now "g:i A" %}</div>
+  <div class="welcome-right">
+    <div class="welcome-date"><i class="bi bi-calendar3"></i> {% now "l, F j, Y" %} &nbsp;|&nbsp; <i class="bi bi-clock"></i> {% now "g:i A" %}</div>
+    <form method="post" action="{% url 'attendance_tap_in' %}">
+      {% csrf_token %}
+      <button type="submit" class="welcome-tapin-btn {% if tapped_in_today %}done{% endif %}" {% if tapped_in_today %}disabled{% endif %}>
+        <i class="bi {% if tapped_in_today %}bi-check2-circle{% else %}bi-hand-index-thumb{% endif %}"></i>
+        {% if tapped_in_today %}Tapped In Today{% else %}Tap In{% endif %}
+      </button>
+    </form>
+  </div>
 </div>
 
 {% if active_theme.is_kids_world %}

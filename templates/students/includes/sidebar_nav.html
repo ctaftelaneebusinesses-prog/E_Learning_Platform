@@ -46,6 +46,13 @@
         </a>
       </li>
       <li>
+        <a href="{% url 'student_attendance' %}" data-label="Attendance"
+           class="dash-nav-link {% if url_name == 'student_attendance' %}active{% endif %}">
+          <i class="bi bi-calendar-check"></i>
+          <span class="dash-nav-text">Attendance</span>
+        </a>
+      </li>
+      <li>
         <a href="{% url 'student_achievements' %}" data-label="Achievements"
            class="dash-nav-link {% if url_name == 'student_achievements' %}active{% endif %}">
           <i class="bi bi-award-fill"></i>

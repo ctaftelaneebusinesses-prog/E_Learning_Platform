@@ -12,12 +12,16 @@ from courses.models import Quiz, Question
 from courses.models import Certificate
 from datetime import date, datetime, time as dt_time, timezone as dt_timezone
 from django.db.models import Count, F
-from django.http import FileResponse, JsonResponse
+from django.http import FileResponse, HttpResponse, JsonResponse
 from django.utils import timezone
+import io
 import math
 import os
 
 from utils.activity_logger import LOG_FILE, backfill_existing_users, pending_count, sync_pending_entries
+from courses.models import Attendance
+from courses.utils import get_attendance_month_data, get_attendance_yearly_summary
+from django.utils.timezone import localdate
 
 def _add_months(d, delta):
     m = d.month - 1 + delta
@@ -213,7 +217,17 @@ def admin_dashboard(request):
     streak_bars, streak_max = _simple_bar_series(streak_buckets, 'label', 'value', max_bars=5)
     streak_has_activity = any(b['value'] for b in streak_buckets)
 
+    today = localdate()
+    attendance_present_today = Attendance.objects.filter(
+        date=today, student__profile__role='STUDENT'
+    ).count()
+    attendance_total_students = role_counts['STUDENT']
+    attendance_absent_today = attendance_total_students - attendance_present_today
+
     context = {
+        'attendance_present_today': attendance_present_today,
+        'attendance_absent_today': attendance_absent_today,
+        'attendance_total_students': attendance_total_students,
         'total_users': total_users,
         'total_courses': total_courses,
         'role_counts': role_counts,
@@ -821,3 +835,130 @@ def sync_user_activity_log(request):
             messages.info(request, "Nothing to sync — the workbook was saved successfully or there's nothing pending.")
 
     return redirect('admin_user_activity_log')
+
+
+# -------------------------
+# ATTENDANCE
+# -------------------------
+def _filtered_students(education_filter):
+    students = Profile.objects.filter(role='STUDENT').select_related('user')
+    if education_filter:
+        students = students.filter(education_type=education_filter)
+    return students.order_by('user__first_name', 'user__username')
+
+
+def _present_today_ids(education_filter, today):
+    qs = Attendance.objects.filter(date=today, student__profile__role='STUDENT')
+    if education_filter:
+        qs = qs.filter(student__profile__education_type=education_filter)
+    return set(qs.values_list('student_id', flat=True))
+
+
+@admin_required
+def admin_attendance_list(request):
+    education_filter = request.GET.get('education', '')
+    today = localdate()
+
+    students = list(_filtered_students(education_filter))
+    present_today_ids = _present_today_ids(education_filter, today)
+    tap_times = dict(
+        Attendance.objects.filter(date=today, student_id__in=present_today_ids)
+        .values_list('student_id', 'tapped_in_at')
+    )
+
+    rows = [
+        {
+            'profile': profile,
+            'is_present': profile.user_id in present_today_ids,
+            'tap_time': tap_times.get(profile.user_id),
+        }
+        for profile in students
+    ]
+
+    return render(request, 'adminpanel/attendance_list.html', {
+        'rows': rows,
+        'education_filter': education_filter,
+        'education_choices': Profile.EDUCATION_TYPE_CHOICES,
+        'present_count': len(present_today_ids),
+        'absent_count': len(students) - len(present_today_ids),
+        'total_count': len(students),
+        'today': today,
+    })
+
+
+@admin_required
+def admin_student_attendance_detail(request, user_id):
+    student_user = get_object_or_404(User, pk=user_id, profile__role='STUDENT')
+    today = localdate()
+    try:
+        year = int(request.GET.get('year', today.year))
+        month = int(request.GET.get('month', today.month))
+    except (TypeError, ValueError):
+        year, month = today.year, today.month
+
+    month_data = get_attendance_month_data(student_user, year, month)
+    yearly = get_attendance_yearly_summary(student_user, year)
+
+    prev_month, prev_year = (12, year - 1) if month == 1 else (month - 1, year)
+    next_month, next_year = (1, year + 1) if month == 12 else (month + 1, year)
+
+    return render(request, 'adminpanel/attendance_detail.html', {
+        'student_user': student_user,
+        'month_data': month_data,
+        'yearly': yearly,
+        'today': today,
+        'prev_month': prev_month, 'prev_year': prev_year,
+        'next_month': next_month, 'next_year': next_year,
+    })
+
+
+@admin_required
+def admin_download_attendance_excel(request):
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill
+
+    education_filter = request.GET.get('education', '')
+    today = localdate()
+
+    students = list(_filtered_students(education_filter))
+    present_today_ids = _present_today_ids(education_filter, today)
+    tap_times = dict(
+        Attendance.objects.filter(date=today, student_id__in=present_today_ids)
+        .values_list('student_id', 'tapped_in_at')
+    )
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Attendance"
+    ws.append(["Name", "Username", "Email", "Education", "Status", "Tap-In Time"])
+    for cell in ws[1]:
+        cell.font = Font(bold=True, color="FFFFFF")
+        cell.fill = PatternFill(start_color="0B1A33", end_color="0B1A33", fill_type="solid")
+
+    for profile in students:
+        is_present = profile.user_id in present_today_ids
+        tap_time = tap_times.get(profile.user_id)
+        ws.append([
+            profile.user.get_full_name() or profile.user.username,
+            profile.user.username,
+            profile.user.email,
+            profile.get_education_type_display() if profile.education_type else '',
+            'Present' if is_present else 'Absent',
+            timezone.localtime(tap_time).strftime('%H:%M:%S') if tap_time else '',
+        ])
+
+    for col_cells in ws.columns:
+        length = max((len(str(c.value)) if c.value else 0) for c in col_cells)
+        ws.column_dimensions[col_cells[0].column_letter].width = length + 4
+
+    buffer = io.BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+
+    filename = f"attendance_{today.isoformat()}{'_' + education_filter if education_filter else ''}.xlsx"
+    response = HttpResponse(
+        buffer.getvalue(),
+        content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    )
+    response['Content-Disposition'] = f'attachment; filename="{filename}"'
+    return response

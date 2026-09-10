@@ -4,6 +4,7 @@ from .views import lesson_list, create_lesson, toggle_lesson_status, question_li
 from .views import revoke_certificate, reissue_certificate
 from .views import certificate_list
 from .views import user_activity_log, download_user_activity_log, live_user_activity_log, backfill_user_activity_log, sync_user_activity_log
+from .views import admin_attendance_list, admin_student_attendance_detail, admin_download_attendance_excel
 
 
 from .views import (
@@ -76,6 +77,9 @@ urlpatterns = [
     path('activity-log/live/', live_user_activity_log, name='admin_live_user_activity_log'),
     path('activity-log/backfill/', backfill_user_activity_log, name='admin_backfill_user_activity_log'),
     path('activity-log/sync/', sync_user_activity_log, name='admin_sync_user_activity_log'),
+    path('attendance/', admin_attendance_list, name='admin_attendance_list'),
+    path('attendance/download/', admin_download_attendance_excel, name='admin_download_attendance_excel'),
+    path('attendance/<int:user_id>/', admin_student_attendance_detail, name='admin_student_attendance_detail'),
 
 
 ]

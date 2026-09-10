@@ -49,6 +49,13 @@
         </a>
       </li>
       <li>
+        <a href="{% url 'admin_attendance_list' %}" data-label="Attendance"
+           class="dash-nav-link {% if url_name == 'admin_attendance_list' or url_name == 'admin_student_attendance_detail' %}active{% endif %}">
+          <i class="bi bi-calendar-check"></i>
+          <span class="dash-nav-text">Attendance</span>
+        </a>
+      </li>
+      <li>
         <a href="{% url 'admin_course_list' %}" data-label="Manage Courses"
            class="dash-nav-link {% if url_name == 'admin_course_list' or url_name == 'admin_lesson_list' or url_name == 'admin_quiz_list' or url_name == 'admin_question_list' %}active{% endif %}">
           <i class="bi bi-journal-text"></i>

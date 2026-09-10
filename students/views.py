@@ -775,6 +775,9 @@ from reportlab.lib.colors import HexColor
 from reportlab.lib.units import inch
 from career.services import get_job_suggestions
 from courses.models import Achievement
+from courses.models import Attendance
+from courses.utils import get_attendance_month_data, get_attendance_yearly_summary
+from django.contrib import messages
 
 
 # -------------------------
@@ -822,6 +825,10 @@ def student_dashboard(request):
     else:
         job_suggestions = get_job_suggestions(request.user)
 
+    tapped_in_today = Attendance.objects.filter(
+        student=request.user, date=localdate()
+    ).exists()
+
     return render(
         request,
         'students/dashboard.html',
@@ -832,6 +839,7 @@ def student_dashboard(request):
             'total_xp': total_xp,
             'job_suggestions': job_suggestions,
             'achievements': achievements,
+            'tapped_in_today': tapped_in_today,
         }
     )
 
@@ -1496,3 +1504,44 @@ def ai_learning_path(request):
             'history': history,
         }
     )
+
+
+# -------------------------
+# ATTENDANCE
+# -------------------------
+@student_required
+def attendance_tap_in(request):
+    if request.method == 'POST':
+        today = localdate()
+        _, created = Attendance.objects.get_or_create(student=request.user, date=today)
+        if created:
+            messages.success(request, "Attendance marked for today.")
+        else:
+            messages.info(request, "You've already tapped in today.")
+    return redirect('student_attendance')
+
+
+@student_required
+def student_attendance(request):
+    today = localdate()
+    try:
+        year = int(request.GET.get('year', today.year))
+        month = int(request.GET.get('month', today.month))
+    except (TypeError, ValueError):
+        year, month = today.year, today.month
+
+    month_data = get_attendance_month_data(request.user, year, month)
+    yearly = get_attendance_yearly_summary(request.user, year)
+    tapped_in_today = Attendance.objects.filter(student=request.user, date=today).exists()
+
+    prev_month, prev_year = (12, year - 1) if month == 1 else (month - 1, year)
+    next_month, next_year = (1, year + 1) if month == 12 else (month + 1, year)
+
+    return render(request, 'students/attendance.html', {
+        'month_data': month_data,
+        'yearly': yearly,
+        'tapped_in_today': tapped_in_today,
+        'today': today,
+        'prev_month': prev_month, 'prev_year': prev_year,
+        'next_month': next_month, 'next_year': next_year,
+    })
