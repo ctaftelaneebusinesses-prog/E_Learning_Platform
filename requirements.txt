@@ -29,7 +29,7 @@ PyJWT==2.13.0
 PyMySQL==1.1.2
 pypdf==6.5.0
 pyphen==0.17.2
-python-bidi==0.6.7
+python-bidi==0.4.2
 python-dotenv==1.2.1
 PyYAML==6.0.3
 reportlab==4.4.7
